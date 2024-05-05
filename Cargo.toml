@@ -8,11 +8,14 @@ description = "drawing primitives (e.g., triangles and lines) to bitmap images a
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-num-traits = "0.2.18"
+num-traits = "0.2.19"
 png = "0.17.13"
 gif = "0.13.1"
+image = "0.25.1"
 nalgebra = "0.32.5"
-# del-msh = { path = "../del-msh"}
-# del-geo = { path = "../del-geo"}
-del-msh = "0.1.28"
-del-geo = "0.1.22"
+rand = "0.8.5"
+
+#del-msh = "0.1.28"
+#del-geo = "0.1.22"
+del-msh = { path = "../del-msh"}
+del-geo = { path = "../del-geo"}

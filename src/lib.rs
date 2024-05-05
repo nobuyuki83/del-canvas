@@ -3,10 +3,13 @@ use num_traits::AsPrimitive;
 pub mod canvas;
 pub mod canvas_gif;
 pub mod colormap;
+pub mod dda;
+pub mod cam3;
 
 
 ///
 /// * `transform` - from `xy` to `pixel coordinate`
+#[allow(clippy::identity_op)]
 pub fn trimsh2_vtxcolor<Index, Real>(
     img_width: usize,
     img_height: usize,
@@ -32,9 +35,9 @@ pub fn trimsh2_vtxcolor<Index, Real>(
                 = del_msh::trimesh2::search_bruteforce_one_triangle_include_input_point(
                 &p_xy, tri2vtx, vtx2xy) else { continue; };
             let r2 = Real::one() - r0 - r1;
-            let iv0: usize = tri2vtx[i_tri*3+0].as_();
-            let iv1: usize = tri2vtx[i_tri*3+1].as_();
-            let iv2: usize = tri2vtx[i_tri*3+2].as_();
+            let iv0: usize = tri2vtx[i_tri * 3 + 0].as_();
+            let iv1: usize = tri2vtx[i_tri * 3 + 1].as_();
+            let iv2: usize = tri2vtx[i_tri * 3 + 2].as_();
             for i_dim in 0..num_dim {
                 pix2color[(i_h * img_width + i_w) * num_dim + i_dim]
                     = r0 * vtx2color[iv0 * num_dim + i_dim]
@@ -50,11 +53,11 @@ pub fn write_png_from_float_image<Real, Path>(
     img_width: usize,
     img_height: usize,
     img: &[Real])
-where Real: num_traits::Float + 'static + Copy + AsPrimitive<u8>,
-    usize: AsPrimitive<Real>,
-    Path: AsRef<std::path::Path>
+    where Real: num_traits::Float + 'static + Copy + AsPrimitive<u8>,
+          usize: AsPrimitive<Real>,
+          Path: AsRef<std::path::Path>
 {
-    let pix2color_u8: Vec<u8> = img.iter().map(|&v| (v * 255.as_()).as_() ).collect();
+    let pix2color_u8: Vec<u8> = img.iter().map(|&v| (v * 255.as_()).as_()).collect();
     let file = std::fs::File::create(path).unwrap();
     let w = std::io::BufWriter::new(file);
     let mut encoder = png::Encoder::new(
@@ -84,7 +87,7 @@ fn test_draw_mesh() {
     let img_height = 300;
     let mut pix2color = vec!(0_f32; img_width * img_height);
     let transform_xy2pix = nalgebra::Matrix3::<f32>::new(
-        (img_width/2) as f32, 0., 0.,
+        (img_width / 2) as f32, 0., 0.,
         0., -(img_height as f32), img_height as f32,
         0., 0., 1.);
     trimsh2_vtxcolor(

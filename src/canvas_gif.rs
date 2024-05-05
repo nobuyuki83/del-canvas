@@ -8,9 +8,11 @@ pub struct CanvasGif {
 }
 
 impl CanvasGif {
-    pub fn new(path_: &std::path::Path,
+    pub fn new<Path>(path_: Path,
                size: (usize, usize),
-               palette: &Vec<i32>) -> Self {
+               palette: &Vec<i32>) -> Self
+        where Path: AsRef<std::path::Path>,
+    {
         let res_encoder = {
             let global_palette = {
                 let mut res: Vec<u8> = vec!();

@@ -97,6 +97,7 @@ impl Canvas {
         }
     }
 
+    #[allow(clippy::identity_op)]
     pub fn paint_pixel(
         &mut self,
         iw: usize, ih: usize, r: u8, g: u8, b: u8)

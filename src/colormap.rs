@@ -546,7 +546,7 @@ pub fn apply_colormap<T, const N: usize>(
     if fc as i32 <= 0 { return colormap[0]; }
     if fc as usize >= N - 1 { return colormap[N - 1]; }
     let ic = fc as usize;
-    assert!(ic > 0 && ic <= N - 1);
+    assert!(ic > 0);
     let r1 = fc - ic as f32;
     [
         colormap[ic][0] + (colormap[ic + 1][0] - colormap[ic][0]) * r1,
