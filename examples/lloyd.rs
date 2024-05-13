@@ -22,16 +22,21 @@ fn main() {
         for i_site in 0..site2xy.len() / 2 {
             let vtxc2xy = &site2vtxc2xy[i_site];
             let vtxc2xy = del_msh::vtx2xyz::from_array_of_nalgebra(&vtxc2xy);
-            let p = del_msh::polyloop2::cog_area(&vtxc2xy);
+            let p = del_msh::polyloop2::cog_as_face(&vtxc2xy);
             site2xy_new[i_site] = p.into();
-            canvas.paint_polyloop(
+            del_canvas::paint_pixcenter::polyloop(
+                &mut canvas.data, canvas.width,
                 &vtxc2xy, &transform_to_scr,
                 1., 1);
-            canvas.paint_point(
-                site2xy[i_site*2+0], site2xy[i_site*2+1], &transform_to_scr,
+            del_canvas::paint_pixcenter::point(
+                &mut canvas.data, canvas.width,
+                [site2xy[i_site*2+0], site2xy[i_site*2+1]],
+                &transform_to_scr,
                 3.0, 1);
-            canvas.paint_point(
-                p[0], p[1], &transform_to_scr,
+            del_canvas::paint_pixcenter::point(
+                &mut canvas.data, canvas.width,
+                [p[0], p[1]],
+                &transform_to_scr,
                 3.0, 2);
         }
         canvas.write();

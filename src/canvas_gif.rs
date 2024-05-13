@@ -1,9 +1,8 @@
-use num_traits::AsPrimitive;
 
 pub struct CanvasGif {
     pub width: usize,
     pub height: usize,
-    data: Vec<u8>,
+    pub data: Vec<u8>,
     gif_enc: Option<gif::Encoder<std::fs::File>>,
 }
 
@@ -47,60 +46,6 @@ impl CanvasGif {
                     gif_enc: Some(t),
                 }
             }
-        }
-    }
-
-    pub fn paint_point<T>(
-        &mut self,
-        x: T, y: T, transf: &nalgebra::Matrix3::<T>,
-        point_size: T, color: u8)
-        where T: num_traits::Float + 'static + AsPrimitive<i64> + nalgebra::RealField,
-              f64: AsPrimitive<T>,
-              i64: AsPrimitive<T>
-    {
-        let a = transf * nalgebra::Vector3::<T>::new(x, y, T::one());
-        let pixs = crate::canvas::pixels_in_point(
-            a.x, a.y,
-            point_size, self.width, self.height);
-        for idata in pixs {
-            self.data[idata] = color;
-        }
-    }
-
-    #[allow(clippy::identity_op)]
-    pub fn paint_polyloop<T>(
-        &mut self,
-        vtx2xy: &[T],
-        transform: &nalgebra::Matrix3::<T>,
-        point_size: T, color: u8)
-        where T: num_traits::Float + 'static + AsPrimitive<i64> + nalgebra::RealField,
-              f64: AsPrimitive<T>,
-              i64: AsPrimitive<T>
-    {
-        let n = vtx2xy.len() / 2;
-        for i in 0..n {
-            let j = (i + 1) % n;
-            self.paint_line(
-                vtx2xy[i * 2 + 0], vtx2xy[i * 2 + 1],
-                vtx2xy[j * 2 + 0], vtx2xy[j * 2 + 1], transform, point_size, color);
-        }
-    }
-
-    pub fn paint_line<T>(
-        &mut self,
-        x0: T, y0: T,
-        x1: T, y1: T,
-        transform: &nalgebra::Matrix3::<T>,
-        rad: T, color: u8)
-        where T: num_traits::Float + 'static + AsPrimitive<i64> + nalgebra::RealField,
-              f64: AsPrimitive<T>,
-              i64: AsPrimitive<T>
-    {
-        let a0 = transform * nalgebra::Vector3::<T>::new(x0, y0, T::one());
-        let a1 = transform * nalgebra::Vector3::<T>::new(x1, y1, T::one());
-        let pixs = crate::canvas::pixels_in_line(a0.x, a0.y, a1.x, a1.y, rad, self.width, self.height);
-        for idata in pixs {
-            self.data[idata] = color;
         }
     }
 
