@@ -5,13 +5,6 @@ pub struct Canvas {
     data: Vec<u8>,
 }
 
-pub fn rgb(color: i32) -> (u8, u8, u8) {
-    let r = ((color & 0xff0000) >> 16) as u8;
-    let g = ((color & 0x00ff00) >> 8) as u8;
-    let b = (color & 0x0000ff) as u8;a
-    (r,g,b)
-}
-
 impl Canvas {
     pub fn new(size: (usize, usize)) -> Self {
         Self {

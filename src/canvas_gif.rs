@@ -16,7 +16,7 @@ impl CanvasGif {
             let global_palette = {
                 let mut res: Vec<u8> = vec!();
                 for &color in palette {
-                    let (r, g, b) = crate::canvas::rgb(color);
+                    let (r, g, b) = crate::color::u8rgb_from_i32(color);
                     res.push(r);
                     res.push(g);
                     res.push(b);

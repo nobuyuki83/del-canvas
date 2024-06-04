@@ -131,7 +131,7 @@ pub fn polyloop<T, VAL>(
 pub fn point<Real, VAL>(
     img_data: &mut [VAL],
     width: usize,
-    x: [Real;2],
+    x: &[Real;2],
     transform: &nalgebra::Matrix3::<Real>,
     rad: Real,
     color: VAL)

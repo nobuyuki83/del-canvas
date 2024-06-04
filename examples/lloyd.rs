@@ -30,12 +30,12 @@ fn main() {
                 1., 1);
             del_canvas::paint_pixcenter::point(
                 &mut canvas.data, canvas.width,
-                [site2xy[i_site*2+0], site2xy[i_site*2+1]],
+                &[site2xy[i_site*2+0], site2xy[i_site*2+1]],
                 &transform_to_scr,
                 3.0, 1);
             del_canvas::paint_pixcenter::point(
                 &mut canvas.data, canvas.width,
-                [p[0], p[1]],
+                &[p[0], p[1]],
                 &transform_to_scr,
                 3.0, 2);
         }

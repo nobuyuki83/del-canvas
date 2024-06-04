@@ -6,6 +6,7 @@ pub mod colormap;
 pub mod dda;
 pub mod cam3;
 pub mod paint_pixcenter;
+pub mod color;
 
 
 ///
