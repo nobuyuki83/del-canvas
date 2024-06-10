@@ -7,10 +7,11 @@ pub fn pixels_in_line<Real>(
     y1: Real,
     rad: Real,
     width: usize,
-    height: usize)
-    -> Vec<usize>
-where Real: num_traits::Float + 'static + AsPrimitive<i64>,
-    i64: AsPrimitive<Real>
+    height: usize,
+) -> Vec<usize>
+where
+    Real: num_traits::Float + 'static + AsPrimitive<i64>,
+    i64: AsPrimitive<Real>,
 {
     let half: Real = Real::one() / (Real::one() + Real::one());
     let (iw_min, iw_max, ih_min, ih_max) = {
@@ -26,25 +27,32 @@ where Real: num_traits::Float + 'static + AsPrimitive<i64>,
             std::cmp::min(iw0_min, iw1_min),
             std::cmp::max(iw0_max, iw1_max),
             std::cmp::min(ih0_min, ih1_min),
-            std::cmp::max(ih0_max, ih1_max))
+            std::cmp::max(ih0_max, ih1_max),
+        )
     };
-    let sqlen = (x1-x0) * (x1-x0) + (y1-y0) * (y1-y0);
+    let sqlen = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
     let mut res = Vec::<usize>::new();
     for ih in ih_min..ih_max + 1 {
-        if ih < 0 || ih >= height.try_into().unwrap() { continue; }
+        if ih < 0 || ih >= height.try_into().unwrap() {
+            continue;
+        }
         for iw in iw_min..iw_max + 1 {
-            if iw < 0 || iw >= width.try_into().unwrap() { continue; }
+            if iw < 0 || iw >= width.try_into().unwrap() {
+                continue;
+            }
             let w: Real = iw.as_() + half; // pixel center
             let h: Real = ih.as_() + half; // pixel center
-            let t = ((w-x0)*(x1-x0) + (h-y0)*(y1-y0))/sqlen;
+            let t = ((w - x0) * (x1 - x0) + (h - y0) * (y1 - y0)) / sqlen;
             let sqdist = if t < Real::zero() {
-                (w-x0)*(w-x0) + (h-y0)*(h-y0)
+                (w - x0) * (w - x0) + (h - y0) * (h - y0)
             } else if t > Real::one() {
-                (w-x1)*(w-x1) + (h-y1)*(h-y1)
+                (w - x1) * (w - x1) + (h - y1) * (h - y1)
             } else {
-                (w-x0)*(w-x0) + (h-y0)*(h-y0) - sqlen * t * t
+                (w - x0) * (w - x0) + (h - y0) * (h - y0) - sqlen * t * t
             };
-            if sqdist > rad * rad { continue; }
+            if sqdist > rad * rad {
+                continue;
+            }
             let idata = ih as usize * width + iw as usize;
             res.push(idata);
         }
@@ -52,12 +60,10 @@ where Real: num_traits::Float + 'static + AsPrimitive<i64>,
     res
 }
 
-
-pub fn pixels_in_point<Real>(
-    x: Real, y: Real, rad: Real,
-    width: usize, height: usize) -> Vec<usize>
-    where Real: num_traits::Float + 'static + AsPrimitive<i64>,
-          i64: AsPrimitive<Real>,
+pub fn pixels_in_point<Real>(x: Real, y: Real, rad: Real, width: usize, height: usize) -> Vec<usize>
+where
+    Real: num_traits::Float + 'static + AsPrimitive<i64>,
+    i64: AsPrimitive<Real>,
 {
     let half: Real = Real::one() / (Real::one() + Real::one());
     let iwmin: i64 = (x - rad - half).ceil().as_();
@@ -66,12 +72,18 @@ pub fn pixels_in_point<Real>(
     let ihmax: i64 = (y + rad - half).floor().as_();
     let mut res = Vec::<usize>::new();
     for iw in iwmin..iwmax + 1 {
-        if iw < 0 || iw >= width.try_into().unwrap() { continue; }
+        if iw < 0 || iw >= width.try_into().unwrap() {
+            continue;
+        }
         for ih in ihmin..ihmax + 1 {
-            if ih < 0 || ih >= height.try_into().unwrap() { continue; }
+            if ih < 0 || ih >= height.try_into().unwrap() {
+                continue;
+            }
             let w: Real = iw.as_() + half; // pixel center
             let h: Real = ih.as_() + half; // pixel center
-            if (w - x) * (w - x) + (h - y) * (h - y) > rad * rad { continue; }
+            if (w - x) * (w - x) + (h - y) * (h - y) > rad * rad {
+                continue;
+            }
             let idata = ih as usize * width + iw as usize;
             res.push(idata);
         }
@@ -82,14 +94,15 @@ pub fn pixels_in_point<Real>(
 pub fn line<T, VAL>(
     img_data: &mut [VAL],
     width: usize,
-    p0 :&[T;2],
-    p1: &[T;2],
-    transform: &nalgebra::Matrix3::<T>,
+    p0: &[T; 2],
+    p1: &[T; 2],
+    transform: &nalgebra::Matrix3<T>,
     rad: T,
-    color: VAL)
-    where T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<i64>,
-          i64: AsPrimitive<T>,
-          VAL: Copy
+    color: VAL,
+) where
+    T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<i64>,
+    i64: AsPrimitive<T>,
+    VAL: Copy,
 {
     let height = img_data.len() / width;
     let a0 = transform * nalgebra::Vector3::<T>::new(p0[0], p0[1], T::one());
@@ -106,12 +119,13 @@ pub fn polyloop<T, VAL>(
     width: usize,
     //
     vtx2xy: &[T],
-    transform: &nalgebra::Matrix3::<T>,
+    transform: &nalgebra::Matrix3<T>,
     point_size: T,
-    color: VAL)
-    where T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<i64>,
-          i64: AsPrimitive<T>,
-          VAL: Copy
+    color: VAL,
+) where
+    T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<i64>,
+    i64: AsPrimitive<T>,
+    VAL: Copy,
 {
     let n = vtx2xy.len() / 2;
     for i in 0..n {
@@ -123,7 +137,8 @@ pub fn polyloop<T, VAL>(
             &[vtx2xy[j * 2 + 0], vtx2xy[j * 2 + 1]],
             transform,
             point_size,
-            color);
+            color,
+        );
     }
 }
 
@@ -131,13 +146,14 @@ pub fn polyloop<T, VAL>(
 pub fn point<Real, VAL>(
     img_data: &mut [VAL],
     width: usize,
-    x: &[Real;2],
-    transform: &nalgebra::Matrix3::<Real>,
+    x: &[Real; 2],
+    transform: &nalgebra::Matrix3<Real>,
     rad: Real,
-    color: VAL)
-    where Real: num_traits::Float + 'static + AsPrimitive<i64> + nalgebra::RealField,
-          i64: AsPrimitive<Real>,
-          VAL: Copy
+    color: VAL,
+) where
+    Real: num_traits::Float + 'static + AsPrimitive<i64> + nalgebra::RealField,
+    i64: AsPrimitive<Real>,
+    VAL: Copy,
 {
     let height = img_data.len() / width;
     let a = transform * nalgebra::Vector3::<Real>::new(x[0], x[1], Real::one());

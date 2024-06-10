@@ -11,18 +11,18 @@ pub fn i32_form_u8rgb(r: u8, g: u8, b: u8) -> i32 {
     let r = (r as i32) * 0x010000;
     let g = (g as i32) * 0x000100;
     let b = b as i32;
-    r+g+b
+    r + g + b
 }
 
-pub fn rgb_from_hsv<T>(
-    h: T,
-    s: T,
-    v: T) -> (T, T, T)
-    where T: num_traits::Float + std::ops::MulAssign + AsPrimitive<i32>,
-          i32: AsPrimitive<T>
+pub fn rgb_from_hsv<T>(h: T, s: T, v: T) -> (T, T, T)
+where
+    T: num_traits::Float + std::ops::MulAssign + AsPrimitive<i32>,
+    i32: AsPrimitive<T>,
 {
     assert!(h >= T::zero() && h <= T::one());
-    if s < T::zero() { return (v, v, v); }
+    if s < T::zero() {
+        return (v, v, v);
+    }
     //
     let one = T::one();
     let six = one + one + one + one + one + one;
@@ -55,7 +55,7 @@ pub fn rgb_from_hsv<T>(
             g *= one - s;
             b *= one - s * f;
         }
-        _ => panic!()
+        _ => panic!(),
     }
     (r, g, b)
 }

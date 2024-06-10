@@ -1,4 +1,3 @@
-
 pub struct Canvas {
     pub width: usize,
     pub height: usize,
@@ -10,7 +9,7 @@ impl Canvas {
         Self {
             width: size.0,
             height: size.1,
-            data: vec!(0; size.0 * size.1 * 3),
+            data: vec![0; size.0 * size.1 * 3],
         }
     }
 
@@ -35,11 +34,11 @@ impl Canvas {
         let mut encoder = png::Encoder::new(
             w,
             self.width.try_into().unwrap(),
-            self.height.try_into().unwrap()); // Width is 2 pixels and height is 1.
+            self.height.try_into().unwrap(),
+        ); // Width is 2 pixels and height is 1.
         encoder.set_color(png::ColorType::Rgb);
         encoder.set_depth(png::BitDepth::Eight);
         let mut writer = encoder.write_header().unwrap();
         writer.write_image_data(&self.data).unwrap(); // Save
     }
 }
-

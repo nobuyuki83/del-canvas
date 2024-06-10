@@ -3,7 +3,7 @@ pub const COLORMAP_HEAT: [[f32; 3]; 5] = [
     [0.0, 1.0, 1.0],
     [0.0, 1.0, 0.0],
     [1.0, 1.0, 0.0],
-    [1.0, 0.0, 0.0]
+    [1.0, 0.0, 0.0],
 ];
 
 pub const COLORMAP_PLASMA: [[f32; 3]; 256] = [
@@ -262,9 +262,8 @@ pub const COLORMAP_PLASMA: [[f32; 3]; 256] = [
     [0.946602, 0.955190, 0.150328],
     [0.944152, 0.961916, 0.146861],
     [0.941896, 0.968590, 0.140956],
-    [0.940015, 0.975158, 0.131326]
+    [0.940015, 0.975158, 0.131326],
 ];
-
 
 pub const COLORMAP_VIRIDIS: [[f32; 3]; 256] = [
     [0.267004, 0.004874, 0.329415],
@@ -522,7 +521,7 @@ pub const COLORMAP_VIRIDIS: [[f32; 3]; 256] = [
     [0.964894, 0.902323, 0.123941],
     [0.974417, 0.903590, 0.130215],
     [0.983868, 0.904867, 0.136897],
-    [0.993248, 0.906157, 0.143936]
+    [0.993248, 0.906157, 0.143936],
 ];
 
 pub const COLORMAP_JET: [[f32; 3]; 9] = [
@@ -534,22 +533,31 @@ pub const COLORMAP_JET: [[f32; 3]; 9] = [
     [1.0, 1.0, 0.0],
     [1.0, 0.5, 0.0],
     [1.0, 0.0, 0.0],
-    [0.5, 0.0, 0.0]
+    [0.5, 0.0, 0.0],
 ];
 
 pub fn apply_colormap<T, const N: usize>(
-    p: T, pmin: T, pmax: T,
-    colormap: [[f32; 3]; N]) -> [f32; 3]
-    where T: num_traits::Float + num_traits::AsPrimitive<f32>
+    p: T,
+    pmin: T,
+    pmax: T,
+    colormap: [[f32; 3]; N],
+) -> [f32; 3]
+where
+    T: num_traits::Float + num_traits::AsPrimitive<f32>,
 {
     let fc: f32 = (N as f32) * (p - pmin).as_() / (pmax - pmin).as_();
-    if fc as i32 <= 0 { return colormap[0]; }
-    if fc as usize >= N - 1 { return colormap[N - 1]; }
+    if fc as i32 <= 0 {
+        return colormap[0];
+    }
+    if fc as usize >= N - 1 {
+        return colormap[N - 1];
+    }
     let ic = fc as usize;
     assert!(ic > 0);
     let r1 = fc - ic as f32;
     [
         colormap[ic][0] + (colormap[ic + 1][0] - colormap[ic][0]) * r1,
         colormap[ic][1] + (colormap[ic + 1][1] - colormap[ic][1]) * r1,
-        colormap[ic][2] + (colormap[ic + 1][2] - colormap[ic][2]) * r1]
+        colormap[ic][2] + (colormap[ic + 1][2] - colormap[ic][2]) * r1,
+    ]
 }

@@ -1,4 +1,3 @@
-
 fn hoge() {
     let str2 = "M 457.60409,474.77081 H 347.66161 \
     L 208.25942,282.21963 q -15.48914,0.60741 -25.20781,0.60741 \
@@ -19,18 +18,18 @@ fn hoge() {
     // dbg!(&loops);
     // dbg!(loops.len());
     let (width, height) = (512usize, 512usize);
-    let mut img_data = vec!(255u8; height * width);
+    let mut img_data = vec![255u8; height * width];
     // winding number
     for i_w in 0..width {
         for i_h in 0..height {
-            let p = nalgebra::Vector2::<f32>::new(
-                i_w as f32 + 0.5f32,
-                i_h as f32 + 0.5f32);
+            let p = nalgebra::Vector2::<f32>::new(i_w as f32 + 0.5f32, i_h as f32 + 0.5f32);
             let mut wn = 0.0f32;
             for i_loop in 0..loops.len() {
                 wn += del_msh::polyloop2::winding_number(&loops[i_loop].0, &p);
             }
-            if wn.round() as i64 != 0 { img_data[i_h * width + i_w] = 128; }
+            if wn.round() as i64 != 0 {
+                img_data[i_h * width + i_w] = 128;
+            }
         }
     }
     // dda
@@ -40,19 +39,12 @@ fn hoge() {
             let j_vtx = (i_vtx + 1) % num_vtx;
             let p0 = &vtx2xy[i_vtx];
             let p1 = &vtx2xy[j_vtx];
-            del_canvas::dda::line_scr(
-                &mut img_data, width,
-                &[p0.x, p0.y],
-                &[p1.x, p1.y],
-            0);
+            del_canvas::dda::line_scr(&mut img_data, width, &[p0.x, p0.y], &[p1.x, p1.y], 0);
         }
     }
     let file = std::fs::File::create("target/r0.png").unwrap();
     let w = std::io::BufWriter::new(file);
-    let mut encoder = png::Encoder::new(
-        w,
-        width.try_into().unwrap(),
-        height.try_into().unwrap()); // Width is 2 pixels and height is 1.
+    let mut encoder = png::Encoder::new(w, width.try_into().unwrap(), height.try_into().unwrap()); // Width is 2 pixels and height is 1.
     encoder.set_color(png::ColorType::Grayscale);
     encoder.set_depth(png::BitDepth::Eight);
     let mut writer = encoder.write_header().unwrap();
@@ -77,26 +69,19 @@ fn hoge1() {
     let loops = del_msh::io_svg::svg_loops_from_outline_path(&strs);
     // dbg!(&loops);
     let (width, height) = (512usize, 512usize);
-    let mut img_data = vec!(255u8; height * width);
+    let mut img_data = vec![255u8; height * width];
     for (vtx2xy, seg2vtx, is_close) in &loops {
-        let vtxp2xy = del_msh::io_svg::polybezier2polyloop(
-            &vtx2xy, &seg2vtx, *is_close, 0.01);
+        let vtxp2xy = del_msh::io_svg::polybezier2polyloop(&vtx2xy, &seg2vtx, *is_close, 0.01);
         for i_vtx in 0..vtxp2xy.len() {
             let j_vtx = (i_vtx + 1) % vtxp2xy.len();
             let p0 = vtxp2xy[i_vtx];
             let p1 = vtxp2xy[j_vtx];
-            del_canvas::dda::line_scr(
-                &mut img_data, width,
-                &[p0.x, p0.y],
-                &[p1.x, p1.y],0);
+            del_canvas::dda::line_scr(&mut img_data, width, &[p0.x, p0.y], &[p1.x, p1.y], 0);
         }
     }
     let file = std::fs::File::create("target/r1.png").unwrap();
     let w = std::io::BufWriter::new(file);
-    let mut encoder = png::Encoder::new(
-        w,
-        width.try_into().unwrap(),
-        height.try_into().unwrap()); // Width is 2 pixels and height is 1.
+    let mut encoder = png::Encoder::new(w, width.try_into().unwrap(), height.try_into().unwrap()); // Width is 2 pixels and height is 1.
     encoder.set_color(png::ColorType::Grayscale);
     encoder.set_depth(png::BitDepth::Eight);
     let mut writer = encoder.write_header().unwrap();

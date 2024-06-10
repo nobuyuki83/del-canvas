@@ -5,15 +5,20 @@ fn gauss(x: f32, s: f32) -> f32 {
 }
 
 fn main() {
-    type Vec3 = nalgebra::Vector3::<f32>;
+    type Vec3 = nalgebra::Vector3<f32>;
     let (width, height) = (512usize, 512usize);
-    let mut img_data = vec!(
-        image::Rgb::<f32>::from([0.8, 0.8, 0.8]);
-        height * width * 3);
+    let mut img_data = vec![image::Rgb::<f32>::from([0.8, 0.8, 0.8]); height * width * 3];
     let transform_pix2glb = nalgebra::Matrix3::<f32>::new(
-        2f32 / (width as f32), 0f32, -1f32,
-        0f32, -2f32 / (height as f32), 1f32,
-        0f32, 0f32, 1f32);
+        2f32 / (width as f32),
+        0f32,
+        -1f32,
+        0f32,
+        -2f32 / (height as f32),
+        1f32,
+        0f32,
+        0f32,
+        1f32,
+    );
     let light_pos = Vec3::new(1.0, 1.0, 1.0);
     let alpha_rad = (-10f32) * std::f32::consts::PI / 180f32;
     let beta_rad = (10f32) * std::f32::consts::PI / 180f32;
@@ -21,13 +26,17 @@ fn main() {
     let fresnel_0 = ((1f32 - eta) / (1f32 + eta)).pow(2);
     for i_w in 0..width {
         for i_h in 0..height {
-            let org = Vec3::new(
-                i_w as f32 + 0.5f32, i_h as f32 + 0.5f32, 1f32);
+            let org = Vec3::new(i_w as f32 + 0.5f32, i_h as f32 + 0.5f32, 1f32);
             let org = transform_pix2glb * org;
             let dir = Vec3::new(0f32, 0f32, -1f32);
-            let Some((hit_pos, hit_normal, _depth))
-                = del_geo::sphere::intersection_ray(
-                &nalgebra::Vector3::new(0., 0., 0.), 0.5, &org, &dir) else { continue; };
+            let Some((hit_pos, hit_normal, _depth)) = del_geo::sphere::intersection_ray(
+                &nalgebra::Vector3::new(0., 0., 0.),
+                0.5,
+                &org,
+                &dir,
+            ) else {
+                continue;
+            };
             assert!((hit_normal.norm() - 1f32).abs() < 1.0e-5);
             // pointing in the direction from the root toward the tip
             let fiber_dir = Vec3::new(0., -1., 0.);
@@ -46,7 +55,7 @@ fn main() {
             let phi = phi_i - phi_o;
             let n_r = {
                 let x = (0.5f32 + 0.5f32 * w_i.dot(&w_o)).sqrt(); // cos(tdheta/2)
-                // reflection ratio by Schlick's approximation
+                                                                  // reflection ratio by Schlick's approximation
                 let a = fresnel_0 + (1f32 - fresnel_0) * (1f32 - x).pow(5);
                 0.25f32 * (phi * 0.5f32).cos() * a
             };

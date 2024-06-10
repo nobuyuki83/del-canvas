@@ -1,20 +1,18 @@
-
-pub struct CanvasGif {
+pub struct Canvas {
     pub width: usize,
     pub height: usize,
     pub data: Vec<u8>,
     gif_enc: Option<gif::Encoder<std::fs::File>>,
 }
 
-impl CanvasGif {
-    pub fn new<Path>(path_: Path,
-               size: (usize, usize),
-               palette: &Vec<i32>) -> Self
-        where Path: AsRef<std::path::Path>,
+impl Canvas {
+    pub fn new<Path>(path_: Path, size: (usize, usize), palette: &Vec<i32>) -> Self
+    where
+        Path: AsRef<std::path::Path>,
     {
         let res_encoder = {
             let global_palette = {
-                let mut res: Vec<u8> = vec!();
+                let mut res: Vec<u8> = vec![];
                 for &color in palette {
                     let (r, g, b) = crate::color::u8rgb_from_i32(color);
                     res.push(r);
@@ -27,25 +25,22 @@ impl CanvasGif {
                 std::fs::File::create(path_).unwrap(),
                 size.0.try_into().unwrap(),
                 size.1.try_into().unwrap(),
-                &global_palette)
+                &global_palette,
+            )
         };
         match res_encoder {
-            Err(_e) => {
-                Self {
-                    width: size.0,
-                    height: size.1,
-                    data: vec!(0; size.0 * size.1),
-                    gif_enc: None,
-                }
-            }
-            Ok(t) => {
-                Self {
-                    width: size.0,
-                    height: size.1,
-                    data: vec!(0; size.0 * size.1),
-                    gif_enc: Some(t),
-                }
-            }
+            Err(_e) => Self {
+                width: size.0,
+                height: size.1,
+                data: vec![0; size.0 * size.1],
+                gif_enc: None,
+            },
+            Ok(t) => Self {
+                width: size.0,
+                height: size.1,
+                data: vec![0; size.0 * size.1],
+                gif_enc: Some(t),
+            },
         }
     }
 
