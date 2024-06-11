@@ -39,7 +39,13 @@ fn hoge() {
             let j_vtx = (i_vtx + 1) % num_vtx;
             let p0 = &vtx2xy[i_vtx];
             let p1 = &vtx2xy[j_vtx];
-            del_canvas::dda::line_scr(&mut img_data, width, &[p0.x, p0.y], &[p1.x, p1.y], 0);
+            del_canvas::rasterize_line::draw_dda(
+                &mut img_data,
+                width,
+                &[p0.x, p0.y],
+                &[p1.x, p1.y],
+                0,
+            );
         }
     }
     let file = std::fs::File::create("target/r0.png").unwrap();
@@ -76,7 +82,13 @@ fn hoge1() {
             let j_vtx = (i_vtx + 1) % vtxp2xy.len();
             let p0 = vtxp2xy[i_vtx];
             let p1 = vtxp2xy[j_vtx];
-            del_canvas::dda::line_scr(&mut img_data, width, &[p0.x, p0.y], &[p1.x, p1.y], 0);
+            del_canvas::rasterize_line::draw_dda(
+                &mut img_data,
+                width,
+                &[p0.x, p0.y],
+                &[p1.x, p1.y],
+                0,
+            );
         }
     }
     let file = std::fs::File::create("target/r1.png").unwrap();

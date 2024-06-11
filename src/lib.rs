@@ -6,8 +6,9 @@ pub mod canvas_gif;
 pub mod canvas_svg;
 pub mod color;
 pub mod colormap;
-pub mod dda;
-pub mod paint_pixcenter;
+pub mod rasterize_circle;
+pub mod rasterize_line;
+pub mod rasterize_polygon;
 
 fn hoge<Real>(p0: &[Real; 2], p1: &[Real; 2], p2: &[Real; 2], q: &[Real; 2]) -> Option<(Real, Real)>
 where
@@ -43,20 +44,19 @@ pub fn triangle<Index, Real>(
     Index: AsPrimitive<usize>,
     usize: AsPrimitive<Real>,
 {
+    let half = Real::one() / (Real::one() + Real::one());
     let img_height = pix2color.len() / img_width;
     //
     let q0 = transform * nalgebra::Vector3::<Real>::new(p0[0], p0[1], Real::one());
     let q1 = transform * nalgebra::Vector3::<Real>::new(p1[0], p1[1], Real::one());
     let q2 = transform * nalgebra::Vector3::<Real>::new(p2[0], p2[1], Real::one());
-    let q0: [Real; 2] = [q0[0], q0[1]];
-    let q1: [Real; 2] = [q1[0], q1[1]];
-    let q2: [Real; 2] = [q2[0], q2[1]];
-    // dbg!(&del_geo::tri2::area(p0, p1,p2));
-    let transform_inv = transform.clone().try_inverse().unwrap();
+    let q0: [Real; 2] = del_geo::vec2::from_homogeneous(q0.as_slice().try_into().unwrap()).unwrap();
+    let q1: [Real; 2] = del_geo::vec2::from_homogeneous(q1.as_slice().try_into().unwrap()).unwrap();
+    let q2: [Real; 2] = del_geo::vec2::from_homogeneous(q2.as_slice().try_into().unwrap()).unwrap();
     for i_h in 0..img_height {
         for i_w in 0..img_width {
-            let p_xy: [Real; 2] = [i_w.as_(), i_h.as_()];
-            let Some((r0, r1)) = hoge(&q0, &q1, &q2, &p_xy) else {
+            let p_xy: [Real; 2] = [i_w.as_() + half, i_h.as_() + half];
+            let Some((_r0, _r1)) = hoge(&q0, &q1, &q2, &p_xy) else {
                 continue;
             };
             pix2color[i_h * img_width + i_w] = i_color;
@@ -136,8 +136,10 @@ pub fn write_png_from_float_image<Real, Path>(
 
 #[test]
 fn test_draw_mesh() {
-    let (tri2vtx, vtx2xy) = del_msh::trimesh2_dynamic::meshing_from_polyloop2::<usize, f32>(
+    let (tri2vtx, vtx2xy)
+        = del_msh::trimesh2_dynamic::meshing_from_polyloop2::<usize, f32>(
         &[0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0],
+        0.11,
         0.11,
     );
     let vtx2color = {
