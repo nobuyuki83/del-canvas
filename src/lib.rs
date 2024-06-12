@@ -1,5 +1,6 @@
 use num_traits::AsPrimitive;
 
+pub mod cam2;
 pub mod cam3;
 pub mod canvas_bitmap;
 pub mod canvas_gif;
@@ -11,7 +12,6 @@ pub mod rasterize_line;
 pub mod rasterize_polygon;
 pub mod raycast_trimesh2;
 pub mod raycast_trimesh3;
-pub mod cam2;
 
 fn hoge<Real>(p0: &[Real; 2], p1: &[Real; 2], p2: &[Real; 2], q: &[Real; 2]) -> Option<(Real, Real)>
 where
@@ -30,7 +30,7 @@ where
         return None;
     }
     let sum_area_inv = Real::one() / (a0 + a1 + a2);
-    return Some((a0 * sum_area_inv, a1 * sum_area_inv));
+    Some((a0 * sum_area_inv, a1 * sum_area_inv))
 }
 
 #[allow(clippy::identity_op)]
@@ -62,9 +62,6 @@ pub fn triangle<Index, Real>(
         }
     }
 }
-
-
-
 
 pub fn write_png_from_float_image<Real, Path>(
     path: Path,

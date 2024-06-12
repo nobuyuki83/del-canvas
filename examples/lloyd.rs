@@ -8,8 +8,9 @@ fn main() {
         &vec![0xffffff, 0x000000, 0xff0000],
     );
     let transform_world2pix = cam2::transform_world2pix_ortho_preserve_asp(
-        (canvas.width, canvas.height),
-        &[-0.3, -0.1, 1.3, 1.1]);
+        &(canvas.width, canvas.height),
+        &[-0.3, -0.1, 1.3, 1.1],
+    );
     // loop vtxs
     let vtxl2xy = vec![0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0];
     // site vtxs

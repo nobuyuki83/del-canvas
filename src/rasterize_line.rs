@@ -62,36 +62,18 @@ pub fn pixels_in_line<Real>(
     height: usize,
 ) -> Vec<usize>
 where
-    Real: num_traits::Float + 'static + AsPrimitive<i64>,
-    i64: AsPrimitive<Real>,
+    Real: num_traits::Float + 'static + AsPrimitive<usize>,
+    usize: AsPrimitive<Real>,
 {
     let half: Real = Real::one() / (Real::one() + Real::one());
-    let (iw_min, iw_max, ih_min, ih_max) = {
-        let iw0_min: i64 = (x0 - rad - half).ceil().as_();
-        let ih0_min: i64 = (y0 - rad - half).ceil().as_();
-        let iw1_min: i64 = (x1 - rad - half).ceil().as_();
-        let ih1_min: i64 = (y1 - rad - half).ceil().as_();
-        let iw0_max: i64 = (x0 + rad - half).floor().as_();
-        let ih0_max: i64 = (y0 + rad - half).floor().as_();
-        let iw1_max: i64 = (x1 + rad - half).floor().as_();
-        let ih1_max: i64 = (y1 + rad - half).floor().as_();
-        (
-            std::cmp::min(iw0_min, iw1_min),
-            std::cmp::max(iw0_max, iw1_max),
-            std::cmp::min(ih0_min, ih1_min),
-            std::cmp::max(ih0_max, ih1_max),
-        )
+    let aabbi = {
+        let aabb = del_geo::aabb2::from_two_points(&[x0, y0], &[x1, y1], rad);
+        del_geo::aabb2::rasterize(&aabb, &(width, height))
     };
     let sqlen = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
     let mut res = Vec::<usize>::new();
-    for ih in ih_min..ih_max + 1 {
-        if ih < 0 || ih >= height.try_into().unwrap() {
-            continue;
-        }
-        for iw in iw_min..iw_max + 1 {
-            if iw < 0 || iw >= width.try_into().unwrap() {
-                continue;
-            }
+    for ih in aabbi[1]..aabbi[3] {
+        for iw in aabbi[0]..aabbi[2] {
             let w: Real = iw.as_() + half; // pixel center
             let h: Real = ih.as_() + half; // pixel center
             let t = ((w - x0) * (x1 - x0) + (h - y0) * (y1 - y0)) / sqlen;
@@ -105,8 +87,7 @@ where
             if sqdist > rad * rad {
                 continue;
             }
-            let idata = ih as usize * width + iw as usize;
-            res.push(idata);
+            res.push(ih * width + iw);
         }
     }
     res
@@ -118,21 +99,18 @@ pub fn draw_pixcenter<T, VAL>(
     width: usize,
     p0: &[T; 2],
     p1: &[T; 2],
-    transform_world_to_pix: &[T; 9],
+    transform_world2pix: &[T; 9],
     rad: T,
     color: VAL,
 ) where
-    T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<i64>,
-    i64: AsPrimitive<T>,
+    T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<usize>,
+    usize: AsPrimitive<T>,
     VAL: Copy,
 {
     let height = img_data.len() / width;
-    let a0 = del_geo::mat3::transform_homogeneous(transform_world_to_pix, p0).unwrap();
-    let a1 = del_geo::mat3::transform_homogeneous(transform_world_to_pix, p1).unwrap();
-    let pixs = pixels_in_line(
-        a0[0], a0[1],
-        a1[0], a1[1],
-        rad, width, height);
+    let a0 = del_geo::mat3::transform_homogeneous(transform_world2pix, p0).unwrap();
+    let a1 = del_geo::mat3::transform_homogeneous(transform_world2pix, p1).unwrap();
+    let pixs = pixels_in_line(a0[0], a0[1], a1[0], a1[1], rad, width, height);
     for i_data in pixs {
         img_data[i_data] = color;
     }

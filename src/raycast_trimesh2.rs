@@ -29,9 +29,9 @@ pub fn trimsh2_vtxcolor<Index, Real>(
                 del_msh::trimesh2::search_bruteforce_one_triangle_include_input_point(
                     &p_xy, tri2vtx, vtx2xy,
                 )
-                else {
-                    continue;
-                };
+            else {
+                continue;
+            };
             let r2 = Real::one() - r0 - r1;
             let iv0: usize = tri2vtx[i_tri * 3 + 0].as_();
             let iv1: usize = tri2vtx[i_tri * 3 + 1].as_();

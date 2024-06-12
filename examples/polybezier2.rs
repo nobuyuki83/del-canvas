@@ -39,11 +39,13 @@ fn hoge() {
             let j_vtx = (i_vtx + 1) % num_vtx;
             let p0 = &vtx2xy[i_vtx];
             let p1 = &vtx2xy[j_vtx];
-            del_canvas::rasterize_line::draw_dda(
+            del_canvas::rasterize_line::draw_pixcenter(
                 &mut img_data,
                 width,
                 &[p0.x, p0.y],
                 &[p1.x, p1.y],
+                &[1., 0., 0., 0., 1., 0., 0., 0., 1.],
+                3.0,
                 0,
             );
         }

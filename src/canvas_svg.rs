@@ -40,7 +40,7 @@ impl crate::canvas_svg::Canvas {
     ) {
         let s = format!(
             "<polygon points=\"{}\" {} {} {} />",
-            del_msh::polyloop2::to_svg(vtx2xy, &transform_xy2pix),
+            del_msh::polyloop2::to_svg(vtx2xy, transform_xy2pix),
             if stroke_color.is_some() {
                 format!("stroke=\"#{:06X}\"", stroke_color.unwrap())
             } else {
