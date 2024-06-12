@@ -118,7 +118,7 @@ pub fn draw_pixcenter<T, VAL>(
     width: usize,
     p0: &[T; 2],
     p1: &[T; 2],
-    transform: &[T;9],
+    transform_world_to_pix: &[T; 9],
     rad: T,
     color: VAL,
 ) where
@@ -127,10 +127,13 @@ pub fn draw_pixcenter<T, VAL>(
     VAL: Copy,
 {
     let height = img_data.len() / width;
-    let a0 = del_geo::mat3::transform_homogeneous(transform, p0).unwrap();
-    let a1 = del_geo::mat3::transform_homogeneous(transform, p1).unwrap();
-    let pixs = pixels_in_line(a0[0], a0[1], a1[0], a1[1], rad, width, height);
-    for idata in pixs {
-        img_data[idata] = color;
+    let a0 = del_geo::mat3::transform_homogeneous(transform_world_to_pix, p0).unwrap();
+    let a1 = del_geo::mat3::transform_homogeneous(transform_world_to_pix, p1).unwrap();
+    let pixs = pixels_in_line(
+        a0[0], a0[1],
+        a1[0], a1[1],
+        rad, width, height);
+    for i_data in pixs {
+        img_data[i_data] = color;
     }
 }

@@ -5,7 +5,7 @@ fn main() {
         (300, 300),
         &vec![0xffffff, 0x000000, 0xff0000],
     );
-    let transform_to_scr = nalgebra::Matrix3::<f32>::new(
+    let transform_world_to_pix = nalgebra::Matrix3::<f32>::new(
         canvas.width as f32 * 0.8,
         0.,
         canvas.width as f32 * 0.1,
@@ -34,7 +34,7 @@ fn main() {
                 &mut canvas.data,
                 canvas.width,
                 &vtxc2xy,
-                transform_to_scr.as_slice().try_into().unwrap(),
+                transform_world_to_pix.as_slice().try_into().unwrap(),
                 1.,
                 1,
             );
@@ -42,7 +42,7 @@ fn main() {
                 &mut canvas.data,
                 canvas.width,
                 &[site2xy[i_site * 2 + 0], site2xy[i_site * 2 + 1]],
-                transform_to_scr.as_slice().try_into().unwrap(),
+                transform_world_to_pix.as_slice().try_into().unwrap(),
                 3.0,
                 1,
             );
@@ -50,7 +50,7 @@ fn main() {
                 &mut canvas.data,
                 canvas.width,
                 &[p[0], p[1]],
-                transform_to_scr.as_slice().try_into().unwrap(),
+                transform_world_to_pix.as_slice().try_into().unwrap(),
                 3.0,
                 2,
             );

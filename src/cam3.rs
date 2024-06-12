@@ -30,3 +30,18 @@ where
         (self.o + d * 140.as_(), d.normalize())
     }
 }
+
+
+pub fn ray3_homogeneous(
+    pix_coord: (usize, usize),
+    image_size: (usize, usize),
+    transform_ndc_to_world: &[f32;16]) -> ([f32;3], [f32;3])
+{
+    let x0 = 2. * (pix_coord.0 as f32 + 0.5f32) / (image_size.0 as f32) - 1.;
+    let y0 = 1. - 2. * (pix_coord.1 as f32 + 0.5f32) / (image_size.1 as f32);
+    let ray_org = del_geo::mat4::transform_homogeneous(&transform_ndc_to_world, &[x0, y0, 1.]).unwrap();
+    let ray_dir = del_geo::vec3::sub_(
+        &del_geo::mat4::transform_homogeneous(&transform_ndc_to_world, &[x0, y0, -1.]).unwrap(),
+        &del_geo::mat4::transform_homogeneous(&transform_ndc_to_world, &[x0, y0, 1.]).unwrap());
+    (ray_org, ray_dir)
+}

@@ -7,7 +7,7 @@ pub fn stroke<T, VAL>(
     img_data: &mut [VAL],
     width: usize,
     vtx2xy: &[T],
-    transform: &[T;9],
+    transform_world_to_pix: &[T; 9],
     point_size: T,
     color: VAL,
 ) where
@@ -23,9 +23,44 @@ pub fn stroke<T, VAL>(
             width,
             &[vtx2xy[i * 2 + 0], vtx2xy[i * 2 + 1]],
             &[vtx2xy[j * 2 + 0], vtx2xy[j * 2 + 1]],
-            transform,
+            transform_world_to_pix,
             point_size,
             color,
         );
     }
+}
+
+
+#[allow(clippy::identity_op)]
+pub fn fill<T, VAL>(
+    img_data: &mut [VAL],
+    width: usize,
+    vtx2xy: &[T],
+    transform_world_to_pix: &[T; 9],
+    point_size: T,
+    color: VAL,
+) where
+    T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<i64>,
+    i64: AsPrimitive<T>,
+    VAL: Copy,
+{
+    let n = vtx2xy.len() / 2;
+    for i in 0..n {
+        let j = (i + 1) % n;
+        rasterize_line::draw_pixcenter(
+            img_data,
+            width,
+            &[vtx2xy[i * 2 + 0], vtx2xy[i * 2 + 1]],
+            &[vtx2xy[j * 2 + 0], vtx2xy[j * 2 + 1]],
+            transform_world_to_pix,
+            point_size,
+            color,
+        );
+    }
+}
+
+#[test]
+fn test_fill() {
+    let img_size = (100usize, 100usize);
+
 }

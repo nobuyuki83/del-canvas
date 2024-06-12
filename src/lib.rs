@@ -9,6 +9,8 @@ pub mod colormap;
 pub mod rasterize_circle;
 pub mod rasterize_line;
 pub mod rasterize_polygon;
+pub mod raycast_trimesh2;
+pub mod raycast_trimesh3;
 
 fn hoge<Real>(p0: &[Real; 2], p1: &[Real; 2], p2: &[Real; 2], q: &[Real; 2]) -> Option<(Real, Real)>
 where
@@ -37,7 +39,7 @@ pub fn triangle<Index, Real>(
     p0: &[Real; 2],
     p1: &[Real; 2],
     p2: &[Real; 2],
-    transform: &nalgebra::Matrix3<Real>,
+    transform: &[Real; 9],
     i_color: u8,
 ) where
     Real: num_traits::Float + 'static + Copy + nalgebra::RealField,
@@ -46,13 +48,9 @@ pub fn triangle<Index, Real>(
 {
     let half = Real::one() / (Real::one() + Real::one());
     let img_height = pix2color.len() / img_width;
-    //
-    let q0 = transform * nalgebra::Vector3::<Real>::new(p0[0], p0[1], Real::one());
-    let q1 = transform * nalgebra::Vector3::<Real>::new(p1[0], p1[1], Real::one());
-    let q2 = transform * nalgebra::Vector3::<Real>::new(p2[0], p2[1], Real::one());
-    let q0: [Real; 2] = del_geo::vec2::from_homogeneous(q0.as_slice().try_into().unwrap()).unwrap();
-    let q1: [Real; 2] = del_geo::vec2::from_homogeneous(q1.as_slice().try_into().unwrap()).unwrap();
-    let q2: [Real; 2] = del_geo::vec2::from_homogeneous(q2.as_slice().try_into().unwrap()).unwrap();
+    let q0: [Real; 2] = del_geo::mat3::transform_homogeneous(transform, p0).unwrap();
+    let q1: [Real; 2] = del_geo::mat3::transform_homogeneous(transform, p1).unwrap();
+    let q2: [Real; 2] = del_geo::mat3::transform_homogeneous(transform, p2).unwrap();
     for i_h in 0..img_height {
         for i_w in 0..img_width {
             let p_xy: [Real; 2] = [i_w.as_() + half, i_h.as_() + half];
@@ -64,51 +62,8 @@ pub fn triangle<Index, Real>(
     }
 }
 
-///
-/// * `transform` - from `xy` to `pixel coordinate`
-#[allow(clippy::identity_op)]
-pub fn trimsh2_vtxcolor<Index, Real>(
-    img_width: usize,
-    img_height: usize,
-    pix2color: &mut [Real],
-    tri2vtx: &[Index],
-    vtx2xy: &[Real],
-    vtx2color: &[Real],
-    transform: &nalgebra::Matrix3<Real>,
-) where
-    Real: num_traits::Float + 'static + Copy + nalgebra::RealField,
-    Index: AsPrimitive<usize>,
-    usize: AsPrimitive<Real>,
-{
-    let num_dim = pix2color.len() / (img_width * img_height);
-    let num_vtx = vtx2xy.len() / 2;
-    let transform_inv = transform.clone().try_inverse().unwrap();
-    assert_eq!(vtx2color.len(), num_vtx * num_dim);
-    for i_h in 0..img_height {
-        for i_w in 0..img_width {
-            let p_xy =
-                transform_inv * nalgebra::Vector3::<Real>::new(i_w.as_(), i_h.as_(), Real::one());
-            let p_xy = [p_xy[0] / p_xy[2], p_xy[1] / p_xy[2]];
-            let Some((i_tri, r0, r1)) =
-                del_msh::trimesh2::search_bruteforce_one_triangle_include_input_point(
-                    &p_xy, tri2vtx, vtx2xy,
-                )
-            else {
-                continue;
-            };
-            let r2 = Real::one() - r0 - r1;
-            let iv0: usize = tri2vtx[i_tri * 3 + 0].as_();
-            let iv1: usize = tri2vtx[i_tri * 3 + 1].as_();
-            let iv2: usize = tri2vtx[i_tri * 3 + 2].as_();
-            for i_dim in 0..num_dim {
-                pix2color[(i_h * img_width + i_w) * num_dim + i_dim] = r0
-                    * vtx2color[iv0 * num_dim + i_dim]
-                    + r1 * vtx2color[iv1 * num_dim + i_dim]
-                    + r2 * vtx2color[iv2 * num_dim + i_dim];
-            }
-        }
-    }
-}
+
+
 
 pub fn write_png_from_float_image<Real, Path>(
     path: Path,
@@ -136,8 +91,7 @@ pub fn write_png_from_float_image<Real, Path>(
 
 #[test]
 fn test_draw_mesh() {
-    let (tri2vtx, vtx2xy)
-        = del_msh::trimesh2_dynamic::meshing_from_polyloop2::<usize, f32>(
+    let (tri2vtx, vtx2xy) = del_msh::trimesh2_dynamic::meshing_from_polyloop2::<usize, f32>(
         &[0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0],
         0.11,
         0.11,
@@ -164,7 +118,7 @@ fn test_draw_mesh() {
         0.,
         1.,
     );
-    trimsh2_vtxcolor(
+    crate::raycast_trimesh2::trimsh2_vtxcolor(
         img_width,
         img_height,
         &mut pix2color,
