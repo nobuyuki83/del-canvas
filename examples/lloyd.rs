@@ -1,3 +1,5 @@
+use del_canvas::cam2;
+
 fn main() {
     let mut reng = rand::thread_rng();
     let mut canvas = del_canvas::canvas_gif::Canvas::new(
@@ -5,17 +7,9 @@ fn main() {
         (300, 300),
         &vec![0xffffff, 0x000000, 0xff0000],
     );
-    let transform_world_to_pix = nalgebra::Matrix3::<f32>::new(
-        canvas.width as f32 * 0.8,
-        0.,
-        canvas.width as f32 * 0.1,
-        0.,
-        -(canvas.height as f32) * 0.8,
-        canvas.height as f32 * 0.9,
-        0.,
-        0.,
-        1.,
-    );
+    let transform_world2pix = cam2::transform_world2pix_ortho_preserve_asp(
+        (canvas.width, canvas.height),
+        &[-0.3, -0.1, 1.3, 1.1]);
     // loop vtxs
     let vtxl2xy = vec![0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0];
     // site vtxs
@@ -34,7 +28,7 @@ fn main() {
                 &mut canvas.data,
                 canvas.width,
                 &vtxc2xy,
-                transform_world_to_pix.as_slice().try_into().unwrap(),
+                &transform_world2pix,
                 1.,
                 1,
             );
@@ -42,7 +36,7 @@ fn main() {
                 &mut canvas.data,
                 canvas.width,
                 &[site2xy[i_site * 2 + 0], site2xy[i_site * 2 + 1]],
-                transform_world_to_pix.as_slice().try_into().unwrap(),
+                &transform_world2pix,
                 3.0,
                 1,
             );
@@ -50,7 +44,7 @@ fn main() {
                 &mut canvas.data,
                 canvas.width,
                 &[p[0], p[1]],
-                transform_world_to_pix.as_slice().try_into().unwrap(),
+                &transform_world2pix,
                 3.0,
                 2,
             );

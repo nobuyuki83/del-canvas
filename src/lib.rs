@@ -11,6 +11,7 @@ pub mod rasterize_line;
 pub mod rasterize_polygon;
 pub mod raycast_trimesh2;
 pub mod raycast_trimesh3;
+pub mod cam2;
 
 fn hoge<Real>(p0: &[Real; 2], p1: &[Real; 2], p2: &[Real; 2], q: &[Real; 2]) -> Option<(Real, Real)>
 where
