@@ -26,7 +26,6 @@ pub fn transform_world2pix_ortho_preserve_asp(
             aabb_world[3],
         ]
     };
-    // dbg!(&aabb_world1);
     let p_tl = [aabb_world1[0], aabb_world1[3]];
     let p_br = [aabb_world1[2], aabb_world1[1]];
     let a = width_img as f32 / (p_br[0] - p_tl[0]);

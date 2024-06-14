@@ -54,9 +54,11 @@ impl Canvas {
 
     pub fn write(&mut self) {
         // For reading and opening files
-        let mut frame = gif::Frame::default();
-        frame.width = self.width as u16;
-        frame.height = self.height as u16;
+        let mut frame = gif::Frame {
+            width: self.width as u16,
+            height: self.height as u16,
+            ..Default::default()
+        };
         frame.buffer = std::borrow::Cow::Borrowed(&self.data);
         match &mut self.gif_enc {
             None => {}

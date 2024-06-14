@@ -1,41 +1,56 @@
 use num_traits::AsPrimitive;
 
+pub struct TriMeshWithBvh<'a, Index, Real> {
+    pub tri2vtx: &'a [Index],
+    pub vtx2xy: &'a [Real],
+    pub bvhnodes: &'a [Index],
+    pub aabbs: &'a [Real],
+}
+
 ///
 /// * `transform` - from `xy` to `pixel coordinate`
 #[allow(clippy::identity_op)]
-pub fn trimsh2_vtxcolor<Index, Real>(
-    img_width: usize,
-    img_height: usize,
+pub fn draw_vtxcolor<Index, Real>(
+    &(img_width, img_height): &(usize, usize),
     pix2color: &mut [Real],
-    tri2vtx: &[Index],
-    vtx2xy: &[Real],
+    trimesh: TriMeshWithBvh<Index, Real>,
     vtx2color: &[Real],
-    transform: &nalgebra::Matrix3<Real>,
+    transform_xy2pix: &[Real; 9],
 ) where
-    Real: num_traits::Float + 'static + Copy + nalgebra::RealField,
-    Index: AsPrimitive<usize>,
+    Real: num_traits::Float + 'static + Copy,
+    Index: AsPrimitive<usize> + num_traits::PrimInt,
     usize: AsPrimitive<Real>,
 {
+    let half = Real::one() / (Real::one() + Real::one());
     let num_dim = pix2color.len() / (img_width * img_height);
-    let num_vtx = vtx2xy.len() / 2;
-    let transform_inv = transform.clone().try_inverse().unwrap();
+    let num_vtx = trimesh.vtx2xy.len() / 2;
+    assert_eq!(num_vtx, vtx2color.len());
+    let transform_pix2xy = del_geo::mat3::try_inverse(transform_xy2pix).unwrap();
     assert_eq!(vtx2color.len(), num_vtx * num_dim);
     for i_h in 0..img_height {
         for i_w in 0..img_width {
-            let p_xy =
-                transform_inv * nalgebra::Vector3::<Real>::new(i_w.as_(), i_h.as_(), Real::one());
-            let p_xy = [p_xy[0] / p_xy[2], p_xy[1] / p_xy[2]];
-            let Some((i_tri, r0, r1)) =
-                del_msh::trimesh2::search_bruteforce_one_triangle_include_input_point(
-                    &p_xy, tri2vtx, vtx2xy,
-                )
-            else {
+            let p_xy = del_geo::mat3::transform_homogeneous(
+                &transform_pix2xy,
+                &[i_w.as_() + half, i_h.as_() + half],
+            )
+            .unwrap();
+            let mut res: Vec<(usize, Real, Real)> = vec![];
+            del_msh::bvh2::search_including_point(
+                &mut res,
+                trimesh.tri2vtx,
+                trimesh.vtx2xy,
+                &p_xy,
+                0,
+                trimesh.bvhnodes,
+                trimesh.aabbs,
+            );
+            let Some(&(i_tri, r0, r1)) = res.first() else {
                 continue;
             };
             let r2 = Real::one() - r0 - r1;
-            let iv0: usize = tri2vtx[i_tri * 3 + 0].as_();
-            let iv1: usize = tri2vtx[i_tri * 3 + 1].as_();
-            let iv2: usize = tri2vtx[i_tri * 3 + 2].as_();
+            let iv0: usize = trimesh.tri2vtx[i_tri * 3 + 0].as_();
+            let iv1: usize = trimesh.tri2vtx[i_tri * 3 + 1].as_();
+            let iv2: usize = trimesh.tri2vtx[i_tri * 3 + 2].as_();
             for i_dim in 0..num_dim {
                 pix2color[(i_h * img_width + i_w) * num_dim + i_dim] = r0
                     * vtx2color[iv0 * num_dim + i_dim]
@@ -44,4 +59,47 @@ pub fn trimsh2_vtxcolor<Index, Real>(
             }
         }
     }
+}
+
+#[test]
+fn test0() {
+    let (tri2vtx, vtx2xy) = del_msh::trimesh2_dynamic::meshing_from_polyloop2::<usize, f32>(
+        &[0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0],
+        0.03,
+        0.03,
+    );
+    let bvhnodes = del_msh::bvh_topology_morton::from_triangle_mesh(&tri2vtx, &vtx2xy, 2);
+    let aabbs =
+        del_msh::bvh2::aabbs_from_uniform_mesh(0, &bvhnodes, Some(&tri2vtx), 3, &vtx2xy, None);
+    let vtx2color = {
+        use rand::Rng;
+        let mut reng = rand::thread_rng();
+        let mut vtx2color = vec![0.5_f32; vtx2xy.len() / 2];
+        for i_vtx in 0..vtx2color.len() {
+            vtx2color[i_vtx] = reng.gen::<f32>();
+        }
+        vtx2color
+    };
+    dbg!(tri2vtx.len(), vtx2xy.len());
+    let img_shape = (400, 300);
+    let mut pix2color = vec![0_f32; img_shape.0 * img_shape.1];
+    let transform_xy2pix =
+        crate::cam2::transform_world2pix_ortho_preserve_asp(&img_shape, &[-0.1, -0.1, 1.1, 1.1]);
+    draw_vtxcolor(
+        &img_shape,
+        &mut pix2color,
+        TriMeshWithBvh {
+            tri2vtx: &tri2vtx,
+            vtx2xy: &vtx2xy,
+            bvhnodes: &bvhnodes,
+            aabbs: &aabbs,
+        },
+        &vtx2color,
+        &transform_xy2pix,
+    );
+    crate::write_png_from_float_image(
+        "target/rasterize_trimesh2-test0.png",
+        &img_shape,
+        &pix2color,
+    );
 }
