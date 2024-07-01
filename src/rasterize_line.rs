@@ -47,8 +47,8 @@ pub fn draw_dda_with_transformation<Real>(
         + Copy
         + AsPrimitive<usize>,
 {
-    let q0 = del_geo::mat3::transform_homogeneous(transform, p0).unwrap();
-    let q1 = del_geo::mat3::transform_homogeneous(transform, p1).unwrap();
+    let q0 = del_geo_core::mat3::transform_homogeneous(transform, p0).unwrap();
+    let q1 = del_geo_core::mat3::transform_homogeneous(transform, p1).unwrap();
     draw_dda(img_data, width, &q0, &q1, i_color);
 }
 
@@ -67,8 +67,8 @@ where
 {
     let half: Real = Real::one() / (Real::one() + Real::one());
     let aabbi = {
-        let aabb = del_geo::aabb2::from_two_points(&[x0, y0], &[x1, y1], rad);
-        del_geo::aabb2::rasterize(&aabb, &(width, height))
+        let aabb = del_geo_core::aabb2::from_two_points(&[x0, y0], &[x1, y1], rad);
+        del_geo_core::aabb2::rasterize(&aabb, &(width, height))
     };
     let sqlen = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
     let mut res = Vec::<usize>::new();
@@ -108,8 +108,8 @@ pub fn draw_pixcenter<T, VAL>(
     VAL: Copy,
 {
     let height = img_data.len() / width;
-    let a0 = del_geo::mat3::transform_homogeneous(transform_world2pix, p0).unwrap();
-    let a1 = del_geo::mat3::transform_homogeneous(transform_world2pix, p1).unwrap();
+    let a0 = del_geo_core::mat3::transform_homogeneous(transform_world2pix, p0).unwrap();
+    let a1 = del_geo_core::mat3::transform_homogeneous(transform_world2pix, p1).unwrap();
     let pixs = pixels_in_line(a0[0], a0[1], a1[0], a1[1], rad, width, height);
     for i_data in pixs {
         img_data[i_data] = color;

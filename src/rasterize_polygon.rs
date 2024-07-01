@@ -47,19 +47,19 @@ pub fn fill<T, VAL>(
     usize: AsPrimitive<T>,
     VAL: Copy,
 {
-    let transform_pix2xy = del_geo::mat3::try_inverse(transform_xy2pix).unwrap();
+    let transform_pix2xy = del_geo_core::mat3::try_inverse(transform_xy2pix).unwrap();
     let half = T::one() / (T::one() + T::one());
     let height = img_data.len() / width;
     let aabbi = {
-        let aabb = del_geo::aabb2::from_vtx2xy(vtx2xy);
-        let aabb = del_geo::aabb2::transform_homogeneous(&aabb, transform_xy2pix);
-        del_geo::aabb2::rasterize(&aabb, &(width, height))
+        let aabb = del_geo_core::aabb2::from_vtx2xy(vtx2xy);
+        let aabb = del_geo_core::aabb2::transform_homogeneous(&aabb, transform_xy2pix);
+        del_geo_core::aabb2::rasterize(&aabb, &(width, height))
     };
     for ih in aabbi[1]..aabbi[3] {
         for iw in aabbi[0]..aabbi[2] {
             let w: T = iw.as_() + half; // pixel center
             let h: T = ih.as_() + half; // pixel center
-            let p = del_geo::mat3::transform_homogeneous(&transform_pix2xy, &[w, h]).unwrap();
+            let p = del_geo_core::mat3::transform_homogeneous(&transform_pix2xy, &[w, h]).unwrap();
             let wn = del_msh_core::polyloop2::winding_number_(vtx2xy, &p);
             if (wn - T::one()).round() == T::zero() {
                 img_data[ih * width + iw] = color;

@@ -17,7 +17,7 @@ fn radiance(ray: &Ray, vtx2xyz: &[f64], _rng: &mut rand::rngs::ThreadRng) -> Vec
     let mut i_material = 0; // none
     let mut hit_depth = Option::<f64>::None;
     {
-        let hd = del_geo::plane::intersection_ray3(&floor.0, &floor.1, &ray.o, &ray.d);
+        let hd = del_geo_nalgebra::plane::intersection_ray3(&floor.0, &floor.1, &ray.o, &ray.d);
         if hd.is_some() {
             if hit_depth.is_none() || Some(hd) < Some(hit_depth) {
                 hit_depth = hd;
@@ -26,7 +26,7 @@ fn radiance(ray: &Ray, vtx2xyz: &[f64], _rng: &mut rand::rngs::ThreadRng) -> Vec
         }
     }
     {
-        let hd = del_msh::polyloop3::winding_number(
+        let hd = del_msh_core::polyloop3::winding_number(
             vtx2xyz,
             ray.o.as_slice().try_into().unwrap(),
             ray.d.as_slice().try_into().unwrap(),

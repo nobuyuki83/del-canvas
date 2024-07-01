@@ -46,7 +46,7 @@ pub fn fill<Real, VAL>(
     VAL: Copy,
 {
     let height = img_data.len() / width;
-    let a = del_geo::mat3::transform_homogeneous(transform, x).unwrap();
+    let a = del_geo_core::mat3::transform_homogeneous(transform, x).unwrap();
     let pixs = pixels_in_point(a[0], a[1], rad, width, height);
     for idata in pixs {
         img_data[idata] = color;

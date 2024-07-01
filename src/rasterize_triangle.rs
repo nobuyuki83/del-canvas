@@ -17,17 +17,17 @@ pub fn fill<Index, Real, VAL>(
 {
     let half = Real::one() / (Real::one() + Real::one());
     let img_height = pix2color.len() / img_width;
-    let q0: [Real; 2] = del_geo::mat3::transform_homogeneous(transform_xy2pix, p0).unwrap();
-    let q1: [Real; 2] = del_geo::mat3::transform_homogeneous(transform_xy2pix, p1).unwrap();
-    let q2: [Real; 2] = del_geo::mat3::transform_homogeneous(transform_xy2pix, p2).unwrap();
+    let q0: [Real; 2] = del_geo_core::mat3::transform_homogeneous(transform_xy2pix, p0).unwrap();
+    let q1: [Real; 2] = del_geo_core::mat3::transform_homogeneous(transform_xy2pix, p1).unwrap();
+    let q2: [Real; 2] = del_geo_core::mat3::transform_homogeneous(transform_xy2pix, p2).unwrap();
     let aabbi = {
-        let aabb = del_geo::aabb2::from_vtx2xy(&[q0[0], q0[1], q1[0], q1[1], q2[0], q2[1]]);
-        del_geo::aabb2::rasterize(&aabb, &(img_width, img_height))
+        let aabb = del_geo_core::aabb2::from_vtx2xy(&[q0[0], q0[1], q1[0], q1[1], q2[0], q2[1]]);
+        del_geo_core::aabb2::rasterize(&aabb, &(img_width, img_height))
     };
     for i_h in aabbi[1]..aabbi[3] {
         for i_w in aabbi[0]..aabbi[2] {
             let p_xy: [Real; 2] = [i_w.as_() + half, i_h.as_() + half];
-            let Some((_r0, _r1)) = del_geo::tri2::is_inside(&q0, &q1, &q2, &p_xy, -Real::one())
+            let Some((_r0, _r1)) = del_geo_core::tri2::is_inside(&q0, &q1, &q2, &p_xy, -Real::one())
             else {
                 continue;
             };

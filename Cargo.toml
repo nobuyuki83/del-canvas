@@ -18,4 +18,5 @@ rand = "0.8.5"
 #del-msh = "0.1.28"
 #del-geo = "0.1.22"
 del-msh-core = { path = "../del-msh/del-msh-core"}
-del-geo = { path = "../del-geo"}
+del-geo-core = { path = "../del-geo/del-geo-core"}
+del-geo-nalgebra = { path = "../del-geo/del-geo-nalgebra"}
