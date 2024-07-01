@@ -48,8 +48,8 @@ fn main() {
             let theta_o = fiber_dir.dot(&w_o).atan2(hit_normal.dot(&w_o));
             let theta_h = (theta_i + theta_o) * 0.5f32;
             let m_r = gauss(theta_h - alpha_rad, beta_rad);
-            let m_tt = gauss(theta_h + alpha_rad * 0.5f32, beta_rad * 0.5f32);
-            let m_trt = gauss(theta_h + alpha_rad * 1.5f32, beta_rad * 2f32);
+            let _m_tt = gauss(theta_h + alpha_rad * 0.5f32, beta_rad * 0.5f32);
+            let _m_trt = gauss(theta_h + alpha_rad * 1.5f32, beta_rad * 2f32);
             let phi_i = binormal.dot(&w_i).atan2(hit_normal.dot(&w_i));
             let phi_o = binormal.dot(&w_o).atan2(hit_normal.dot(&w_o));
             let phi = phi_i - phi_o;

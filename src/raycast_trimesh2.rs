@@ -19,7 +19,7 @@ pub fn draw_vtxcolor<Index, Real>(
 ) where
     Real: num_traits::Float + 'static + Copy,
     Index: AsPrimitive<usize> + num_traits::PrimInt,
-    usize: AsPrimitive<Real>,
+    usize: AsPrimitive<Real> + AsPrimitive<Index>,
 {
     let half = Real::one() / (Real::one() + Real::one());
     let num_dim = pix2color.len() / (img_width * img_height);
@@ -29,13 +29,14 @@ pub fn draw_vtxcolor<Index, Real>(
     assert_eq!(vtx2color.len(), num_vtx * num_dim);
     for i_h in 0..img_height {
         for i_w in 0..img_width {
-            let p_xy = del_geo::mat3::transform_homogeneous(
+            let p_xy = del_geo::mat3::transform_homogeneous::<Real>(
                 &transform_pix2xy,
-                &[i_w.as_() + half, i_h.as_() + half],
+                &[<usize as AsPrimitive<Real>>::as_(i_w) + half,
+                    <usize as AsPrimitive<Real>>::as_(i_h) + half],
             )
             .unwrap();
-            let mut res: Vec<(usize, Real, Real)> = vec![];
-            del_msh::bvh2::search_including_point(
+            let mut res: Vec<(Index, Real, Real)> = vec![];
+            del_msh_core::bvh2::search_including_point::<Real, Index>(
                 &mut res,
                 trimesh.tri2vtx,
                 trimesh.vtx2xy,
@@ -47,6 +48,7 @@ pub fn draw_vtxcolor<Index, Real>(
             let Some(&(i_tri, r0, r1)) = res.first() else {
                 continue;
             };
+            let i_tri: usize = i_tri.as_();
             let r2 = Real::one() - r0 - r1;
             let iv0: usize = trimesh.tri2vtx[i_tri * 3 + 0].as_();
             let iv1: usize = trimesh.tri2vtx[i_tri * 3 + 1].as_();
@@ -63,14 +65,14 @@ pub fn draw_vtxcolor<Index, Real>(
 
 #[test]
 fn test0() {
-    let (tri2vtx, vtx2xy) = del_msh::trimesh2_dynamic::meshing_from_polyloop2::<usize, f32>(
+    let (tri2vtx, vtx2xy) = del_msh_core::trimesh2_dynamic::meshing_from_polyloop2::<usize, f32>(
         &[0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0],
         0.03,
         0.03,
     );
-    let bvhnodes = del_msh::bvh_topology_morton::from_triangle_mesh(&tri2vtx, &vtx2xy, 2);
+    let bvhnodes = del_msh_core::bvh_topology_morton::from_triangle_mesh(&tri2vtx, &vtx2xy, 2);
     let aabbs =
-        del_msh::bvh2::aabbs_from_uniform_mesh(0, &bvhnodes, Some(&tri2vtx), 3, &vtx2xy, None);
+        del_msh_core::bvh2::aabbs_from_uniform_mesh(0, &bvhnodes, Some(&tri2vtx), 3, &vtx2xy, None);
     let vtx2color = {
         use rand::Rng;
         let mut reng = rand::thread_rng();

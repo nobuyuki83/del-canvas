@@ -18,13 +18,13 @@ pub fn render_depth_bvh(
     for ih in 0..height {
         for iw in 0..width {
             let (ray_org, ray_dir) =
-                crate::cam3::ray3_homogeneous((iw, ih), image_size, transform_ndc2world);
+                crate::cam3::ray3_homogeneous((iw, ih), &image_size, transform_ndc2world);
             let mut hits: Vec<(f32, usize)> = vec![];
-            del_msh::bvh3::search_intersection_ray(
+            del_msh_core::bvh3::search_intersection_ray(
                 &mut hits,
                 &ray_org,
                 &ray_dir,
-                &del_msh::bvh3::TriMesh3Bvh {
+                &del_msh_core::bvh3::TriMeshWithBvh {
                     tri2vtx,
                     vtx2xyz,
                     bvhnodes,

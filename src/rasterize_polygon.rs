@@ -60,7 +60,7 @@ pub fn fill<T, VAL>(
             let w: T = iw.as_() + half; // pixel center
             let h: T = ih.as_() + half; // pixel center
             let p = del_geo::mat3::transform_homogeneous(&transform_pix2xy, &[w, h]).unwrap();
-            let wn = del_msh::polyloop2::winding_number_(vtx2xy, &p);
+            let wn = del_msh_core::polyloop2::winding_number_(vtx2xy, &p);
             if (wn - T::one()).round() == T::zero() {
                 img_data[ih * width + iw] = color;
             }
