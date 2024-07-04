@@ -51,7 +51,7 @@ pub fn fill<T, VAL>(
     let half = T::one() / (T::one() + T::one());
     let height = img_data.len() / width;
     let aabbi = {
-        let aabb = del_geo_core::aabb2::from_vtx2xy(vtx2xy);
+        let aabb = del_msh_core::vtx2xy::aabb2(vtx2xy);
         let aabb = del_geo_core::aabb2::transform_homogeneous(&aabb, transform_xy2pix);
         del_geo_core::aabb2::rasterize(&aabb, &(width, height))
     };

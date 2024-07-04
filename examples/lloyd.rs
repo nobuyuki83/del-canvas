@@ -19,10 +19,10 @@ fn main() {
     for _iter in 0..50 {
         canvas.clear(0);
         let site2cell = { del_msh_core::voronoi2::voronoi_cells(&vtxl2xy, &site2xy, |_v| true) };
-        let mut site2xy_new = del_msh_core::vtx2xyz::to_array_of_nalgebra_vector(&site2xy);
+        let mut site2xy_new = del_msh_core::vtx2pos::to_array_of_nalgebra_vector(&site2xy);
         for i_site in 0..site2xy.len() / 2 {
             let vtxc2xy = &site2cell[i_site].vtx2xy;
-            let vtxc2xy = del_msh_core::vtx2xyz::from_array_of_nalgebra(&vtxc2xy);
+            let vtxc2xy = del_msh_core::vtx2pos::from_array_of_nalgebra(&vtxc2xy);
             let p = del_msh_core::polyloop2::cog_as_face(&vtxc2xy);
             site2xy_new[i_site] = p.into();
             del_canvas::rasterize_polygon::stroke(
@@ -51,6 +51,6 @@ fn main() {
             );
         }
         canvas.write();
-        site2xy = del_msh_core::vtx2xyz::from_array_of_nalgebra(&site2xy_new);
+        site2xy = del_msh_core::vtx2pos::from_array_of_nalgebra(&site2xy_new);
     }
 }

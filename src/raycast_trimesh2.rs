@@ -70,9 +70,9 @@ fn test0() {
         0.03,
         0.03,
     );
-    let bvhnodes = del_msh_core::bvh_topology_morton::from_triangle_mesh(&tri2vtx, &vtx2xy, 2);
+    let bvhnodes = del_msh_core::bvhnodes_morton::from_triangle_mesh(&tri2vtx, &vtx2xy, 2);
     let aabbs =
-        del_msh_core::bvh2::aabbs_from_uniform_mesh(0, &bvhnodes, Some(&tri2vtx), 3, &vtx2xy, None);
+        del_msh_core::bvh2::aabbs_from_uniform_mesh(0, &bvhnodes, Some((&tri2vtx, 3)), &vtx2xy, None);
     let vtx2color = {
         use rand::Rng;
         let mut reng = rand::thread_rng();

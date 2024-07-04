@@ -21,7 +21,7 @@ pub fn fill<Index, Real, VAL>(
     let q1: [Real; 2] = del_geo_core::mat3::transform_homogeneous(transform_xy2pix, p1).unwrap();
     let q2: [Real; 2] = del_geo_core::mat3::transform_homogeneous(transform_xy2pix, p2).unwrap();
     let aabbi = {
-        let aabb = del_geo_core::aabb2::from_vtx2xy(&[q0[0], q0[1], q1[0], q1[1], q2[0], q2[1]]);
+        let aabb = del_msh_core::vtx2xy::aabb2(&[q0[0], q0[1], q1[0], q1[1], q2[0], q2[1]]);
         del_geo_core::aabb2::rasterize(&aabb, &(img_width, img_height))
     };
     for i_h in aabbi[1]..aabbi[3] {

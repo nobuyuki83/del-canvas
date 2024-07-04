@@ -29,7 +29,7 @@ fn main() {
             let org = Vec3::new(i_w as f32 + 0.5f32, i_h as f32 + 0.5f32, 1f32);
             let org = transform_pix2glb * org;
             let dir = Vec3::new(0f32, 0f32, -1f32);
-            let Some((hit_pos, hit_normal, _depth)) = del_geo::sphere::intersection_ray(
+            let Some((hit_pos, hit_normal, _depth)) = del_geo_nalgebra::sphere::intersection_ray(
                 &nalgebra::Vector3::new(0., 0., 0.),
                 0.5,
                 &org,
