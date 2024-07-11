@@ -27,7 +27,8 @@ pub fn fill<Index, Real, VAL>(
     for i_h in aabbi[1]..aabbi[3] {
         for i_w in aabbi[0]..aabbi[2] {
             let p_xy: [Real; 2] = [i_w.as_() + half, i_h.as_() + half];
-            let Some((_r0, _r1)) = del_geo_core::tri2::is_inside(&q0, &q1, &q2, &p_xy, -Real::one())
+            let Some((_r0, _r1)) =
+                del_geo_core::tri2::is_inside(&q0, &q1, &q2, &p_xy, -Real::one())
             else {
                 continue;
             };

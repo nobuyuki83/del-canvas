@@ -8,7 +8,7 @@ pub struct TriMeshWithBvh<'a, Index, Real> {
 }
 
 ///
-/// * `transform` - from `xy` to `pixel coordinate`
+/// * `transform_xy2pix` - from `xy` to `pixel coordinate`
 #[allow(clippy::identity_op)]
 pub fn draw_vtxcolor<Index, Real>(
     &(img_width, img_height): &(usize, usize),
@@ -31,8 +31,10 @@ pub fn draw_vtxcolor<Index, Real>(
         for i_w in 0..img_width {
             let p_xy = del_geo_core::mat3::transform_homogeneous::<Real>(
                 &transform_pix2xy,
-                &[<usize as AsPrimitive<Real>>::as_(i_w) + half,
-                    <usize as AsPrimitive<Real>>::as_(i_h) + half],
+                &[
+                    <usize as AsPrimitive<Real>>::as_(i_w) + half,
+                    <usize as AsPrimitive<Real>>::as_(i_h) + half,
+                ],
             )
             .unwrap();
             let mut res: Vec<(Index, Real, Real)> = vec![];
@@ -71,8 +73,13 @@ fn test0() {
         0.03,
     );
     let bvhnodes = del_msh_core::bvhnodes_morton::from_triangle_mesh(&tri2vtx, &vtx2xy, 2);
-    let aabbs =
-        del_msh_core::bvh2::aabbs_from_uniform_mesh(0, &bvhnodes, Some((&tri2vtx, 3)), &vtx2xy, None);
+    let aabbs = del_msh_core::aabbs2::from_uniform_mesh_with_bvh(
+        0,
+        &bvhnodes,
+        Some((&tri2vtx, 3)),
+        &vtx2xy,
+        None,
+    );
     let vtx2color = {
         use rand::Rng;
         let mut reng = rand::thread_rng();
@@ -87,6 +94,7 @@ fn test0() {
     let mut pix2color = vec![0_f32; img_shape.0 * img_shape.1];
     let transform_xy2pix =
         crate::cam2::transform_world2pix_ortho_preserve_asp(&img_shape, &[-0.1, -0.1, 1.1, 1.1]);
+    let now = std::time::Instant::now();
     draw_vtxcolor(
         &img_shape,
         &mut pix2color,
@@ -99,6 +107,7 @@ fn test0() {
         &vtx2color,
         &transform_xy2pix,
     );
+    println!("{:?}", now.elapsed());
     crate::write_png_from_float_image(
         "target/rasterize_trimesh2-test0.png",
         &img_shape,

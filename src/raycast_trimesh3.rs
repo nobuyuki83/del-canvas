@@ -37,7 +37,8 @@ pub fn render_depth_bvh(
                 continue;
             };
             let pos = del_geo_core::vec3::axpy(depth, &ray_dir, &ray_org);
-            let ndc = del_geo_core::mat4::transform_homogeneous(&transform_world_to_ndc, &pos).unwrap();
+            let ndc =
+                del_geo_core::mat4::transform_homogeneous(&transform_world_to_ndc, &pos).unwrap();
             let depth_ndc = (ndc[2] + 1f32) * 0.5f32;
             img_data[ih * width + iw] = depth_ndc;
         }
