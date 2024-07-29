@@ -47,7 +47,7 @@ pub fn fill<T, VAL>(
     usize: AsPrimitive<T>,
     VAL: Copy,
 {
-    let transform_pix2xy = del_geo_core::mat3::try_inverse(transform_xy2pix).unwrap();
+    let transform_pix2xy = del_geo_core::mat3_col_major::try_inverse(transform_xy2pix).unwrap();
     let half = T::one() / (T::one() + T::one());
     let height = img_data.len() / width;
     let aabbi = {
@@ -59,7 +59,8 @@ pub fn fill<T, VAL>(
         for iw in aabbi[0]..aabbi[2] {
             let w: T = iw.as_() + half; // pixel center
             let h: T = ih.as_() + half; // pixel center
-            let p = del_geo_core::mat3::transform_homogeneous(&transform_pix2xy, &[w, h]).unwrap();
+            let p = del_geo_core::mat3_col_major::transform_homogeneous(&transform_pix2xy, &[w, h])
+                .unwrap();
             let wn = del_msh_core::polyloop2::winding_number_(vtx2xy, &p);
             if (wn - T::one()).round() == T::zero() {
                 img_data[ih * width + iw] = color;
@@ -81,5 +82,5 @@ fn test0() {
         &trans_world2pix,
         1f32,
     );
-    crate::write_png_from_float_image("target/rasterize_polygon-test0.png", &img_size, &img_data);
+    crate::write_png_from_float_image_grayscale("target/rasterize_polygon-test0.png", &img_size, &img_data);
 }

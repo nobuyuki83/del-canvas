@@ -39,10 +39,16 @@ pub fn ray3_homogeneous(
     let x0 = 2. * (pix_coord.0 as f32 + 0.5f32) / (image_size.0 as f32) - 1.;
     let y0 = 1. - 2. * (pix_coord.1 as f32 + 0.5f32) / (image_size.1 as f32);
     let ray_org =
-        del_geo_core::mat4::transform_homogeneous(transform_ndc_to_world, &[x0, y0, 1.]).unwrap();
+        del_geo_core::mat4_col_major::transform_homogeneous(transform_ndc_to_world, &[x0, y0, 1.])
+            .unwrap();
     let ray_dir = del_geo_core::vec3::sub(
-        &del_geo_core::mat4::transform_homogeneous(transform_ndc_to_world, &[x0, y0, -1.]).unwrap(),
-        &del_geo_core::mat4::transform_homogeneous(transform_ndc_to_world, &[x0, y0, 1.]).unwrap(),
+        &del_geo_core::mat4_col_major::transform_homogeneous(
+            transform_ndc_to_world,
+            &[x0, y0, -1.],
+        )
+        .unwrap(),
+        &del_geo_core::mat4_col_major::transform_homogeneous(transform_ndc_to_world, &[x0, y0, 1.])
+            .unwrap(),
     );
     (ray_org, ray_dir)
 }

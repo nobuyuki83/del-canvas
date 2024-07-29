@@ -25,11 +25,11 @@ pub fn draw_vtxcolor<Index, Real>(
     let num_dim = pix2color.len() / (img_width * img_height);
     let num_vtx = trimesh.vtx2xy.len() / 2;
     assert_eq!(num_vtx, vtx2color.len());
-    let transform_pix2xy = del_geo_core::mat3::try_inverse(transform_xy2pix).unwrap();
+    let transform_pix2xy = del_geo_core::mat3_col_major::try_inverse(transform_xy2pix).unwrap();
     assert_eq!(vtx2color.len(), num_vtx * num_dim);
     for i_h in 0..img_height {
         for i_w in 0..img_width {
-            let p_xy = del_geo_core::mat3::transform_homogeneous::<Real>(
+            let p_xy = del_geo_core::mat3_col_major::transform_homogeneous::<Real>(
                 &transform_pix2xy,
                 &[
                     <usize as AsPrimitive<Real>>::as_(i_w) + half,
