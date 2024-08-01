@@ -36,6 +36,7 @@ fn main() -> anyhow::Result<()> {
         obj.unified_xyz_uv_as_trimesh()
     };
 
+    // define 3D points
     let mut points = {
         let mut points: Vec<Point> = vec![];
         let cumsumarea = del_msh_core::sampling::cumulative_area_sum(&tri2vtx, &vtx2xyz, 3);
@@ -83,12 +84,14 @@ fn main() -> anyhow::Result<()> {
     let transform_world2ndc =
         del_geo_core::mat4_col_major::multmat(&cam_projection, &cam_modelview);
 
+    // transform points
     for point in points.iter_mut() {
         point.pos_ndc = del_geo_core::mat4_col_major::transform_homogeneous(
             &transform_world2ndc,
             &point.pos_world,
         ).unwrap();
     }
+    // sort points depth
     points.sort_by(|a, b| a.pos_ndc[2].partial_cmp(&b.pos_ndc[2]).unwrap());
 
     let transform_ndc2pix = [
@@ -100,6 +103,7 @@ fn main() -> anyhow::Result<()> {
         0.5 * (img_shape.1 as f32),
     ];
 
+    // projects points & covariance 2D
     for point in points.iter_mut() {
         // screen position
         {
@@ -163,6 +167,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     {
+        // splatting Gaussian with tile-based acceleration
         const TILE_SIZE: usize = 16;
         println!("gaussian_tile");
         let now = std::time::Instant::now();
@@ -256,7 +261,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     {
-        // visualize as gaussian
+        // visualize as Gaussian without tile acceleration
         println!("gaussian_naive");
         let now = std::time::Instant::now();
         let mut img_data = vec![0f32; img_shape.1 * img_shape.0 * 3];
@@ -290,7 +295,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     {
-        // visualize as sphere
+        // visualize Gaussian as ellipsoid
         println!("gaussian_ellipse");
         let now = std::time::Instant::now();
         let mut img_data = vec![0f32; img_shape.1 * img_shape.0 * 3];
