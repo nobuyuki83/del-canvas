@@ -108,7 +108,7 @@ fn test0() {
         &transform_xy2pix,
     );
     println!("{:?}", now.elapsed());
-    crate::write_png_from_float_image(
+    crate::write_png_from_float_image_grayscale(
         "target/rasterize_trimesh2-test0.png",
         &img_shape,
         &pix2color,

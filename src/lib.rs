@@ -13,6 +13,7 @@ pub mod rasterize_polygon;
 pub mod rasterize_triangle;
 pub mod raycast_trimesh2;
 pub mod raycast_trimesh3;
+pub mod rasterize_points3;
 
 pub fn write_png_from_float_image_grayscale<Real, Path>(
     path: Path,

@@ -4,16 +4,7 @@ fn main() {
     let (tri2vtx, vtx2xyz, vtx2uv) = {
         let mut obj = del_msh_core::io_obj::WavefrontObj::<usize, f32>::new();
         obj.load("examples/asset/spot_triangulated.obj");
-        let (tri2uni, uni2vtx_xyz, uni2vtx_uv) =
-            del_msh_core::unify_index::unify_two_indices_of_triangle_mesh(
-                &obj.idx2vtx_xyz,
-                &obj.idx2vtx_uv,
-            );
-        assert_eq!(uni2vtx_xyz.len(), uni2vtx_uv.len());
-        let uni2xyz =
-            del_msh_core::map_idx::map_vertex_attibute_from(&obj.vtx2xyz, 3, &uni2vtx_xyz);
-        let uni2uv = del_msh_core::map_idx::map_vertex_attibute_from(&obj.vtx2uv, 2, &uni2vtx_uv);
-        (tri2uni, uni2xyz, uni2uv)
+        obj.unified_xyz_uv_as_trimesh()
     };
     let img_size = (400, 400);
     let cam_projection = del_geo_core::mat4_col_major::camera_perspective_blender(
@@ -23,7 +14,7 @@ fn main() {
         3.0,
     );
     let cam_modelview =
-        del_geo_core::mat4_col_major::camera_external_blender(&[0., 0., 2.], 10., -30., 110.);
+        del_geo_core::mat4_col_major::camera_external_blender(&[0., 0., 2.], 0., 0., 0.);
     let transform_world2ndc =
         del_geo_core::mat4_col_major::multmat(&cam_projection, &cam_modelview);
     let transform_ndc2world =
@@ -52,6 +43,7 @@ fn main() {
     );
 
     {
+        // render normalmap
         let pix2rgb = del_canvas::raycast_trimesh3::render_normalmap_pix2tri(
             img_size,
             &cam_modelview,
@@ -66,6 +58,7 @@ fn main() {
         );
     }
 
+    // render depth
     {
         let mut img_data = vec![0f32; img_size.0 * img_size.1];
         del_canvas::raycast_trimesh3::render_depth_bvh(
@@ -83,4 +76,7 @@ fn main() {
             &img_data,
         );
     }
+
+    // render texture
+    {}
 }
