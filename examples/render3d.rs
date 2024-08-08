@@ -6,7 +6,10 @@ fn main() {
         obj.load("examples/asset/spot_triangulated.obj");
         obj.unified_xyz_uv_as_trimesh()
     };
-    let img_size = (400, 400);
+    let img_size = {
+        const TILE_SIZE: usize = 16;
+        (TILE_SIZE * 28, TILE_SIZE * 28)
+    };
     let cam_projection = del_geo_core::mat4_col_major::camera_perspective_blender(
         img_size.0 as f32 / img_size.1 as f32,
         24f32,

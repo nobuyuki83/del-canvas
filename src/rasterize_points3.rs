@@ -1,14 +1,9 @@
-
-
 pub trait PointWithColor {
-    fn pix_coord(&self) -> [f32;2];
-    fn color(&self) -> [f32;3];
+    fn pix_coord(&self) -> [f32; 2];
+    fn color(&self) -> [f32; 3];
 }
 
-pub fn points<POINT: PointWithColor>(
-    img_size: &(usize, usize),
-    points: &[POINT]) -> Vec<f32>
-{
+pub fn points<POINT: PointWithColor>(img_size: &(usize, usize), points: &[POINT]) -> Vec<f32> {
     let mut img_data = vec![0f32; img_size.1 * img_size.0 * 3];
     for point in points.iter() {
         //let x = (point.pos_ndc[0] + 1.0) * 0.5 * (img_size.0 as f32);
