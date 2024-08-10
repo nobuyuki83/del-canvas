@@ -32,7 +32,7 @@ impl del_canvas::rasterize_points3::PointWithColor for Point {
 fn main() -> anyhow::Result<()> {
     let (tri2vtx, vtx2xyz, vtx2uv) = {
         let mut obj = del_msh_core::io_obj::WavefrontObj::<usize, f32>::new();
-        obj.load("examples/asset/spot_triangulated.obj");
+        obj.load("examples/asset/spot_triangulated.obj")?;
         obj.unified_xyz_uv_as_trimesh()
     };
 
