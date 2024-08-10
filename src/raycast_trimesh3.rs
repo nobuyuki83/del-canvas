@@ -113,7 +113,7 @@ pub fn render_normalmap_pix2tri(
             let nrm = tri.normal();
             let nrm = del_geo_core::mat4_col_major::transform_vector(cam_modelviewd, &nrm);
             let unrm = del_geo_core::vec3::normalized(&nrm);
-            img[(ih * width + iw) * 3 + 0] = unrm[0] * 0.5 + 0.5;
+            img[(ih * width + iw) * 3] = unrm[0] * 0.5 + 0.5;
             img[(ih * width + iw) * 3 + 1] = unrm[1] * 0.5 + 0.5;
             img[(ih * width + iw) * 3 + 2] = unrm[2] * 0.5 + 0.5;
         }

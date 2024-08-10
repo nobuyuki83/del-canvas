@@ -12,7 +12,7 @@ pub fn points<POINT: PointWithColor>(img_size: &(usize, usize), points: &[POINT]
         let i_x = scrn_pos[0] as usize;
         let i_y = scrn_pos[1] as usize;
         let color = point.color();
-        img_data[(i_y * img_size.0 + i_x) * 3 + 0] = color[0];
+        img_data[(i_y * img_size.0 + i_x) * 3] = color[0];
         img_data[(i_y * img_size.0 + i_x) * 3 + 1] = color[1];
         img_data[(i_y * img_size.0 + i_x) * 3 + 2] = color[2];
     }

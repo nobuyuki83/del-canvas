@@ -7,8 +7,8 @@ pub mod canvas_gif;
 pub mod canvas_svg;
 pub mod color;
 pub mod colormap;
+pub mod gaussian_splatting;
 pub mod rasterize_circle;
-pub mod rasterize_gaussian_splatting;
 pub mod rasterize_line;
 pub mod rasterize_points3;
 pub mod rasterize_polygon;
@@ -69,4 +69,19 @@ pub fn write_png_from_float_image_rgb<Real, Path>(
     encoder.set_depth(png::BitDepth::Eight);
     let mut writer = encoder.write_header().unwrap();
     writer.write_image_data(&pix2color_u8).unwrap(); // Save
+}
+
+pub fn load_image_as_float_array<P>(path: P) -> (Vec<f32>, (usize, usize), usize)
+where
+    P: AsRef<std::path::Path>,
+{
+    use image::GenericImageView;
+    let img_trg = image::open(path).unwrap();
+    let (width, height) = img_trg.dimensions();
+    let (width, height) = (width as usize, height as usize);
+    let depth: usize = img_trg.color().bytes_per_pixel().into();
+    let img_trg = img_trg.into_bytes();
+    let img_trg: Vec<f32> = img_trg.iter().map(|&v| (v as f32) / 255.0f32).collect();
+    assert_eq!(img_trg.len(), width * height * depth);
+    (img_trg, (width, height), depth)
 }

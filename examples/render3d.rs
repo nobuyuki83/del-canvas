@@ -1,9 +1,7 @@
-use del_msh_core::vtx2xyz::transform;
-
-fn main() {
+fn main() -> anyhow::Result<()>{
     let (tri2vtx, vtx2xyz, vtx2uv) = {
         let mut obj = del_msh_core::io_obj::WavefrontObj::<usize, f32>::new();
-        obj.load("examples/asset/spot_triangulated.obj");
+        obj.load("examples/asset/spot_triangulated.obj")?;
         obj.unified_xyz_uv_as_trimesh()
     };
     let img_size = {
@@ -80,6 +78,24 @@ fn main() {
         );
     }
 
-    // render texture
-    {}
+    /*
+    {
+        // render texture
+        let (tex_data, tex_shape, depth)
+            = del_canvas::load_image_as_float_array("examples/asset/spot_texture.png");
+        dbg!(tex_shape);
+        let mut img_data = vec![0f32; img_size.0 * img_size.1];
+        del_canvas::raycast_trimesh3::render_depth_bvh(
+            img_size,
+            &mut img_data,
+            &transform_ndc2world,
+            &tri2vtx,
+            &vtx2xyz,
+            &bvhnodes,
+            &aabbs,
+        );
+    }
+     */
+
+    Ok(())
 }
