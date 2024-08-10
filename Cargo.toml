@@ -1,5 +1,8 @@
-[package]
-name = "del-canvas"
+[workspace]
+members = ["del-canvas-core"]
+resolver = "2"
+
+[workspace.package]
 version = "0.1.1"
 edition = "2021"
 license = "MIT"
@@ -7,7 +10,7 @@ description = "drawing primitives (e.g., triangles and lines) to bitmap images a
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[workspace.dependencies]
 num-traits = "0.2.19"
 png = "0.17.13"
 gif = "0.13.1"

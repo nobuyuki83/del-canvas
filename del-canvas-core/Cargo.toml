@@ -1,0 +1,29 @@
+[package]
+name = "del-canvas-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+num-traits = {workspace = true}
+png = {workspace = true}
+gif = {workspace = true}
+image = {workspace = true}
+nalgebra = {workspace = true}
+rand = {workspace = true}
+rayon = {workspace = true}
+anyhow = {workspace = true}
+arrayref = {workspace = true}
+itertools = {workspace = true}
+rand_chacha = {workspace = true}
+
+del-msh-core = { workspace = true }
+del-geo-core = { workspace = true }
+del-geo-nalgebra = { workspace = true }
+#
+# del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git" }
+# del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git" }
+# del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }

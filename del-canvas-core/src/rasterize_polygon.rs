@@ -83,7 +83,7 @@ fn test0() {
         1f32,
     );
     crate::write_png_from_float_image_grayscale(
-        "target/rasterize_polygon-test0.png",
+        "../target/rasterize_polygon-test0.png",
         &img_size,
         &img_data,
     );

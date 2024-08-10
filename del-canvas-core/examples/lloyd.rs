@@ -1,8 +1,8 @@
-use del_canvas::cam2;
+use del_canvas_core::cam2;
 
 fn main() {
     let mut reng = rand::thread_rng();
-    let mut canvas = del_canvas::canvas_gif::Canvas::new(
+    let mut canvas = del_canvas_core::canvas_gif::Canvas::new(
         "target/lloyd.gif",
         (300, 300),
         &vec![0xffffff, 0x000000, 0xff0000],
@@ -26,7 +26,7 @@ fn main() {
             let vtxc2xy = del_msh_core::vtx2xdim::from_array_of_nalgebra(&vtxc2xy);
             let p = del_msh_core::polyloop2::cog_as_face(&vtxc2xy);
             site2xy_new[i_site] = p.into();
-            del_canvas::rasterize_polygon::stroke(
+            del_canvas_core::rasterize_polygon::stroke(
                 &mut canvas.data,
                 canvas.width,
                 &vtxc2xy,
@@ -34,7 +34,7 @@ fn main() {
                 1.,
                 1,
             );
-            del_canvas::rasterize_circle::fill(
+            del_canvas_core::rasterize_circle::fill(
                 &mut canvas.data,
                 canvas.width,
                 &[site2xy[i_site * 2 + 0], site2xy[i_site * 2 + 1]],
@@ -42,7 +42,7 @@ fn main() {
                 3.0,
                 1,
             );
-            del_canvas::rasterize_circle::fill(
+            del_canvas_core::rasterize_circle::fill(
                 &mut canvas.data,
                 canvas.width,
                 &[p[0], p[1]],

@@ -1,5 +1,5 @@
 fn main() -> anyhow::Result<()>{
-    let (tri2vtx, vtx2xyz, vtx2uv) = {
+    let (tri2vtx, vtx2xyz, _vtx2uv) = {
         let mut obj = del_msh_core::io_obj::WavefrontObj::<usize, f32>::new();
         obj.load("examples/asset/spot_triangulated.obj")?;
         obj.unified_xyz_uv_as_trimesh()
@@ -34,7 +34,7 @@ fn main() -> anyhow::Result<()>{
         &vtx2xyz,
         None,
     );
-    let pix2tri = del_canvas::raycast_trimesh3::pix2tri(
+    let pix2tri = del_canvas_core::raycast_trimesh3::pix2tri(
         &tri2vtx,
         &vtx2xyz,
         &bvhnodes,
@@ -45,14 +45,14 @@ fn main() -> anyhow::Result<()>{
 
     {
         // render normalmap
-        let pix2rgb = del_canvas::raycast_trimesh3::render_normalmap_pix2tri(
+        let pix2rgb = del_canvas_core::raycast_trimesh3::render_normalmap_pix2tri(
             img_size,
             &cam_modelview,
             &tri2vtx,
             &vtx2xyz,
             &pix2tri,
         );
-        del_canvas::write_png_from_float_image_rgb(
+        del_canvas_core::write_png_from_float_image_rgb(
             "target/render3d_normalmap.png",
             &img_size,
             &pix2rgb,
@@ -62,7 +62,7 @@ fn main() -> anyhow::Result<()>{
     // render depth
     {
         let mut img_data = vec![0f32; img_size.0 * img_size.1];
-        del_canvas::raycast_trimesh3::render_depth_bvh(
+        del_canvas_core::raycast_trimesh3::render_depth_bvh(
             img_size,
             &mut img_data,
             &transform_ndc2world,
@@ -71,7 +71,7 @@ fn main() -> anyhow::Result<()>{
             &bvhnodes,
             &aabbs,
         );
-        del_canvas::write_png_from_float_image_grayscale(
+        del_canvas_core::write_png_from_float_image_grayscale(
             "target/render3d_depth.png",
             &img_size,
             &img_data,
