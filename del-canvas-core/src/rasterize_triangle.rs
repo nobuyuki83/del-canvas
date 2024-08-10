@@ -41,7 +41,7 @@ pub fn fill<Index, Real, VAL>(
 }
 
 #[test]
-fn test0() {
+fn test0() -> anyhow::Result<()>{
     let img_size = (100usize, 100usize);
     let trans_xy2pix =
         crate::cam2::transform_world2pix_ortho_preserve_asp(&img_size, &[-0.1, -0.1, 1.1, 1.1]);
@@ -56,8 +56,9 @@ fn test0() {
         1f32,
     );
     crate::write_png_from_float_image_grayscale(
-        "target/rasterize_triangle-test0.png",
+        "../target/rasterize_triangle-test0.png",
         &img_size,
         &img_data,
-    );
+    )?;
+    Ok(())
 }

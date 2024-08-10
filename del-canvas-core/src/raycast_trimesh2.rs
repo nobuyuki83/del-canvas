@@ -66,7 +66,7 @@ pub fn draw_vtxcolor<Index, Real>(
 }
 
 #[test]
-fn test0() {
+fn test0() -> anyhow::Result<()>{
     let (tri2vtx, vtx2xy) = del_msh_core::trimesh2_dynamic::meshing_from_polyloop2::<usize, f32>(
         &[0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0],
         0.03,
@@ -109,8 +109,9 @@ fn test0() {
     );
     println!("{:?}", now.elapsed());
     crate::write_png_from_float_image_grayscale(
-        "target/rasterize_trimesh2-test0.png",
+        "../target/rasterize_trimesh2-test0.png",
         &img_shape,
         &pix2color,
-    );
+    )?;
+    Ok(())
 }
