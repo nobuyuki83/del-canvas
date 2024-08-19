@@ -1,13 +1,15 @@
 #include <string>
+#include <iostream>
 #include <cstdlib>
 #include <glad/glad.h>
 #define GL_SILENCE_DEPRECATION
 #include <GLFW/glfw3.h>
 #include <cuda_gl_interop.h>
 #include <cuda_runtime.h>
-//
-#include "util_opengl.h"
+
+#ifndef M_PI
 #define M_PI 3.1415
+#endif
 
 // cudaのエラー検出用マクロ
 #define EXIT_IF_FAIL(call)                                                 \
@@ -41,17 +43,14 @@ void kernel(uchar4 *bitmap, int tick) {
   bitmap[offset].w = 255;
 }
 
-// フレームバッファの取得に使用
-cudaGraphicsResource *dev_resource;
-
-#define WIDTH 1024
-#define HEIGHT 1024
-
 int main() {
   if (!glfwInit()) { exit(EXIT_FAILURE); }
   // set OpenGL's version (note: ver. 2.1 is very old, but I chose because it's simple)
   ::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   ::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+
+  const unsigned int WIDTH = 1024;
+  const unsigned int HEIGHT = 1024;
   GLFWwindow *window = ::glfwCreateWindow(WIDTH, HEIGHT, "task05", nullptr, nullptr);
   if (!window) { // exit if failed to create window
     ::glfwTerminate();
@@ -64,21 +63,6 @@ int main() {
     exit(-1);
   }
 
-  int shaderProgram;
-  {
-    const auto vrt_path = std::string(SOURCE_DIR) + "/shader.vert";
-    const auto frg_path = std::string(SOURCE_DIR) + "/shader.frag";
-    std::string vrt = acg::load_file_as_string(vrt_path.c_str()); // read source code of vertex shader program
-    std::string frg = acg::load_file_as_string(frg_path.c_str()); // read source code of fragment shader program
-    shaderProgram = acg::create_shader_program(vrt, frg); // compile the shader on GPU
-  }
-
-  glDisable(GL_MULTISAMPLE);
-  const GLint iloc = glGetUniformLocation(shaderProgram, "time");  // location of variable in the shader program
-
-  //::glClearColor(1, 1, 1, 1);  // set the color to fill the frame buffer when glClear is called.
-  //::glEnable(GL_DEPTH_TEST);
-
     GLuint pbo;
     // バッファを作成
     glGenBuffers(1, &pbo);
@@ -87,6 +71,10 @@ int main() {
                  sizeof(char4) * WIDTH * HEIGHT,
                  NULL,
                  GL_DYNAMIC_DRAW);
+
+    // フレームバッファの取得に使用
+    cudaGraphicsResource *dev_resource;
+
 
     // OpenGLのバッファをCudaと共有する設定
     EXIT_IF_FAIL(cudaGraphicsGLRegisterBuffer(
