@@ -1,26 +1,11 @@
-
-extern crate cc;
-
 fn main() {
-    cc::Build::new()
-        .cuda(true)
-        .flag("-cudart=shared")
-        .flag("-gencode")
-        .flag("arch=compute_86,code=sm_86")
-        .files(["src/kernel.cu"])
-        .compile("del_canvas_cuda");
+    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=src/compatibility.cuh");
+    println!("cargo:rerun-if-changed=src/cuda_utils.cuh");
+    println!("cargo:rerun-if-changed=src/binary_op_macros.cuh");
 
-    /* Link CUDA Runtime (libcudart.so) */
-
-    // Add link directory
-    // - This path depends on where you install CUDA (i.e. depends on your Linux distribution)
-    // - This should be set by `$LIBRARY_PATH`
-    // println!("cargo:rustc-link-search=native=/usr/local/cuda/lib64");
-    // println!("cargo:rustc-link-search={}", std::path::Path::new("C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.3\\lib\\x64").display());
-    // println!("cargo:rustc-link-lib=cudart");
-
-    /* Optional: Link CUDA Driver API (libcuda.so) */
-
-    // println!("cargo:rustc-link-search=native=/usr/local/cuda/lib64/stub");
-    // println!("cargo:rustc-link-lib=cuda");
+    let builder = bindgen_cuda::Builder::default();
+    println!("cargo:info={builder:?}");
+    let bindings = builder.build_ptx().unwrap();
+    bindings.write("src/lib.rs").unwrap();
 }

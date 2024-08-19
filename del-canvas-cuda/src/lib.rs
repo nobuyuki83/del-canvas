@@ -1,11 +1,2 @@
-#[link(name = "del_canvas_cuda", kind = "static")]
-extern "C" {
-    fn vectorAdd_main();
-}
-
-pub fn hoge() {
-    unsafe {
-        vectorAdd_main();
-    }
-}
-
+pub const PIX2TRI: &str = include_str!(concat!(env!("OUT_DIR"), "/pix2tri.ptx"));
+pub const SIMPLE: &str = include_str!(concat!(env!("OUT_DIR"), "/simple.ptx"));
