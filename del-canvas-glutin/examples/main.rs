@@ -1,10 +1,10 @@
+use del_canvas_glutin::gl;
+use del_canvas_glutin::gl::types::GLfloat;
+use glutin::display::GlDisplay;
 use std::error::Error;
 use std::ffi::CString;
 use std::ops::Deref;
-use glutin::display::GlDisplay;
 use winit::event_loop::EventLoop;
-use del_canvas_glutin::gl;
-use del_canvas_glutin::gl::types::GLfloat;
 
 #[rustfmt::skip]
 static VERTEX_DATA: [f32; 15] = [
@@ -39,7 +39,6 @@ void main() {
 }
 \0";
 
-
 pub struct Renderer {
     program: gl::types::GLuint,
     vao: gl::types::GLuint,
@@ -62,12 +61,16 @@ impl del_canvas_glutin::Renderer for Renderer {
                 println!("OpenGL Version {}", version.to_string_lossy());
             }
 
-            if let Some(shaders_version) = del_canvas_glutin::get_gl_string(&gl, gl::SHADING_LANGUAGE_VERSION) {
+            if let Some(shaders_version) =
+                del_canvas_glutin::get_gl_string(&gl, gl::SHADING_LANGUAGE_VERSION)
+            {
                 println!("Shaders version on {}", shaders_version.to_string_lossy());
             }
 
-            let vertex_shader = del_canvas_glutin::create_shader(&gl, gl::VERTEX_SHADER, VERTEX_SHADER_SOURCE);
-            let fragment_shader = del_canvas_glutin::create_shader(&gl, gl::FRAGMENT_SHADER, FRAGMENT_SHADER_SOURCE);
+            let vertex_shader =
+                del_canvas_glutin::create_shader(&gl, gl::VERTEX_SHADER, VERTEX_SHADER_SOURCE);
+            let fragment_shader =
+                del_canvas_glutin::create_shader(&gl, gl::FRAGMENT_SHADER, FRAGMENT_SHADER_SOURCE);
 
             let program = gl.CreateProgram();
 
@@ -116,7 +119,12 @@ impl del_canvas_glutin::Renderer for Renderer {
             gl.EnableVertexAttribArray(pos_attrib as gl::types::GLuint);
             gl.EnableVertexAttribArray(color_attrib as gl::types::GLuint);
 
-            Self { program, vao, vbo, gl }
+            Self {
+                program,
+                vao,
+                vbo,
+                gl,
+            }
         }
     }
 
@@ -131,15 +139,8 @@ impl del_canvas_glutin::Renderer for Renderer {
     }
 }
 
-
 impl Renderer {
-    fn draw_with_clear_color(
-        &self,
-        red: GLfloat,
-        green: GLfloat,
-        blue: GLfloat,
-        alpha: GLfloat,
-    ) {
+    fn draw_with_clear_color(&self, red: GLfloat, green: GLfloat, blue: GLfloat, alpha: GLfloat) {
         unsafe {
             self.gl.UseProgram(self.program);
 
@@ -151,8 +152,6 @@ impl Renderer {
             self.gl.DrawArrays(gl::TRIANGLES, 0, 3);
         }
     }
-
-
 }
 
 impl Deref for Renderer {

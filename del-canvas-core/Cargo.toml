@@ -20,10 +20,10 @@ arrayref = {workspace = true}
 itertools = {workspace = true}
 rand_chacha = {workspace = true}
 
-del-msh-core = { workspace = true }
-del-geo-core = { workspace = true }
-del-geo-nalgebra = { workspace = true }
+# del-msh-core = { workspace = true }
+# del-geo-core = { workspace = true }
+# del-geo-nalgebra = { workspace = true }
 #
-# del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git" }
-# del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git" }
-# del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
+del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git" }
+del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git" }
+del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }

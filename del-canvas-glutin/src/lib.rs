@@ -34,7 +34,8 @@ pub mod gl {
 }
 
 pub fn main<Rndr>(event_loop: winit::event_loop::EventLoop<()>) -> Result<(), Box<dyn Error>>
-where Rndr: Renderer
+where
+    Rndr: Renderer,
 {
     let window_attributes = Window::default_attributes()
         .with_transparent(true)
@@ -48,8 +49,9 @@ where Rndr: Renderer
     // that, because we can query only one config at a time on it, but all
     // normal platforms will return multiple configs, so we can find the config
     // with transparency ourselves inside the `reduce`.
-    let template =
-        ConfigTemplateBuilder::new().with_alpha_size(8).with_transparency(cfg!(cgl_backend));
+    let template = ConfigTemplateBuilder::new()
+        .with_alpha_size(8)
+        .with_transparency(cfg!(cgl_backend));
 
     let display_builder = DisplayBuilder::new().with_window_attributes(Some(window_attributes));
 
@@ -71,7 +73,7 @@ impl<Rndr: Renderer> ApplicationHandler for App<Rndr> {
                 self.exit_state = Err(e);
                 event_loop.exit();
                 return;
-            },
+            }
         };
 
         println!("Picked a config with {} samples", gl_config.num_samples());
@@ -103,17 +105,22 @@ impl<Rndr: Renderer> ApplicationHandler for App<Rndr> {
         // Reuse the uncurrented context from a suspended() call if it exists, otherwise
         // this is the first time resumed() is called, where the context still
         // has to be created.
-        let not_current_gl_context = self.not_current_gl_context.take().unwrap_or_else(|| unsafe {
-            gl_display.create_context(&gl_config, &context_attributes).unwrap_or_else(|_| {
-                gl_display.create_context(&gl_config, &fallback_context_attributes).unwrap_or_else(
-                    |_| {
+        let not_current_gl_context = self
+            .not_current_gl_context
+            .take()
+            .unwrap_or_else(|| unsafe {
+                gl_display
+                    .create_context(&gl_config, &context_attributes)
+                    .unwrap_or_else(|_| {
                         gl_display
-                            .create_context(&gl_config, &legacy_context_attributes)
-                            .expect("failed to create context")
-                    },
-                )
-            })
-        });
+                            .create_context(&gl_config, &fallback_context_attributes)
+                            .unwrap_or_else(|_| {
+                                gl_display
+                                    .create_context(&gl_config, &legacy_context_attributes)
+                                    .expect("failed to create context")
+                            })
+                    })
+            });
 
         #[cfg(android_platform)]
         println!("Android window available");
@@ -128,8 +135,12 @@ impl<Rndr: Renderer> ApplicationHandler for App<Rndr> {
         let attrs = window
             .build_surface_attributes(Default::default())
             .expect("Failed to build surface attributes");
-        let gl_surface =
-            unsafe { gl_config.display().create_window_surface(&gl_config, &attrs).unwrap() };
+        let gl_surface = unsafe {
+            gl_config
+                .display()
+                .create_window_surface(&gl_config, &attrs)
+                .unwrap()
+        };
 
         // Make it current.
         let gl_context = not_current_gl_context.make_current(&gl_surface).unwrap();
@@ -137,7 +148,8 @@ impl<Rndr: Renderer> ApplicationHandler for App<Rndr> {
         // The context needs to be current for the Renderer to set up shaders and
         // buffers. It also performs function loading, which needs a current context on
         // WGL.
-        self.renderer.get_or_insert_with(|| Renderer::new(&gl_display));
+        self.renderer
+            .get_or_insert_with(|| Renderer::new(&gl_display));
 
         // Try setting vsync.
         if let Err(res) = gl_surface
@@ -146,7 +158,14 @@ impl<Rndr: Renderer> ApplicationHandler for App<Rndr> {
             eprintln!("Error setting vsync: {res:?}");
         }
 
-        assert!(self.state.replace(AppState { gl_context, gl_surface, window }).is_none());
+        assert!(self
+            .state
+            .replace(AppState {
+                gl_context,
+                gl_surface,
+                window
+            })
+            .is_none());
     }
 
     fn suspended(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
@@ -175,7 +194,12 @@ impl<Rndr: Renderer> ApplicationHandler for App<Rndr> {
                 // Notable platforms here are Wayland and macOS, other don't require it
                 // and the function is no-op, but it's wise to resize it for portability
                 // reasons.
-                if let Some(AppState { gl_context, gl_surface, window: _ }) = self.state.as_ref() {
+                if let Some(AppState {
+                    gl_context,
+                    gl_surface,
+                    window: _,
+                }) = self.state.as_ref()
+                {
                     gl_surface.resize(
                         gl_context,
                         NonZeroU32::new(size.width).unwrap(),
@@ -184,10 +208,14 @@ impl<Rndr: Renderer> ApplicationHandler for App<Rndr> {
                     let renderer = self.renderer.as_ref().unwrap();
                     renderer.resize(size.width as i32, size.height as i32);
                 }
-            },
+            }
             WindowEvent::CloseRequested
             | WindowEvent::KeyboardInput {
-                event: KeyEvent { logical_key: Key::Named(NamedKey::Escape), .. },
+                event:
+                    KeyEvent {
+                        logical_key: Key::Named(NamedKey::Escape),
+                        ..
+                    },
                 ..
             } => event_loop.exit(),
             _ => (),
@@ -195,7 +223,12 @@ impl<Rndr: Renderer> ApplicationHandler for App<Rndr> {
     }
 
     fn about_to_wait(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
-        if let Some(AppState { gl_context, gl_surface, window }) = self.state.as_ref() {
+        if let Some(AppState {
+            gl_context,
+            gl_surface,
+            window,
+        }) = self.state.as_ref()
+        {
             let renderer = self.renderer.as_ref().unwrap();
             renderer.draw();
             window.request_redraw();
@@ -205,7 +238,7 @@ impl<Rndr: Renderer> ApplicationHandler for App<Rndr> {
     }
 }
 
-struct App <Rndr>{
+struct App<Rndr> {
     template: ConfigTemplateBuilder,
     display_builder: DisplayBuilder,
     exit_state: Result<(), Box<dyn Error>>,
@@ -259,7 +292,12 @@ pub unsafe fn create_shader(
     source: &[u8],
 ) -> gl::types::GLuint {
     let shader = gl.CreateShader(shader);
-    gl.ShaderSource(shader, 1, [source.as_ptr().cast()].as_ptr(), std::ptr::null());
+    gl.ShaderSource(
+        shader,
+        1,
+        [source.as_ptr().cast()].as_ptr(),
+        std::ptr::null(),
+    );
     gl.CompileShader(shader);
     shader
 }

@@ -1,15 +1,15 @@
-fn main() -> anyhow::Result<()>{
-    let (tri2vtx, vtx2xyz, _vtx2uv) = {
+fn main() -> anyhow::Result<()> {
+    let (tri2vtx, vtx2xyz, vtx2uv) = {
         let mut obj = del_msh_core::io_obj::WavefrontObj::<usize, f32>::new();
-        obj.load("examples/asset/spot_triangulated.obj")?;
+        obj.load("asset/spot_triangulated.obj")?;
         obj.unified_xyz_uv_as_trimesh()
     };
-    let img_size = {
+    let img_shape = {
         const TILE_SIZE: usize = 16;
         (TILE_SIZE * 28, TILE_SIZE * 28)
     };
     let cam_projection = del_geo_core::mat4_col_major::camera_perspective_blender(
-        img_size.0 as f32 / img_size.1 as f32,
+        img_shape.0 as f32 / img_shape.1 as f32,
         24f32,
         0.5,
         3.0,
@@ -39,14 +39,14 @@ fn main() -> anyhow::Result<()>{
         &vtx2xyz,
         &bvhnodes,
         &aabbs,
-        &img_size,
+        &img_shape,
         &transform_ndc2world,
     );
 
     {
         // render normalmap
-        let pix2rgb = del_canvas_core::raycast_trimesh3::render_normalmap_pix2tri(
-            img_size,
+        let pix2rgb = del_canvas_core::raycast_trimesh3::render_normalmap_from_pix2tri(
+            img_shape,
             &cam_modelview,
             &tri2vtx,
             &vtx2xyz,
@@ -54,16 +54,16 @@ fn main() -> anyhow::Result<()>{
         );
         del_canvas_core::write_png_from_float_image_rgb(
             "target/render3d_normalmap.png",
-            &img_size,
+            &img_shape,
             &pix2rgb,
-        );
+        )?;
     }
 
     // render depth
     {
-        let mut img_data = vec![0f32; img_size.0 * img_size.1];
+        let mut img_data = vec![0f32; img_shape.0 * img_shape.1];
         del_canvas_core::raycast_trimesh3::render_depth_bvh(
-            img_size,
+            img_shape,
             &mut img_data,
             &transform_ndc2world,
             &tri2vtx,
@@ -73,29 +73,50 @@ fn main() -> anyhow::Result<()>{
         );
         del_canvas_core::write_png_from_float_image_grayscale(
             "target/render3d_depth.png",
-            &img_size,
+            &img_shape,
             &img_data,
-        );
+        )?;
     }
 
-    /*
     {
         // render texture
-        let (tex_data, tex_shape, depth)
-            = del_canvas::load_image_as_float_array("examples/asset/spot_texture.png");
-        dbg!(tex_shape);
-        let mut img_data = vec![0f32; img_size.0 * img_size.1];
-        del_canvas::raycast_trimesh3::render_depth_bvh(
-            img_size,
-            &mut img_data,
+        let (tex_data, tex_shape, bitdepth) =
+            del_canvas_core::load_image_as_float_array("asset/spot_texture.png")?;
+        assert_eq!(bitdepth, 3);
+        let img_data = del_canvas_core::raycast_trimesh3::render_texture_from_pix2tri(
+            img_shape,
             &transform_ndc2world,
             &tri2vtx,
             &vtx2xyz,
-            &bvhnodes,
-            &aabbs,
+            &vtx2uv,
+            &pix2tri,
+            tex_shape,
+            &tex_data,
+            &del_canvas_core::texture::Interpolation::Nearest,
         );
+        del_canvas_core::write_png_from_float_image_rgb(
+            "target/render3d_texture_nearest.png",
+            &img_shape,
+            &img_data,
+        )?;
+        //
+        let img_data = del_canvas_core::raycast_trimesh3::render_texture_from_pix2tri(
+            img_shape,
+            &transform_ndc2world,
+            &tri2vtx,
+            &vtx2xyz,
+            &vtx2uv,
+            &pix2tri,
+            tex_shape,
+            &tex_data,
+            &del_canvas_core::texture::Interpolation::Bilinear,
+        );
+        del_canvas_core::write_png_from_float_image_rgb(
+            "target/render3d_texture_bilinear.png",
+            &img_shape,
+            &img_data,
+        )?;
     }
-     */
 
     Ok(())
 }
