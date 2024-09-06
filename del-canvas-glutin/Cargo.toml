@@ -9,7 +9,16 @@ description.workspace = true
 glutin = "0.32.0"
 glutin-winit = "0.5.0"
 winit = "0.30.5"
-raw-window-handle = "0.6"
+raw-window-handle = "0.6.2"
+image = "0.25.2"
+#
+del-gl-core = {path = "../../del-gl/del-gl-core"}
+del-winit-glutin = {path = "../../del-gl/del-winit-glutin"}
+# workspace
+del-msh-core = { workspace = true }
+del-geo-core = { workspace = true }
+# local
+del-canvas-core = { path = "../del-canvas-core" }
 
 [build-dependencies]
 gl_generator = "0.14"
