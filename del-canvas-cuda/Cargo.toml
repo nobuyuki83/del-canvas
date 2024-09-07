@@ -10,8 +10,8 @@ num-traits = "0.2.19"
 anyhow = "1.0.86"
 cudarc = { version = "=0.11.8", features = ["std", "cublas", "cublaslt", "curand", "driver", "nvrtc", "f16", "cuda-version-from-build-system", "dynamic-linking"], default-features=false }
 # workspace
-del-msh-core = { workspace = true }
-del-geo-core = { workspace = true }
+del-msh-core = { path = "../../del-msh/del-msh-core" }
+del-geo-core = { path = "../../del-geo/del-geo-core" }
 # local
 del-canvas-core = { path = "../del-canvas-core"}
 

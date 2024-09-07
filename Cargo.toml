@@ -1,7 +1,7 @@
 [workspace]
-members = ["del-canvas-core", "del-canvas-glutin"]
+members = ["del-canvas-core", "demos"]
 resolver = "2"
-exclude = ["del-canvas-cuda"]
+exclude = ["del-canvas-cuda", "demos-cuda"]
 
 [workspace.package]
 version = "0.1.1"
@@ -23,11 +23,9 @@ anyhow = "1.0.86"
 arrayref = "0.3.8"
 itertools = "0.13.0"
 rand_chacha = "0.3.1"
-
-
-del-geo-core = "0.1.29" #{ path = "../del-geo/del-geo-core"}
-del-geo-nalgebra = "0.1.29" # { path = "../del-geo/del-geo-nalgebra"}
-del-msh-core = "0.1.34" #{ path = "../del-msh/del-msh-core"}
+del-geo-core = { path = "../del-geo/del-geo-core"} # "0.1.29" #
+del-geo-nalgebra ={ path = "../del-geo/del-geo-nalgebra"} #  "0.1.29" #
+del-msh-core = { path = "../del-msh/del-msh-core"} # "0.1.34" #
 #
 # del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git" }
 # del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git" }

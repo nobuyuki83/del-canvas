@@ -40,18 +40,18 @@ void pix_to_tri(
     if( i_pix >= img_w * img_h ){ return; }
     //
     auto ray = ray_for_pixel(i_pix, img_w, img_h, transform_ndc2world);
-
-/*
+    /*
     for(int i_tri=0;i_tri<num_tri;++i_tri){
         const float* p0 = vtx2xyz + tri2vtx[i_tri*3+0]*3;
         const float* p1 = vtx2xyz + tri2vtx[i_tri*3+1]*3;
         const float* p2 = vtx2xyz + tri2vtx[i_tri*3+2]*3;
-        const auto res = tri3::intersection_against_ray(p0, p1, p2, q0.data(), v01.data());
+        const auto res = tri3::intersection_against_ray(p0, p1, p2, ray.first.data(), ray.second.data());
         if(!res){ continue; }
-        pix2tri[i_pix] = 1.0;
+        pix2tri[i_pix] = i_tri;
         return;
     }
-*/
+    return;
+    */
     constexpr int STACK_SIZE = 128;
     uint32_t stack[STACK_SIZE];
     float hit_depth = FLT_MAX;
