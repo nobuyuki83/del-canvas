@@ -1,91 +1,92 @@
-use std::io::Read;
 use del_msh_core::vtx2xyz::HasXyz;
-use crate::Format::BinaryLittleEndian;
+use num_traits::cast::AsPrimitive;
 
-enum Format {
-    Ascii,
-    BinaryLittleEndian,
-    BinaryBigEndian
-}
-
-struct XyzRgb {
-    xyz: [f64; 3],
-    rgb: [u8; 3]
-}
-
-fn read_xyzrgb() -> anyhow::Result<Vec<XyzRgb>> {
-    let file_path = "C:/Users/nobuy/Downloads/juice_box.ply";
-    let file = std::fs::File::open(file_path)?;
-    let mut reader = std::io::BufReader::new(file);
-    use std::io::BufRead;
-    let mut line = String::new();
-    let hoge = reader.read_line(&mut line)?;
-    assert_eq!(line, "ply\n");
-    line.clear();
-    let hoge = reader.read_line(&mut line)?;
-    dbg!(&line);
-    let strs: Vec<_> = line.split_whitespace().collect();
-    assert_eq!(strs[0], "format");
-    let format = match strs[1] {
-        "binary_little_endian" => {
-            BinaryLittleEndian
-        },
-        &_ => panic!(),
-    };
-    let hoge = reader.read_line(&mut line)?;
-    dbg!(&line);
-    line.clear();
-    //
-    let hoge = reader.read_line(&mut line)?; // element vertex
-    dbg!(&line);
-    let strs: Vec<_> = line.split_whitespace().collect();
-    assert_eq!(strs[0], "element");
-    use std::str::FromStr;
-    let num_elem = usize::from_str(strs[2]).unwrap();
-    dbg!(num_elem);
-    //
-    let hoge = reader.read_line(&mut line)?; // property double x
-    let hoge = reader.read_line(&mut line)?; // property double y
-    let hoge = reader.read_line(&mut line)?; // property double z
-    let hoge = reader.read_line(&mut line)?; // property uchar red
-    let hoge = reader.read_line(&mut line)?; // property uchar green
-    let hoge = reader.read_line(&mut line)?; // property uchar blue
-    line.clear();
-    //
-    let hoge = reader.read_line(&mut line)?; // property uchar green
-    assert_eq!(line,"end_header\n");
-    //
-    let mut buf: Vec<u8> = Vec::new();
-    reader.read_to_end(&mut buf)?;
-    let mut i_byte = 0usize;
-    let mut vtx2xyzrgb: Vec<XyzRgb> = vec!();
-    for i_elem in 0..num_elem {
-        let i_bype = i_elem * (8*3 + 3);
-        let x = f64::from_le_bytes(buf[i_byte..i_byte+8].try_into()? );
-        let y = f64::from_le_bytes(buf[i_byte+8..i_byte+16].try_into()? );
-        let z = f64::from_le_bytes(buf[i_byte+16..i_byte+24].try_into()? );
-        let r = u8::from_le_bytes(buf[i_byte+24..i_byte+25].try_into()? );
-        let g = u8::from_le_bytes(buf[i_byte+25..i_byte+26].try_into()? );
-        let b = u8::from_le_bytes(buf[i_byte+26..i_byte+27].try_into()? );
-        let xyzrgb = XyzRgb {
-            xyz: [x,y,z],
-            rgb: [r,g,b]
-        };
-        vtx2xyzrgb.push(xyzrgb);
-    }
-    Ok(vtx2xyzrgb)
-}
-
-impl del_msh_core::vtx2xyz::HasXyz<f64> for XyzRgb
-{
-    fn xyz(&self) -> [f64; 3] {
-        self.xyz
-    }
-}
-
-fn main() -> anyhow::Result<()>{
-    let vtx2xyzrgb = read_xyzrgb()?;
+fn main() -> anyhow::Result<()> {
+    let vtx2xyzrgb = del_msh_core::io_ply::read_xyzrgb("/Users/nobuyuki/project/juice_box1.ply")?;
     let aabb3 = del_msh_core::vtx2xyz::aabb3_from_points(&vtx2xyzrgb);
+    let aabb3: [f32; 6] = aabb3.map(|v| v.as_());
     dbg!(aabb3);
+
+    let img_shape = (300usize, 300usize);
+    let mut img_data = vec![[0f32, 0f32, 0f32]; img_shape.0 * img_shape.1];
+
+    let cam_proj = del_geo_core::mat4_col_major::camera_perspective_blender(
+        img_shape.0 as f32 / img_shape.1 as f32,
+        50f32,
+        0.1,
+        1.0,
+        true,
+    );
+    let cam_modelview = del_geo_core::mat4_col_major::camera_external_blender(
+        &[
+            (aabb3[0] + aabb3[3]) * 0.5f32,
+            (aabb3[1] + aabb3[4]) * 0.5f32,
+            (aabb3[2] + aabb3[5]) * 0.5f32 + 1.4f32,
+        ],
+        0f32,
+        0f32,
+        0f32,
+    );
+    let transform_world2ndc = del_geo_core::mat4_col_major::multmat(&cam_proj, &cam_modelview);
+
+    let transform_ndc2pix = [
+        0.5 * (img_shape.0 as f32),
+        0.,
+        0.,
+        -0.5 * (img_shape.1 as f32),
+        0.5 * (img_shape.0 as f32),
+        0.5 * (img_shape.1 as f32),
+    ];
+    let edge2vtx = [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 0],
+        [4, 5],
+        [5, 6],
+        [6, 7],
+        [7, 4],
+        [0, 4],
+        [1, 5],
+        [2, 6],
+        [3, 7],
+    ];
+    use del_geo_core::mat4_col_major::transform_homogeneous;
+    use del_geo_core::mat2x3_col_major::mult_vec3;
+    for i_edge in 0..edge2vtx.len() {
+        let i0_vtx = edge2vtx[i_edge][0];
+        let i1_vtx = edge2vtx[i_edge][1];
+        let p0 = del_geo_core::aabb3::xyz_from_hex_index(&aabb3, i0_vtx);
+        let p1 = del_geo_core::aabb3::xyz_from_hex_index(&aabb3, i1_vtx);
+        let q0 = transform_homogeneous(&transform_world2ndc, &p0).unwrap();
+        let q1 = transform_homogeneous(&transform_world2ndc, &p1).unwrap();
+        let r0 = mult_vec3(&transform_ndc2pix, &[q0[0], q0[1], 1f32]);
+        let r1 = mult_vec3(&transform_ndc2pix, &[q1[0], q1[1], 1f32]);
+        del_canvas_core::rasterize_line::draw_dda::<f32, [f32; 3]>(
+            &mut img_data,
+            img_shape.0,
+            &r0,
+            &r1,
+            [1.0, 1.0, 1.0],
+        );
+    }
+    for i_elem in 0..vtx2xyzrgb.len() {
+        let p0 = vtx2xyzrgb[i_elem].xyz();
+        let p0: [f32;3] = p0.map(|v| v.as_());
+        let q0 = transform_homogeneous(&transform_world2ndc, &p0).unwrap();
+        let r0 = mult_vec3(&transform_ndc2pix, &[q0[0], q0[1], 1f32]);
+        let ix = r0[0] as usize;
+        let iy = r0[1] as usize;
+        let ipix = iy*img_shape.0 + ix;
+        img_data[ipix][0] = (vtx2xyzrgb[i_elem].rgb[0] as f32) / 255.0;
+        img_data[ipix][1] = (vtx2xyzrgb[i_elem].rgb[1] as f32) / 255.0;
+        img_data[ipix][2] = (vtx2xyzrgb[i_elem].rgb[2] as f32) / 255.0;
+    }
+    use ::slice_of_array::SliceFlatExt; // for flat
+    del_canvas_core::write_png_from_float_image_rgb(
+        "target/ply.png",
+        &img_shape,
+        (&img_data).flat(),
+    )?;
     Ok(())
 }

@@ -31,7 +31,7 @@ impl del_canvas_core::rasterize_points3::PointWithColor for Point {
 fn main() -> anyhow::Result<()> {
     let (tri2vtx, vtx2xyz, _vtx2uv) = {
         let mut obj = del_msh_core::io_obj::WavefrontObj::<usize, f32>::new();
-        obj.load("del-canvas-core/examples/asset/spot_triangulated.obj")?;
+        obj.load("asset/spot_triangulated.obj")?;
         obj.unified_xyz_uv_as_trimesh()
     };
 
@@ -125,9 +125,8 @@ fn main() -> anyhow::Result<()> {
             cam_modelview[6],
             cam_modelview[10],
         );
-        let q =
-            del_geo_core::mat4_col_major::transform_homogeneous(&cam_modelview, &point.pos_world)
-                .unwrap();
+        use del_geo_core::mat4_col_major::transform_homogeneous;
+        let q = transform_homogeneous(&cam_modelview, &point.pos_world).unwrap();
         let cam_projection = nalgebra::Matrix4::<f32>::from_column_slice(&cam_projection);
         let q = nalgebra::Vector3::<f32>::from_column_slice(&q);
         let j = del_geo_nalgebra::mat4::jacobian_transform(&cam_projection, &q);
@@ -170,7 +169,7 @@ fn main() -> anyhow::Result<()> {
             "target/points3d_pix.png",
             &img_shape,
             &img_data,
-        );
+        )?;
     }
 
     {
@@ -270,7 +269,7 @@ fn main() -> anyhow::Result<()> {
             "target/points3d_gaussian_tile.png",
             &img_shape,
             &img_data,
-        );
+        )?;
         println!("   Elapsed gaussian_tile: {:.2?}", now.elapsed());
     }
 
@@ -308,7 +307,7 @@ fn main() -> anyhow::Result<()> {
             "target/points3d_gaussian.png",
             &img_shape,
             &img_data,
-        );
+        )?;
         println!("   Elapsed gaussian_naive: {:.2?}", now.elapsed());
     }
 
@@ -340,7 +339,7 @@ fn main() -> anyhow::Result<()> {
             "target/points3d_ellipse.png",
             &img_shape,
             &img_data,
-        );
+        )?;
         println!("   Elapsed ellipse: {:.2?}", now.elapsed());
     }
 

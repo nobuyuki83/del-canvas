@@ -15,10 +15,9 @@ image = "0.25.2"
 # workspace
 del-msh-core = { workspace = true }
 del-geo-core = { workspace = true }
-# local
-del-gl-core = {path = "../../del-gl/del-gl-core"}
-del-winit-glutin = {path = "../../del-gl/del-winit-glutin"}
-del-canvas-core = { path = "../del-canvas-core" }
+del-gl-core = { workspace = true }
+del-winit-glutin = {  workspace = true }
+del-canvas-core = { workspace = true }
 
 [build-dependencies]
 gl_generator = "0.14"
