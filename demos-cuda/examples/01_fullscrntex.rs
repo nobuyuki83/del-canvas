@@ -56,7 +56,7 @@ impl MyApp {
             del_canvas_core::load_image_as_float_array("../asset/spot_texture.png").unwrap();
         assert_eq!(bitdepth,3);
         let dev = cudarc::driver::CudaDevice::new(0).unwrap();
-        dev.load_ptx(del_canvas_cuda::PIX2TRI.into(), "my_module", &["pix_to_tri"]).unwrap();
+        dev.load_ptx(del_canvas_kernel_cuda::PIX2TRI.into(), "my_module", &["pix_to_tri"]).unwrap();
         // let pix_to_tri = dev.get_func("my_module", "pix_to_tri").unwrap();
         let tri2vtx_dev = dev.htod_copy(tri2vtx.iter().map(|&v| v as u32).collect()).unwrap();
         let vtx2xyz_dev = dev.htod_copy(vtx2xyz.clone()).unwrap();
@@ -220,7 +220,7 @@ impl ApplicationHandler for MyApp {
                 .view_prj
                 .mat4_col_major(img_size.0 as f32 / img_size.1 as f32);
             let transform_world2ndc =
-                del_geo_core::mat4_col_major::multmat(&cam_projection, &cam_model);
+                del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_model);
             let transform_ndc2world =
                 del_geo_core::mat4_col_major::try_inverse(&transform_world2ndc).unwrap();
             let mut pix2tri = self.dev.alloc_zeros::<u32>(img_size.1 * img_size.0).unwrap();

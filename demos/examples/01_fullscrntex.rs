@@ -200,7 +200,7 @@ impl ApplicationHandler for MyApp {
                 .view_prj
                 .mat4_col_major(img_size.0 as f32 / img_size.1 as f32);
             let transform_world2ndc =
-                del_geo_core::mat4_col_major::multmat(&cam_projection, &cam_model);
+                del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_model);
             let transform_ndc2world =
                 del_geo_core::mat4_col_major::try_inverse(&transform_world2ndc).unwrap();
             let pix2tri = del_canvas_core::raycast_trimesh3::pix2tri(

@@ -29,19 +29,19 @@ fn main() -> anyhow::Result<()> {
         del_geo_core::mat4_col_major::camera_external_blender(&[0., 0., 2.], 0., 0., 0.);
 
     let transform_world2ndc =
-        del_geo_core::mat4_col_major::multmat(&cam_projection, &cam_modelview);
+        del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_modelview);
     let transform_ndc2world =
         del_geo_core::mat4_col_major::try_inverse(&transform_world2ndc).unwrap();
     //
     let dev = cudarc::driver::CudaDevice::new(0)?;
-    dev.load_ptx(del_canvas_cuda::PIX2TRI.into(), "my_module", &["pix_to_tri"])?;
+    dev.load_ptx(del_canvas_kernel_cuda::PIX2TRI.into(), "my_module", &["pix_to_tri"])?;
     let pix_to_tri = dev.get_func("my_module", "pix_to_tri").unwrap();
     //
     let tri2vtx_dev = dev.htod_copy(tri2vtx.clone())?;
     let vtx2xyz_dev = dev.htod_copy(vtx2xyz.clone())?;
     let bvhnodes_dev = dev.htod_copy(bvhnodes.clone())?;
     let aabbs_dev = dev.htod_copy(aabbs.clone())?;
-    let mut pix2tri = dev.alloc_zeros::<u32>(img_size.1 * img_size.0)?;
+    let mut pix2tri_dev = dev.alloc_zeros::<u32>(img_size.1 * img_size.0)?;
     let transform_ndc2world_dev = dev.htod_copy(transform_ndc2world.to_vec())?;
     let now = std::time::Instant::now();
     let cfg = {
@@ -55,14 +55,14 @@ fn main() -> anyhow::Result<()> {
     };
     //for_num_elems((img_size.0 * img_size.1).try_into()?);
     let param = (
-        &mut pix2tri, tri2vtx.len()/3, &tri2vtx_dev, &vtx2xyz_dev,
+        &mut pix2tri_dev, tri2vtx.len()/3, &tri2vtx_dev, &vtx2xyz_dev,
         img_size.0, img_size.1, &transform_ndc2world_dev,
         &bvhnodes_dev, &aabbs_dev);
     unsafe { pix_to_tri.launch(cfg,param) }?;
-    let pix2tri = dev.dtoh_sync_copy(&pix2tri)?;
+    let pix2tri = dev.dtoh_sync_copy(&pix2tri_dev)?;
     println!("   Elapsed pix2tri: {:.2?}", now.elapsed());
     let pix2flag: Vec<f32> = pix2tri.iter().map(|v| if *v == u32::MAX { 0f32} else { 1f32} ).collect();
-    del_canvas_core::write_png_from_float_image_grayscale("../target/cuda0.png", &img_size, &pix2flag)?;
+    del_canvas_core::write_png_from_float_image_grayscale("../target/raycast_trimesh3_cuda.png", &img_size, &pix2flag)?;
     dbg!(tri2vtx.len());
     Ok(())
 }

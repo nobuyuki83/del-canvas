@@ -1,7 +1,7 @@
 [workspace]
 members = ["del-canvas-core", "demos"]
 resolver = "2"
-exclude = ["del-canvas-cuda", "demos-cuda"]
+exclude = ["del-canvas-kernel-cuda", "demos-cuda"]
 
 [workspace.package]
 version = "0.1.1"
@@ -24,16 +24,17 @@ arrayref = "0.3.8"
 itertools = "0.13.0"
 rand_chacha = "0.3.1"
 slice-of-array = "0.3.2"
-# del-geo-core = { path = "../del-geo/del-geo-core"} # "0.1.29" #
-# del-geo-nalgebra ={ path = "../del-geo/del-geo-nalgebra"} #  "0.1.29" #
-# del-msh-core = { path = "../del-msh/del-msh-core"} # "0.1.34" #
-# del-gl-core = {path = "../../del-gl/del-gl-core"}
-# del-winit-glutin = {path = "../../del-gl/del-winit-glutin"}
-# del-canvas-core = { path = "../del-canvas-core" }
-#
-del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git" }
-del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git" }
-del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
-del-gl-core = {git = "https://github.com/nobuyuki83/del-gl.git"}
-del-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git"}
+# internal
 del-canvas-core = { path = "del-canvas-core" }
+
+ del-geo-core = { path = "../del-geo/del-geo-core"} # "0.1.29" #
+ del-geo-nalgebra ={ path = "../del-geo/del-geo-nalgebra"} #  "0.1.29" #
+ del-msh-core = { path = "../del-msh/del-msh-core"} # "0.1.34" #
+ del-gl-core = {path = "../del-gl/del-gl-core" }
+ del-winit-glutin = {path = "../del-gl/del-winit-glutin"}
+#
+#del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git" }
+#del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git" }
+#del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
+#del-gl-core = {git = "https://github.com/nobuyuki83/del-gl.git"}
+#del-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git"}

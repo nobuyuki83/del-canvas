@@ -4,6 +4,19 @@
 namespace vec3 {
 
 __device__
+auto norm(const float* a) -> float
+{
+   const float sqnrm = a[0] * a[0] + a[1] * a[1] + a[2] * a[2];
+   return sqrt(sqnrm);
+}
+
+__device__
+auto add(const float* a, const float* b) -> cuda::std::array<float,3>
+{
+    return {a[0] + b[0], a[1] + b[1], a[2] + b[2]};
+}
+
+__device__
 auto sub(const float* a, const float* b) -> cuda::std::array<float,3>
 {
     return {a[0] - b[0], a[1] - b[1], a[2] - b[2]};
@@ -24,6 +37,7 @@ auto dot(const float* a, const float* b) -> float
 {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
+
 
 
 

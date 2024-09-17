@@ -84,7 +84,7 @@ fn main() -> anyhow::Result<()> {
     let cam_modelview =
         del_geo_core::mat4_col_major::camera_external_blender(&[0., 0., 2.], 0., 0., 0.);
     let transform_world2ndc =
-        del_geo_core::mat4_col_major::multmat(&cam_projection, &cam_modelview);
+        del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_modelview);
 
     // transform points
     for point in points.iter_mut() {
@@ -96,15 +96,6 @@ fn main() -> anyhow::Result<()> {
     }
     // sort points depth
     points.sort_by(|a, b| a.pos_ndc[2].partial_cmp(&b.pos_ndc[2]).unwrap());
-
-    let transform_ndc2pix = [
-        0.5 * (img_shape.0 as f32),
-        0.,
-        0.,
-        -0.5 * (img_shape.1 as f32),
-        0.5 * (img_shape.0 as f32),
-        0.5 * (img_shape.1 as f32),
-    ];
 
     // projects points & covariance 2D
     for point in points.iter_mut() {
@@ -179,27 +170,7 @@ fn main() -> anyhow::Result<()> {
         let tile_shape: (usize, usize) = (img_shape.0 / TILE_SIZE, img_shape.1 / TILE_SIZE);
         let mut tile2gauss: Vec<Vec<usize>> = vec![vec!(); tile_shape.0 * tile_shape.1];
         for (i_gauss, point) in points.iter().enumerate().rev() {
-            let ix0 = (point.aabb[0] / TILE_SIZE as f32).floor() as i32;
-            let iy0 = (point.aabb[1] / TILE_SIZE as f32).floor() as i32;
-            let ix1 = (point.aabb[2] / TILE_SIZE as f32).floor() as i32 + 1;
-            let iy1 = (point.aabb[3] / TILE_SIZE as f32).floor() as i32 + 1;
-            let mut tiles = std::collections::BTreeSet::<usize>::new();
-            for ix in ix0..ix1 {
-                assert_ne!(ix, ix1);
-                if ix < 0 || ix >= (tile_shape.0 as i32) {
-                    continue;
-                }
-                let ix = ix as usize;
-                for iy in iy0..iy1 {
-                    assert_ne!(iy, iy1);
-                    if iy < 0 || iy >= (tile_shape.1 as i32) {
-                        continue;
-                    }
-                    let iy = iy as usize;
-                    let i_tile = iy * tile_shape.0 + ix;
-                    tiles.insert(i_tile);
-                }
-            }
+            let tiles = del_geo_core::aabb2::overlapping_tiles(&point.aabb, TILE_SIZE, tile_shape);
             for i_tile in tiles {
                 tile2gauss[i_tile].push(i_gauss);
             }

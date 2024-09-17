@@ -13,6 +13,9 @@ winit = "0.30.5"
 raw-window-handle = "0.6.2"
 # for texture
 image = "0.25.2"
+anyhow = "1.0.89"
+num-traits = "0.2.19"
+slice-of-array = "0.3.2"
 # cuda
 cudarc = { version = "=0.11.8", features = ["std", "cublas", "cublaslt", "curand", "driver", "nvrtc", "f16", "cuda-version-from-build-system", "dynamic-linking"], default-features=false }
 # workspace
@@ -21,9 +24,13 @@ del-geo-core = { path = "../../del-geo/del-geo-core" }
 del-gl-core = { path = "../../del-gl/del-gl-core"}
 del-winit-glutin = {path = "../../del-gl/del-winit-glutin"}
 del-canvas-core = { path = "../del-canvas-core" }
-del-canvas-cuda = { path = "../del-canvas-cuda" }
+del-canvas-kernel-cuda = { path = "../del-canvas-kernel-cuda" }
 
 [build-dependencies]
 gl_generator = "0.14"
 cfg_aliases = "0.2.1"
 bindgen_cuda = "0.1.5"
+
+[dev-dependencies]
+rand = "0.8.5"
+rand_chacha = "0.3.1"

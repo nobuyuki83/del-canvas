@@ -9,6 +9,7 @@ pub mod color;
 pub mod colormap;
 pub mod gaussian_splatting;
 pub mod morphology;
+pub mod rasterize_aabb3;
 pub mod rasterize_circle;
 pub mod rasterize_line;
 pub mod rasterize_points3;

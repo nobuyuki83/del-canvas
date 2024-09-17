@@ -18,7 +18,7 @@ fn main() -> anyhow::Result<()> {
     let cam_modelview =
         del_geo_core::mat4_col_major::camera_external_blender(&[0., 0., 2.], 0., 0., 0.);
     let transform_world2ndc =
-        del_geo_core::mat4_col_major::multmat(&cam_projection, &cam_modelview);
+        del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_modelview);
     let transform_ndc2world =
         del_geo_core::mat4_col_major::try_inverse(&transform_world2ndc).unwrap();
     /*
