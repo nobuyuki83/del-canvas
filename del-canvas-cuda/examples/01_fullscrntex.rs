@@ -53,11 +53,11 @@ impl MyApp {
         );
         //println!("{:?}",img.color());
         let (tex_data, tex_shape, bitdepth) =
-            del_canvas_core::load_image_as_float_array("../asset/spot_texture.png").unwrap();
+            del_canvas_cpu::load_image_as_float_array("../asset/spot_texture.png").unwrap();
         assert_eq!(bitdepth, 3);
         let dev = cudarc::driver::CudaDevice::new(0).unwrap();
         dev.load_ptx(
-            del_canvas_kernel_cuda::PIX2TRI.into(),
+            del_canvas_cuda_kernel::PIX2TRI.into(),
             "my_module",
             &["pix_to_tri"],
         )
@@ -280,7 +280,7 @@ impl ApplicationHandler for MyApp {
                 &transform_ndc2world,
             );
              */
-            let img_data = del_canvas_core::raycast_trimesh3::render_texture_from_pix2tri(
+            let img_data = del_canvas_cpu::raycast_trimesh3::render_texture_from_pix2tri(
                 img_size,
                 &transform_ndc2world,
                 &self.tri2vtx,
@@ -289,7 +289,7 @@ impl ApplicationHandler for MyApp {
                 &pix2tri,
                 self.tex_shape,
                 &self.tex_data,
-                &del_canvas_core::texture::Interpolation::Bilinear,
+                &del_canvas_cpu::texture::Interpolation::Bilinear,
             );
             let img_data: Vec<u8> = img_data
                 .iter()

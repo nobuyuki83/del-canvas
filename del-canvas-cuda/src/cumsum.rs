@@ -57,7 +57,7 @@ fn block_sums(
         );
         use cudarc::driver::LaunchAsync;
         let gpu_prescan =
-            crate::get_or_load_func(&dev, "gpu_prescan", del_canvas_kernel_cuda::CUMSUM)?;
+            crate::get_or_load_func(&dev, "gpu_prescan", del_canvas_cuda_kernel::CUMSUM)?;
         unsafe { gpu_prescan.launch(cfg, param) }?;
     }
 
@@ -84,7 +84,7 @@ fn block_sums(
         );
         use cudarc::driver::LaunchAsync;
         let gpu_prescan =
-            crate::get_or_load_func(&dev, "gpu_prescan", del_canvas_kernel_cuda::CUMSUM)?;
+            crate::get_or_load_func(&dev, "gpu_prescan", del_canvas_cuda_kernel::CUMSUM)?;
         unsafe { gpu_prescan.launch(cfg, param) }?;
     } else {
         // println!("prefix sum of blocks using recursive");
@@ -127,7 +127,7 @@ fn add_block_sums(
     let param = (vout_dev, d_block_sums, num_elem);
     use cudarc::driver::LaunchAsync;
     let gpu_add_block_sums =
-        crate::get_or_load_func(&dev, "gpu_add_block_sums", del_canvas_kernel_cuda::CUMSUM)?;
+        crate::get_or_load_func(&dev, "gpu_add_block_sums", del_canvas_cuda_kernel::CUMSUM)?;
     unsafe { gpu_add_block_sums.launch(cfg, param) }?;
     Ok(())
 }

@@ -87,8 +87,11 @@ fn main() -> anyhow::Result<()> {
             radius,
         );
         use cudarc::driver::LaunchAsync;
-        let xyzrgb_to_splat =
-            demos_cuda::get_or_load_func(&dev, "xyzrgb_to_splat", del_canvas_kernel_cuda::XYZRGB)?;
+        let xyzrgb_to_splat = del_canvas_cuda::get_or_load_func(
+            &dev,
+            "xyzrgb_to_splat",
+            del_canvas_cuda_kernel::XYZRGB,
+        )?;
         unsafe { xyzrgb_to_splat.launch(cfg, param) }?;
     }
 
@@ -106,7 +109,7 @@ fn main() -> anyhow::Result<()> {
             idx2vtx
         };
         let mut img_data = vec![[0f32, 0f32, 0f32]; img_shape.0 * img_shape.1];
-        del_canvas_core::rasterize_aabb3::wireframe_dda(
+        del_canvas_cpu::rasterize_aabb3::wireframe_dda(
             &mut img_data,
             img_shape,
             &transform_world2ndc,
@@ -125,7 +128,7 @@ fn main() -> anyhow::Result<()> {
             img_data[ipix][2] = (pnt2xyzrgb[i_vtx].rgb[2] as f32) / 255.0;
         }
         use ::slice_of_array::SliceFlatExt; // for flat
-        del_canvas_core::write_png_from_float_image_rgb(
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "../target/ply_pixel_cuda.png",
             &img_shape,
             (&img_data).flat(),
@@ -154,17 +157,17 @@ fn main() -> anyhow::Result<()> {
                 16u32,
             );
             use cudarc::driver::LaunchAsync;
-            let count_splat_in_tile = demos_cuda::get_or_load_func(
+            let count_splat_in_tile = del_canvas_cuda::get_or_load_func(
                 &dev,
                 "count_splat_in_tile",
-                del_canvas_kernel_cuda::XYZRGB,
+                del_canvas_cuda_kernel::XYZRGB,
             )?;
             unsafe { count_splat_in_tile.launch(cfg, param) }?;
             (tile2idx_dev, pnt2idx_dev)
         };
         let tile2idx_dev = {
             let mut tmp = dev.alloc_zeros(tile2idx_dev.len())?;
-            demos_cuda::cumsum::sum_scan_blelloch(&dev, &mut tmp, &tile2idx_dev)?;
+            del_canvas_cuda::cumsum::sum_scan_blelloch(&dev, &mut tmp, &tile2idx_dev)?;
             tmp
         };
         //
@@ -196,7 +199,7 @@ fn main() -> anyhow::Result<()> {
         } // debug tile2ind
         let pnt2idx_dev = {
             let mut tmp = dev.alloc_zeros::<u32>(pnt2ind_dev.len())?;
-            demos_cuda::cumsum::sum_scan_blelloch(&dev, &mut tmp, &pnt2ind_dev)?;
+            del_canvas_cuda::cumsum::sum_scan_blelloch(&dev, &mut tmp, &pnt2ind_dev)?;
             tmp
         };
         let num_ind = dev.dtoh_sync_copy(&pnt2idx_dev)?.last().unwrap().to_owned(); // todo: send only last element to cpu
@@ -225,13 +228,13 @@ fn main() -> anyhow::Result<()> {
                 16u32,
             );
             use cudarc::driver::LaunchAsync;
-            let count_splat_in_tile = demos_cuda::get_or_load_func(
+            let count_splat_in_tile = del_canvas_cuda::get_or_load_func(
                 &dev,
                 "fill_index_info",
-                del_canvas_kernel_cuda::XYZRGB,
+                del_canvas_cuda_kernel::XYZRGB,
             )?;
             unsafe { count_splat_in_tile.launch(cfg, param) }?;
-            demos_cuda::sort_by_key_u64::radix_sort_by_key_u64(
+            del_canvas_cuda::sort_by_key_u64::radix_sort_by_key_u64(
                 &dev,
                 &mut idx2tiledepth_dev,
                 &mut idx2pnt_dev,
@@ -300,15 +303,15 @@ fn main() -> anyhow::Result<()> {
                 &pnt2splat_dev,
             );
             use cudarc::driver::LaunchAsync;
-            let count_splat_in_tile = demos_cuda::get_or_load_func(
+            let count_splat_in_tile = del_canvas_cuda::get_or_load_func(
                 &dev,
                 "rasterize_splat_using_tile",
-                del_canvas_kernel_cuda::XYZRGB,
+                del_canvas_cuda_kernel::XYZRGB,
             )?;
             unsafe { count_splat_in_tile.launch(cfg, param) }?;
             use ::slice_of_array::SliceFlatExt; // for flat
             let pix2rgb = dev.dtoh_sync_copy(&pix2rgb_dev)?;
-            del_canvas_core::write_png_from_float_image_rgb(
+            del_canvas_cpu::write_png_from_float_image_rgb(
                 "../target/ply_cuda_circle_tile.png",
                 &img_shape,
                 &pix2rgb,
@@ -320,7 +323,7 @@ fn main() -> anyhow::Result<()> {
             let pnt2splat = dev.dtoh_sync_copy(&pnt2splat_dev)?;
             let tile2idx = dev.dtoh_sync_copy(&tile2idx_dev)?;
             let mut img_data = vec![[0f32, 0f32, 0f32]; img_shape.0 * img_shape.1];
-            del_canvas_core::rasterize_aabb3::wireframe_dda(
+            del_canvas_cpu::rasterize_aabb3::wireframe_dda(
                 &mut img_data,
                 img_shape,
                 &transform_world2ndc,
@@ -344,7 +347,7 @@ fn main() -> anyhow::Result<()> {
                 }
             }
             use ::slice_of_array::SliceFlatExt; // for flat
-            del_canvas_core::write_png_from_float_image_rgb(
+            del_canvas_cpu::write_png_from_float_image_rgb(
                 "../target/ply_cuda_circle_tile_cpu_rasterization.png",
                 &img_shape,
                 (&img_data).flat(),

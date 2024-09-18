@@ -102,7 +102,7 @@ fn gpu_radix_sort_local(
     let gpu_radix_sort_local = crate::get_or_load_func(
         &dev,
         "gpu_radix_sort_local",
-        del_canvas_kernel_cuda::SORT_U64,
+        del_canvas_cuda_kernel::SORT_U64,
     )?;
     unsafe { gpu_radix_sort_local.launch(cfg, param) }?;
     Ok(())
@@ -137,7 +137,7 @@ fn glbl_shuffle(
     );
     use cudarc::driver::LaunchAsync;
     let gpu_glbl_shuffle =
-        crate::get_or_load_func(&dev, "gpu_glbl_shuffle", del_canvas_kernel_cuda::SORT_U64)?;
+        crate::get_or_load_func(&dev, "gpu_glbl_shuffle", del_canvas_cuda_kernel::SORT_U64)?;
     unsafe { gpu_glbl_shuffle.launch(cfg, param) }?;
     Ok(())
 }

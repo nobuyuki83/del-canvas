@@ -25,7 +25,7 @@ extern \"C\" __global__ void sin_kernel(float *out, const float *inp, const size
     }
     {
         dev.load_ptx(
-            del_canvas_kernel_cuda::SIMPLE.into(),
+            del_canvas_cuda_kernel::SIMPLE.into(),
             "my_module",
             &["vector_add"],
         )?;

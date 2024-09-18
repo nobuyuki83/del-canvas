@@ -35,7 +35,7 @@ fn main() -> anyhow::Result<()> {
     //
     let dev = cudarc::driver::CudaDevice::new(0)?;
     dev.load_ptx(
-        del_canvas_kernel_cuda::PIX2TRI.into(),
+        del_canvas_cuda_kernel::PIX2TRI.into(),
         "my_module",
         &["pix_to_tri"],
     )?;
@@ -76,7 +76,7 @@ fn main() -> anyhow::Result<()> {
         .iter()
         .map(|v| if *v == u32::MAX { 0f32 } else { 1f32 })
         .collect();
-    del_canvas_core::write_png_from_float_image_grayscale(
+    del_canvas_cpu::write_png_from_float_image_grayscale(
         "../target/raycast_trimesh3_cuda.png",
         &img_size,
         &pix2flag,
