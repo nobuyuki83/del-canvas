@@ -1,12 +1,13 @@
-
 fn main() -> anyhow::Result<()> {
-    let ptx = cudarc::nvrtc::compile_ptx("
+    let ptx = cudarc::nvrtc::compile_ptx(
+        "
 extern \"C\" __global__ void sin_kernel(float *out, const float *inp, const size_t numel) {
     unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < numel) {
         out[i] = sin(inp[i]);
     }
-}")?;
+}",
+    )?;
 
     let dev = cudarc::driver::CudaDevice::new(0)?;
     //
@@ -23,7 +24,11 @@ extern \"C\" __global__ void sin_kernel(float *out, const float *inp, const size
         dbg!(1f32.sin(), &out_host);
     }
     {
-        dev.load_ptx(del_canvas_kernel_cuda::SIMPLE.into(), "my_module", &["vector_add"])?;
+        dev.load_ptx(
+            del_canvas_kernel_cuda::SIMPLE.into(),
+            "my_module",
+            &["vector_add"],
+        )?;
         let vector_add = dev.get_func("my_module", "vector_add").unwrap();
         dbg!(dev.name()?);
         let mut out = dev.alloc_zeros::<f32>(100)?;

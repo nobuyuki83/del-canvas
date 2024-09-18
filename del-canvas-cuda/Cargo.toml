@@ -16,6 +16,7 @@ image = "0.25.2"
 anyhow = "1.0.89"
 num-traits = "0.2.19"
 slice-of-array = "0.3.2"
+itertools = "0.13.0"
 # cuda
 cudarc = { version = "=0.11.8", features = ["std", "cublas", "cublaslt", "curand", "driver", "nvrtc", "f16", "cuda-version-from-build-system", "dynamic-linking"], default-features=false }
 # workspace
@@ -23,8 +24,8 @@ del-msh-core = { path = "../../del-msh/del-msh-core" }
 del-geo-core = { path = "../../del-geo/del-geo-core" }
 del-gl-core = { path = "../../del-gl/del-gl-core"}
 del-winit-glutin = {path = "../../del-gl/del-winit-glutin"}
-del-canvas-core = { path = "../del-canvas-core" }
-del-canvas-kernel-cuda = { path = "../del-canvas-kernel-cuda" }
+del-canvas-core = { path = "../del-canvas-cpu" }
+del-canvas-kernel-cuda = { path = "../del-canvas-cuda-kernel" }
 
 [build-dependencies]
 gl_generator = "0.14"

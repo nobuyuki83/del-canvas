@@ -13,6 +13,7 @@ struct Splat {
     float z;
     float pos_pix[2];
     float rad;
+    float rgb[3];
 };
 
 __global__
@@ -48,6 +49,9 @@ void xyzrgb_to_splat(
    pnt2splat[i_pnt].pos_pix[0] = r0[0];
    pnt2splat[i_pnt].pos_pix[1] = r0[1];
    pnt2splat[i_pnt].rad = rad;
+   pnt2splat[i_pnt].rgb[0] = float(pnt2xyzrgb[i_pnt].rgb[0]) / 255.0;
+   pnt2splat[i_pnt].rgb[1] = float(pnt2xyzrgb[i_pnt].rgb[1]) / 255.0;
+   pnt2splat[i_pnt].rgb[2] = float(pnt2xyzrgb[i_pnt].rgb[2]) / 255.0;
 }
 
 
@@ -98,7 +102,6 @@ __device__ uint32_t float_to_uint32(float value) {
 }
 
 __device__ uint64_t concatenate32To64(uint32_t a, uint32_t b) {
-    // b を64ビットの下位部分に、a を64ビットの上位部分にシフトして結合
     return ((uint64_t)b) | (((uint64_t)a) << 32);
 }
 
@@ -108,6 +111,7 @@ void fill_index_info(
   const Splat* pnt2splat,
   const uint32_t* pnt2idx,
   uint64_t* idx2tiledepth,
+  uint32_t* idx2pnt,
   uint32_t tile_w,
   uint32_t tile_h,
   uint32_t tile_size)
@@ -134,15 +138,56 @@ void fill_index_info(
                 continue;
             }
             uint32_t i_tile = iy * tile_w + ix;
-            uint32_t depth_in_uint32 = float_to_uint32(splat.z);
-            uint64_t tiledepth= concatenate32To64(i_tile, depth_in_uint32);
+            uint32_t zi = float_to_uint32(splat.z);
+            {  // making the negative float value comparable
+                zi &= ~(1 << 31); // set zero to 31st bit
+                zi = ~zi; // invert bit
+            }
+            uint64_t tiledepth= concatenate32To64(i_tile, zi);
             idx2tiledepth[pnt2idx[i_pnt] + cnt] = tiledepth;
+            idx2pnt[pnt2idx[i_pnt] + cnt] = i_pnt;
             ++cnt;
         }
     }
     // pnt2ind[i_pnt] = cnt;
 }
 
+__global__
+void rasterize_splat_using_tile(
+    uint32_t img_w,
+    uint32_t img_h,
+    float* d_pix2rgb,
+    uint32_t tile_w,
+    uint32_t tile_h,
+    uint32_t tile_size,
+    const uint32_t* d_tile2idx,
+    const uint32_t* d_idx2pnt,
+    const Splat* d_pnt2splat)
+{
+    const uint32_t ix = blockDim.x * blockIdx.x + threadIdx.x;
+    if( ix >= img_w ){ return; }
+    //
+    const uint32_t iy = blockDim.y * blockIdx.y + threadIdx.y;
+    if( iy >= img_h ){ return; }
+    const uint32_t i_pix = iy * img_w + ix;
+    //
+    const uint32_t i_tile = (iy / tile_size) * tile_w + (ix / tile_size);
+    for(uint32_t idx=d_tile2idx[i_tile]; idx<d_tile2idx[i_tile+1];++idx){
+        const uint32_t i_pnt = d_idx2pnt[idx];
+        const Splat& splat = d_pnt2splat[i_pnt];
+        const float p0[2] = {
+            float(ix) + 0.5f,
+            float(iy) + 0.5f};
+        const float dx = splat.pos_pix[0] - p0[0];
+        const float dy = splat.pos_pix[1] - p0[1];
+        const float distance = sqrt(dx * dx + dy * dy);
+        if( distance > splat.rad ){ continue; }
+        d_pix2rgb[i_pix*3+0] = splat.rgb[0];
+        d_pix2rgb[i_pix*3+1] = splat.rgb[1];
+        d_pix2rgb[i_pix*3+2] = splat.rgb[2];
+    }
+
+}
 
 
 } // extern "C"

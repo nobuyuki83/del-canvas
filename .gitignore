@@ -3,6 +3,6 @@ Cargo.lock
 .idea
 external/glfwbuild
 external/glfwlib
-del-canvas-kernel-cuda/target
+del-canvas-cuda-kernel/target
 cpp-glfw/build
 target

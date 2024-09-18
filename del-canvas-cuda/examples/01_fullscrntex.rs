@@ -4,6 +4,7 @@ use del_gl_core::gl::types::GLfloat;
 use del_winit_glutin::app_internal;
 use glutin::display::GlDisplay;
 //
+use cudarc::driver::LaunchAsync;
 use image::EncodableLayout;
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
@@ -11,7 +12,6 @@ use winit::event::{KeyEvent, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::keyboard::{Key, NamedKey};
 use winit::window::Window;
-use cudarc::driver::LaunchAsync;
 
 pub struct MyApp {
     pub appi: crate::app_internal::AppInternal,
@@ -54,13 +54,22 @@ impl MyApp {
         //println!("{:?}",img.color());
         let (tex_data, tex_shape, bitdepth) =
             del_canvas_core::load_image_as_float_array("../asset/spot_texture.png").unwrap();
-        assert_eq!(bitdepth,3);
+        assert_eq!(bitdepth, 3);
         let dev = cudarc::driver::CudaDevice::new(0).unwrap();
-        dev.load_ptx(del_canvas_kernel_cuda::PIX2TRI.into(), "my_module", &["pix_to_tri"]).unwrap();
+        dev.load_ptx(
+            del_canvas_kernel_cuda::PIX2TRI.into(),
+            "my_module",
+            &["pix_to_tri"],
+        )
+        .unwrap();
         // let pix_to_tri = dev.get_func("my_module", "pix_to_tri").unwrap();
-        let tri2vtx_dev = dev.htod_copy(tri2vtx.iter().map(|&v| v as u32).collect()).unwrap();
+        let tri2vtx_dev = dev
+            .htod_copy(tri2vtx.iter().map(|&v| v as u32).collect())
+            .unwrap();
         let vtx2xyz_dev = dev.htod_copy(vtx2xyz.clone()).unwrap();
-        let bvhnodes_dev = dev.htod_copy(bvhnodes.iter().map(|&v| v as u32).collect()).unwrap();
+        let bvhnodes_dev = dev
+            .htod_copy(bvhnodes.iter().map(|&v| v as u32).collect())
+            .unwrap();
         let aabbs_dev = dev.htod_copy(aabbs.clone()).unwrap();
         //
         Self {
@@ -223,24 +232,34 @@ impl ApplicationHandler for MyApp {
                 del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_model);
             let transform_ndc2world =
                 del_geo_core::mat4_col_major::try_inverse(&transform_world2ndc).unwrap();
-            let mut pix2tri = self.dev.alloc_zeros::<u32>(img_size.1 * img_size.0).unwrap();
+            let mut pix2tri = self
+                .dev
+                .alloc_zeros::<u32>(img_size.1 * img_size.0)
+                .unwrap();
             let transform_ndc2world_dev = self.dev.htod_copy(transform_ndc2world.to_vec()).unwrap();
             let cfg = {
                 let num_threads = 256;
                 let num_blocks = (img_size.0 * img_size.1) / num_threads + 1;
                 cudarc::driver::LaunchConfig {
-                    grid_dim: (num_blocks as u32,1,1),
-                    block_dim: (num_threads as u32,1,1),
-                    shared_mem_bytes: 0
+                    grid_dim: (num_blocks as u32, 1, 1),
+                    block_dim: (num_threads as u32, 1, 1),
+                    shared_mem_bytes: 0,
                 }
             };
             let param = (
-                &mut pix2tri, self.tri2vtx.len()/3, &self.tri2vtx_dev, &self.vtx2xyz_dev,
-                img_size.0 as u32, img_size.1 as u32, &transform_ndc2world_dev,
-                &self.bvhnodes_dev, &self.aabbs_dev);
+                &mut pix2tri,
+                self.tri2vtx.len() / 3,
+                &self.tri2vtx_dev,
+                &self.vtx2xyz_dev,
+                img_size.0 as u32,
+                img_size.1 as u32,
+                &transform_ndc2world_dev,
+                &self.bvhnodes_dev,
+                &self.aabbs_dev,
+            );
             //unsafe { self.pix_to_tri.clone().launch(cfg,param) }.unwrap();
             let pix_to_tri = self.dev.get_func("my_module", "pix_to_tri").unwrap();
-            unsafe { pix_to_tri.launch(cfg,param) }.unwrap();
+            unsafe { pix_to_tri.launch(cfg, param) }.unwrap();
             let pix2tri = self.dev.dtoh_sync_copy(&pix2tri).unwrap();
             println!("   Elapsed pix2tri: {:.2?}", now.elapsed());
             let now = std::time::Instant::now();

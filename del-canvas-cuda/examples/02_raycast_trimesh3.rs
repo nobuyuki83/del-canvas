@@ -23,7 +23,7 @@ fn main() -> anyhow::Result<()> {
         24f32,
         0.5,
         3.0,
-        true
+        true,
     );
     let cam_modelview =
         del_geo_core::mat4_col_major::camera_external_blender(&[0., 0., 2.], 0., 0., 0.);
@@ -34,7 +34,11 @@ fn main() -> anyhow::Result<()> {
         del_geo_core::mat4_col_major::try_inverse(&transform_world2ndc).unwrap();
     //
     let dev = cudarc::driver::CudaDevice::new(0)?;
-    dev.load_ptx(del_canvas_kernel_cuda::PIX2TRI.into(), "my_module", &["pix_to_tri"])?;
+    dev.load_ptx(
+        del_canvas_kernel_cuda::PIX2TRI.into(),
+        "my_module",
+        &["pix_to_tri"],
+    )?;
     let pix_to_tri = dev.get_func("my_module", "pix_to_tri").unwrap();
     //
     let tri2vtx_dev = dev.htod_copy(tri2vtx.clone())?;
@@ -48,21 +52,35 @@ fn main() -> anyhow::Result<()> {
         let num_threads = 256;
         let num_blocks = (img_size.0 * img_size.1) / num_threads + 1;
         cudarc::driver::LaunchConfig {
-            grid_dim: (num_blocks as u32,1,1),
-            block_dim: (num_threads as u32,1,1),
-            shared_mem_bytes: 0
+            grid_dim: (num_blocks as u32, 1, 1),
+            block_dim: (num_threads as u32, 1, 1),
+            shared_mem_bytes: 0,
         }
     };
     //for_num_elems((img_size.0 * img_size.1).try_into()?);
     let param = (
-        &mut pix2tri_dev, tri2vtx.len()/3, &tri2vtx_dev, &vtx2xyz_dev,
-        img_size.0, img_size.1, &transform_ndc2world_dev,
-        &bvhnodes_dev, &aabbs_dev);
-    unsafe { pix_to_tri.launch(cfg,param) }?;
+        &mut pix2tri_dev,
+        tri2vtx.len() / 3,
+        &tri2vtx_dev,
+        &vtx2xyz_dev,
+        img_size.0,
+        img_size.1,
+        &transform_ndc2world_dev,
+        &bvhnodes_dev,
+        &aabbs_dev,
+    );
+    unsafe { pix_to_tri.launch(cfg, param) }?;
     let pix2tri = dev.dtoh_sync_copy(&pix2tri_dev)?;
     println!("   Elapsed pix2tri: {:.2?}", now.elapsed());
-    let pix2flag: Vec<f32> = pix2tri.iter().map(|v| if *v == u32::MAX { 0f32} else { 1f32} ).collect();
-    del_canvas_core::write_png_from_float_image_grayscale("../target/raycast_trimesh3_cuda.png", &img_size, &pix2flag)?;
+    let pix2flag: Vec<f32> = pix2tri
+        .iter()
+        .map(|v| if *v == u32::MAX { 0f32 } else { 1f32 })
+        .collect();
+    del_canvas_core::write_png_from_float_image_grayscale(
+        "../target/raycast_trimesh3_cuda.png",
+        &img_size,
+        &pix2flag,
+    )?;
     dbg!(tri2vtx.len());
     Ok(())
 }
