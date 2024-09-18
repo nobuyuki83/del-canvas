@@ -46,7 +46,7 @@ impl MyApp {
         );
         //println!("{:?}",img.color());
         let (tex_data, tex_shape, bitdepth) =
-            del_canvas_core::load_image_as_float_array("asset/spot_texture.png").unwrap();
+            del_canvas_cpu::load_image_as_float_array("asset/spot_texture.png").unwrap();
         //
         Self {
             appi: app_internal::AppInternal::new(template, display_builder),
@@ -203,7 +203,7 @@ impl ApplicationHandler for MyApp {
                 del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_model);
             let transform_ndc2world =
                 del_geo_core::mat4_col_major::try_inverse(&transform_world2ndc).unwrap();
-            let pix2tri = del_canvas_core::raycast_trimesh3::pix2tri(
+            let pix2tri = del_canvas_cpu::raycast_trimesh3::pix2tri(
                 &self.tri2vtx,
                 &self.vtx2xyz,
                 &self.bvhnodes,
@@ -211,7 +211,7 @@ impl ApplicationHandler for MyApp {
                 &img_size,
                 &transform_ndc2world,
             );
-            let img_data = del_canvas_core::raycast_trimesh3::render_texture_from_pix2tri(
+            let img_data = del_canvas_cpu::raycast_trimesh3::render_texture_from_pix2tri(
                 img_size,
                 &transform_ndc2world,
                 &self.tri2vtx,
@@ -220,7 +220,7 @@ impl ApplicationHandler for MyApp {
                 &pix2tri,
                 self.tex_shape,
                 &self.tex_data,
-                &del_canvas_core::texture::Interpolation::Bilinear,
+                &del_canvas_cpu::texture::Interpolation::Bilinear,
             );
             let img_data: Vec<u8> = img_data
                 .iter()

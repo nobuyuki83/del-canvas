@@ -35,7 +35,7 @@ fn main() -> anyhow::Result<()> {
         &vtx2xyz,
         None,
     );
-    let pix2tri = del_canvas_core::raycast_trimesh3::pix2tri(
+    let pix2tri = del_canvas_cpu::raycast_trimesh3::pix2tri(
         &tri2vtx,
         &vtx2xyz,
         &bvhnodes,
@@ -46,14 +46,14 @@ fn main() -> anyhow::Result<()> {
 
     {
         // render normalmap
-        let pix2rgb = del_canvas_core::raycast_trimesh3::render_normalmap_from_pix2tri(
+        let pix2rgb = del_canvas_cpu::raycast_trimesh3::render_normalmap_from_pix2tri(
             img_shape,
             &cam_modelview,
             &tri2vtx,
             &vtx2xyz,
             &pix2tri,
         );
-        del_canvas_core::write_png_from_float_image_rgb(
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "target/render3d_normalmap.png",
             &img_shape,
             &pix2rgb,
@@ -63,7 +63,7 @@ fn main() -> anyhow::Result<()> {
     // render depth
     {
         let mut img_data = vec![0f32; img_shape.0 * img_shape.1];
-        del_canvas_core::raycast_trimesh3::render_depth_bvh(
+        del_canvas_cpu::raycast_trimesh3::render_depth_bvh(
             img_shape,
             &mut img_data,
             &transform_ndc2world,
@@ -72,7 +72,7 @@ fn main() -> anyhow::Result<()> {
             &bvhnodes,
             &aabbs,
         );
-        del_canvas_core::write_png_from_float_image_grayscale(
+        del_canvas_cpu::write_png_from_float_image_grayscale(
             "target/render3d_depth.png",
             &img_shape,
             &img_data,
@@ -82,9 +82,9 @@ fn main() -> anyhow::Result<()> {
     {
         // render texture
         let (tex_data, tex_shape, bitdepth) =
-            del_canvas_core::load_image_as_float_array("asset/spot_texture.png")?;
+            del_canvas_cpu::load_image_as_float_array("asset/spot_texture.png")?;
         assert_eq!(bitdepth, 3);
-        let img_data = del_canvas_core::raycast_trimesh3::render_texture_from_pix2tri(
+        let img_data = del_canvas_cpu::raycast_trimesh3::render_texture_from_pix2tri(
             img_shape,
             &transform_ndc2world,
             &tri2vtx,
@@ -93,15 +93,15 @@ fn main() -> anyhow::Result<()> {
             &pix2tri,
             tex_shape,
             &tex_data,
-            &del_canvas_core::texture::Interpolation::Nearest,
+            &del_canvas_cpu::texture::Interpolation::Nearest,
         );
-        del_canvas_core::write_png_from_float_image_rgb(
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "target/render3d_texture_nearest.png",
             &img_shape,
             &img_data,
         )?;
         //
-        let img_data = del_canvas_core::raycast_trimesh3::render_texture_from_pix2tri(
+        let img_data = del_canvas_cpu::raycast_trimesh3::render_texture_from_pix2tri(
             img_shape,
             &transform_ndc2world,
             &tri2vtx,
@@ -110,9 +110,9 @@ fn main() -> anyhow::Result<()> {
             &pix2tri,
             tex_shape,
             &tex_data,
-            &del_canvas_core::texture::Interpolation::Bilinear,
+            &del_canvas_cpu::texture::Interpolation::Bilinear,
         );
-        del_canvas_core::write_png_from_float_image_rgb(
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "target/render3d_texture_bilinear.png",
             &img_shape,
             &img_data,

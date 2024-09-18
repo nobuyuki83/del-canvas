@@ -1,5 +1,5 @@
 [package]
-name = "del-canvas-kernel-cuda"
+name = "del-canvas-cuda-kernel"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"

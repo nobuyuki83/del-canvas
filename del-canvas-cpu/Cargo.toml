@@ -1,5 +1,5 @@
 [package]
-name = "del-canvas-core"
+name = "del-canvas-cpu"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

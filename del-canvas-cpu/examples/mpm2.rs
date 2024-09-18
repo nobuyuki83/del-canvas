@@ -215,7 +215,7 @@ fn main() {
         vec![nalgebra::Vector3::<Real>::new(0., 0., 0.); M * M];
 
     const FRAME_DT: Real = 1e-3;
-    let mut canvas = del_canvas_core::canvas_gif::Canvas::new(
+    let mut canvas = del_canvas_cpu::canvas_gif::Canvas::new(
         std::path::Path::new("target/0.gif"),
         (800, 800),
         &vec![0x112F41, 0xED553B, 0xF2B134, 0x068587],
@@ -275,7 +275,7 @@ fn main() {
         if i_step % ((FRAME_DT / DT) as i32) == 0 {
             canvas.clear(0);
             for p in particles.iter() {
-                del_canvas_core::rasterize_circle::fill::<Real, u8>(
+                del_canvas_cpu::rasterize_circle::fill::<Real, u8>(
                     &mut canvas.data,
                     canvas.width,
                     &[p.x.x, p.x.y],

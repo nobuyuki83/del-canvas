@@ -67,7 +67,7 @@ fn radiance(ray: &Ray, vtx2xyz: &[f64], _rng: &mut rand::rngs::ThreadRng) -> Vec
 fn main() {
     let vtx2xyz: Vec<f64> = vec![0., 30., 0., 30., 1., 0., 0., 60., 0., -30., 1.0, 0.];
     let mut rng = rand::thread_rng();
-    let cam = del_canvas_core::cam3::Camera3::new(
+    let cam = del_canvas_cpu::cam3::Camera3::new(
         1024,
         768,
         Vector::new(50., 52., 295.6),

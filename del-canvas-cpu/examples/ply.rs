@@ -110,7 +110,7 @@ fn main() -> anyhow::Result<()> {
             idx2vtx
         };
         let mut img_data = vec![[0f32, 0f32, 0f32]; img_shape.0 * img_shape.1];
-        del_canvas_core::rasterize_aabb3::wireframe_dda(
+        del_canvas_cpu::rasterize_aabb3::wireframe_dda(
             &mut img_data,
             img_shape,
             &transform_world2ndc,
@@ -128,7 +128,7 @@ fn main() -> anyhow::Result<()> {
             img_data[ipix][2] = (vtx2xyzrgb[i_vtx].rgb[2] as f32) / 255.0;
         }
         use ::slice_of_array::SliceFlatExt; // for flat
-        del_canvas_core::write_png_from_float_image_rgb(
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "target/ply_pixel.png",
             &img_shape,
             (&img_data).flat(),
@@ -148,7 +148,7 @@ fn main() -> anyhow::Result<()> {
             idx2vtx
         };
         let mut img_data = vec![[0f32, 0f32, 0f32]; img_shape.0 * img_shape.1];
-        del_canvas_core::rasterize_aabb3::wireframe_dda(
+        del_canvas_cpu::rasterize_aabb3::wireframe_dda(
             &mut img_data,
             img_shape,
             &transform_world2ndc,
@@ -166,7 +166,7 @@ fn main() -> anyhow::Result<()> {
                 &transform_ndc2pix,
                 &[q0[0], q0[1], 1f32],
             );
-            let pixs = del_canvas_core::rasterize_circle::pixels_in_point(
+            let pixs = del_canvas_cpu::rasterize_circle::pixels_in_point(
                 r0[0],
                 r0[1],
                 vtx2splat[i_vtx].rad_pix,
@@ -180,7 +180,7 @@ fn main() -> anyhow::Result<()> {
             }
         }
         use ::slice_of_array::SliceFlatExt; // for flat
-        del_canvas_core::write_png_from_float_image_rgb(
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "target/ply_circle_naive.png",
             &img_shape,
             (&img_data).flat(),
@@ -238,7 +238,7 @@ fn main() -> anyhow::Result<()> {
         }
         //
         let mut img_data = vec![[0f32, 0f32, 0f32]; img_shape.0 * img_shape.1];
-        del_canvas_core::rasterize_aabb3::wireframe_dda(
+        del_canvas_cpu::rasterize_aabb3::wireframe_dda(
             &mut img_data,
             img_shape,
             &transform_world2ndc,
@@ -261,7 +261,7 @@ fn main() -> anyhow::Result<()> {
             }
         }
         use ::slice_of_array::SliceFlatExt; // for flat
-        del_canvas_core::write_png_from_float_image_rgb(
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "target/ply_circle_tile.png",
             &img_shape,
             (&img_data).flat(),

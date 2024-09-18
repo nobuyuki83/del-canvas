@@ -18,7 +18,7 @@ struct Point {
     pub aabb: [f32; 4],
 }
 
-impl del_canvas_core::rasterize_points3::PointWithColor for Point {
+impl del_canvas_cpu::rasterize_points3::PointWithColor for Point {
     fn pix_coord(&self) -> [f32; 2] {
         [self.s[0], self.s[1]]
     }
@@ -155,8 +155,8 @@ fn main() -> anyhow::Result<()> {
             img_data[(i_y * img_size.0 + i_x) * 3 + 2] = point.color[2];
         }
          */
-        let img_data = del_canvas_core::rasterize_points3::points(&img_shape, &points);
-        del_canvas_core::write_png_from_float_image_rgb(
+        let img_data = del_canvas_cpu::rasterize_points3::points(&img_shape, &points);
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "target/points3d_pix.png",
             &img_shape,
             &img_data,
@@ -236,7 +236,7 @@ fn main() -> anyhow::Result<()> {
                    .flat_map(pix2rgb)
                    .collect();
         */
-        del_canvas_core::write_png_from_float_image_rgb(
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "target/points3d_gaussian_tile.png",
             &img_shape,
             &img_data,
@@ -274,7 +274,7 @@ fn main() -> anyhow::Result<()> {
                 }
             }
         }
-        del_canvas_core::write_png_from_float_image_rgb(
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "target/points3d_gaussian.png",
             &img_shape,
             &img_data,
@@ -306,7 +306,7 @@ fn main() -> anyhow::Result<()> {
                 }
             }
         }
-        del_canvas_core::write_png_from_float_image_rgb(
+        del_canvas_cpu::write_png_from_float_image_rgb(
             "target/points3d_ellipse.png",
             &img_shape,
             &img_data,

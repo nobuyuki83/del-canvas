@@ -1,5 +1,5 @@
 [package]
-name = "demos"
+name = "del-canvas-cpu-gl"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -17,8 +17,11 @@ del-msh-core = { workspace = true }
 del-geo-core = { workspace = true }
 del-gl-core = { workspace = true }
 del-winit-glutin = {  workspace = true }
-del-canvas-core = { workspace = true }
+# internal workspace
+del-canvas-cpu = { workspace = true }
 
 [build-dependencies]
 gl_generator = "0.14"
 cfg_aliases = "0.2.1"
+
+
