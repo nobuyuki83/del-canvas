@@ -14,7 +14,7 @@ cudarc = { version = "=0.11.8", features = ["std", "cublas", "cublaslt", "curand
 del-msh-core = { path = "../../del-msh/del-msh-core" }
 del-geo-core = { path = "../../del-geo/del-geo-core" }
 # local
-del-canvas-core = { path = "../del-canvas-cpu" }
+del-canvas-cpu = { path = "../del-canvas-cpu" }
 
 [build-dependencies]
 bindgen_cuda = "0.1.5"
