@@ -1,5 +1,3 @@
-
-
 fn main() {
     let mut reng = rand::thread_rng();
     let mut canvas = del_canvas_cpu::canvas_gif::Canvas::new(

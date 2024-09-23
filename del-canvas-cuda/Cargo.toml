@@ -6,13 +6,7 @@ license = "MIT"
 description = "hogehoge"
 
 [dependencies]
-# OpenGL and window
-glutin = "0.32.0"
-glutin-winit = "0.5.0"
-winit = "0.30.5"
-raw-window-handle = "0.6.2"
 # for texture
-image = "0.25.2"
 anyhow = "1.0.89"
 num-traits = "0.2.19"
 slice-of-array = "0.3.2"
@@ -29,8 +23,6 @@ del-canvas-cpu = { path = "../del-canvas-cpu" }
 del-canvas-cuda-kernel = { path = "../del-canvas-cuda-kernel" }
 
 [build-dependencies]
-gl_generator = "0.14"
-cfg_aliases = "0.2.1"
 bindgen_cuda = "0.1.5"
 
 [dev-dependencies]

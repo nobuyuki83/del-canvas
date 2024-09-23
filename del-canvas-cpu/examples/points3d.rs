@@ -18,7 +18,7 @@ struct Point {
     pub aabb: [f32; 4],
 }
 
-impl del_canvas_cpu::rasterize_points3::PointWithColor for Point {
+impl del_canvas_cpu::rasterize_points3::Point2dWithColor for Point {
     fn pix_coord(&self) -> [f32; 2] {
         [self.s[0], self.s[1]]
     }

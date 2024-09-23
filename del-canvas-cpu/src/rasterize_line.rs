@@ -1,3 +1,4 @@
+use del_geo_nalgebra::tri3::height;
 use num_traits::AsPrimitive;
 
 pub fn draw_dda<Real, VAL>(
@@ -8,8 +9,13 @@ pub fn draw_dda<Real, VAL>(
     i_color: VAL,
 ) where
     Real: num_traits::Float + 'static + Copy + AsPrimitive<usize> + std::fmt::Debug,
+    usize: AsPrimitive<Real>,
     VAL: Copy,
 {
+    let height = img_data.len() / width;
+    let width_f: Real = width.as_();
+    let height_f: Real = height.as_();
+    let zero = Real::zero();
     let dx = p1[0] - p0[0];
     let dy = p1[1] - p0[1];
     let step = if dx.abs() > dy.abs() {
@@ -22,9 +28,11 @@ pub fn draw_dda<Real, VAL>(
     let mut x = p0[0];
     let mut y = p0[1];
     while (x - p0[0]).abs() <= (p1[0] - p0[0]).abs() && (y - p0[1]).abs() <= (p1[1] - p0[1]).abs() {
-        let ix: usize = x.as_();
-        let iy: usize = y.as_();
-        img_data[iy * width + ix] = i_color;
+        if x >= zero && x < width_f && y >= zero && y < height_f {
+            let ix: usize = x.as_();
+            let iy: usize = y.as_();
+            img_data[iy * width + ix] = i_color;
+        }
         x = x + slope_x;
         y = y + slope_y;
     }
@@ -46,6 +54,7 @@ pub fn draw_dda_with_transformation<Real>(
         + 'static
         + Copy
         + AsPrimitive<usize>,
+    usize: AsPrimitive<Real>,
 {
     let q0 = del_geo_core::mat3_col_major::transform_homogeneous(transform, p0).unwrap();
     let q1 = del_geo_core::mat3_col_major::transform_homogeneous(transform, p1).unwrap();

@@ -14,4 +14,33 @@ auto from_point(
         p[1] + rad};
 }
 
+__device__
+auto scale(
+    const float* aabb,
+    float s
+) -> cuda::std::array<float,4>
+{
+    return {
+        (aabb[0] + aabb[2]) * 0.5f - (aabb[2] - aabb[0]) * 0.5f * s,
+        (aabb[1] + aabb[3]) * 0.5f - (aabb[3] - aabb[1]) * 0.5f * s,
+        (aabb[0] + aabb[2]) * 0.5f + (aabb[2] - aabb[0]) * 0.5f * s,
+        (aabb[1] + aabb[3]) * 0.5f + (aabb[3] - aabb[1]) * 0.5f * s,
+    };
+}
+
+__device__
+auto translate(
+    const float* aabb,
+    const float* t
+) -> cuda::std::array<float,4>
+{
+    return {
+        aabb[0] + t[0],
+        aabb[1] + t[1],
+        aabb[2] + t[0],
+        aabb[3] + t[1],
+    };
+}
+
+
 }
