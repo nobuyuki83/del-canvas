@@ -140,22 +140,23 @@ pub fn splat(
     img_shape: (u32, u32),
     pix2rgb_dev: &mut cudarc::driver::CudaSlice<f32>,
     pnt2splat_dev: &cudarc::driver::CudaSlice<Splat2>,
-    TILE_SIZE: u32,
+    tile_size: u32,
     tile2idx_dev: &cudarc::driver::CudaSlice<u32>,
     idx2pnt_dev: &cudarc::driver::CudaSlice<u32>,
-) -> anyhow::Result<()> {
-    assert_eq!(img_shape.0 % TILE_SIZE, 0);
-    assert_eq!(img_shape.0 % TILE_SIZE, 0);
-    let tile_shape = (img_shape.0 / TILE_SIZE, img_shape.1 / TILE_SIZE);
+) -> anyhow::Result<()>
+{
+    assert_eq!(img_shape.0 % tile_size, 0);
+    assert_eq!(img_shape.0 % tile_size, 0);
+    let tile_shape = (img_shape.0 / tile_size, img_shape.1 / tile_size);
     // gpu splat
     let cfg = {
         cudarc::driver::LaunchConfig {
             grid_dim: (
-                (img_shape.0 / TILE_SIZE + 1) as u32,
-                (img_shape.1 / TILE_SIZE + 1) as u32,
+                (img_shape.0 / tile_size + 1) as u32,
+                (img_shape.1 / tile_size + 1) as u32,
                 1,
             ),
-            block_dim: (TILE_SIZE as u32, TILE_SIZE as u32, 1),
+            block_dim: (tile_size as u32, tile_size as u32, 1),
             shared_mem_bytes: 0,
         }
     };
@@ -165,7 +166,7 @@ pub fn splat(
         pix2rgb_dev,
         tile_shape.0 as u32,
         tile_shape.1 as u32,
-        TILE_SIZE as u32,
+        tile_size as u32,
         tile2idx_dev,
         idx2pnt_dev,
         pnt2splat_dev,

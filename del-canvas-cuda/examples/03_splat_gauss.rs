@@ -1,12 +1,12 @@
-use del_canvas_cuda::splat_gauss::GSplat3;
-use del_canvas_cuda::splat_gauss::GSplat2;
+use del_canvas_cuda::splat_gauss::Splat3;
+use del_canvas_cuda::splat_gauss::Splat2;
 
 fn main() -> anyhow::Result<()> {
-    let file_path = "C:/Users/nobuy/Downloads/dog.ply";
-    let pnt2gs3 = del_msh_core::io_ply::read_3d_gauss_splat::<_, GSplat3>(file_path)?;
+    let file_path = "../asset/dog.ply";
+    let pnt2splat3 = del_msh_core::io_ply::read_3d_gauss_splat::<_, Splat3>(file_path)?;
     // pnt2gs3.iter().enumerate().for_each(|(i_pnt, a)| { dbg!(i_pnt, a.xyz); } );
-    let aabb3 = del_msh_core::vtx2point::aabb3_from_points(&pnt2gs3);
-    let img_shape = (600usize, 1000usize);
+    let aabb3 = del_msh_core::vtx2point::aabb3_from_points(&pnt2splat3);
+    let img_shape = (800usize, 1200usize);
     let transform_world2ndc = {
         let cam_proj = del_geo_core::mat4_col_major::camera_perspective_blender(
             img_shape.0 as f32 / img_shape.1 as f32,
@@ -27,14 +27,13 @@ fn main() -> anyhow::Result<()> {
         );
         del_geo_core::mat4_col_major::mult_mat(&cam_proj, &cam_modelview)
     };
-    let transform_ndc2pix = del_geo_core::mat2x3_col_major::transform_ndc2pix(img_shape);
     // --------------------------
     // below: cuda code from here
     let dev = cudarc::driver::CudaDevice::new(0)?;
     //
-    let pnt2splat3_dev = dev.htod_copy(pnt2gs3.clone())?;
+    let pnt2splat3_dev = dev.htod_copy(pnt2splat3.clone())?;
     let mut pnt2splat2_dev = {
-        let pnt2splat2 = vec![GSplat2::default(); pnt2gs3.len()];
+        let pnt2splat2 = vec![Splat2::default(); pnt2splat3.len()];
         dev.htod_copy(pnt2splat2.clone())?
     };
     let transform_world2ndc_dev = dev.htod_copy(transform_world2ndc.to_vec())?;
@@ -45,60 +44,97 @@ fn main() -> anyhow::Result<()> {
         &transform_world2ndc_dev,
         (img_shape.0 as u32, img_shape.1 as u32),
     )?;
+    let tile_size = 16usize;
+    let (tile2idx_dev, idx2pnt_dev) = del_canvas_cuda::splat_gauss::tile2idx_idx2pnt(
+        &dev,
+        (img_shape.0 as u32, img_shape.1 as u32), tile_size as u32,
+        &pnt2splat2_dev)?;
+    {
+        let now = std::time::Instant::now();
+        let mut pix2rgb_dev = dev.alloc_zeros::<f32>(img_shape.0 * img_shape.1 * 3)?;
+        del_canvas_cuda::splat_gauss::rasterize_pnt2splat2(
+            &dev, (img_shape.0 as u32, img_shape.1 as u32),
+            &mut pix2rgb_dev,
+            &pnt2splat2_dev,
+            tile_size as u32,
+            &tile2idx_dev,
+            &idx2pnt_dev)?;
+        println!("   Elapsed rasterize on GPU with tile: {:.2?}", now.elapsed());
+        let pix2rgb = dev.dtoh_sync_copy(&pix2rgb_dev)?;
+        del_canvas_cpu::write_png_from_float_image_rgb(
+            "../target/03_spat_gauss.png",
+            &img_shape,
+            &pix2rgb,
+        )?;
+
+    }
+
+
+    { // draw image on GPu with tile2pnt computed on cpu
+        let now = std::time::Instant::now();
+        let pnt2splat2 = dev.dtoh_sync_copy(&pnt2splat2_dev)?;
+        let (tile2idx, idx2pnt) = del_canvas_cpu::tile_acceleration::tile2pnt::<_,u32>(&pnt2splat2, img_shape, tile_size);
+        println!("num_idx: {}", idx2pnt.len());
+        println!("   Elapsed tile2pnt on CPU: {:.2?}", now.elapsed());
+        //
+        let tile2idx_dev = dev.htod_copy(tile2idx)?;
+        let idx2pnt_dev = dev.htod_copy(idx2pnt)?;
+        //
+        let now = std::time::Instant::now();
+        let mut pix2rgb_dev = dev.alloc_zeros::<f32>(img_shape.0 * img_shape.1 * 3)?;
+        del_canvas_cuda::splat_gauss::rasterize_pnt2splat2(
+            &dev, (img_shape.0 as u32, img_shape.1 as u32),
+            &mut pix2rgb_dev,
+            &pnt2splat2_dev,
+            tile_size as u32,
+            &tile2idx_dev,
+            &idx2pnt_dev)?;
+        println!("   Elapsed rasterize on GPU with tile: {:.2?}", now.elapsed());
+        let pix2rgb = dev.dtoh_sync_copy(&pix2rgb_dev)?;
+        del_canvas_cpu::write_png_from_float_image_rgb(
+            "../target/03_spat_gauss_test_rasterize.png",
+            &img_shape,
+            &pix2rgb,
+        )?;
+    }
 
     {
+        // check tile2pnt
         let pnt2splat2 = dev.dtoh_sync_copy(&pnt2splat2_dev)?;
-        let idx2pnt = {
-            let num_pnt = pnt2splat2.len();
-            let mut idx2pnt: Vec<usize> = (0..num_pnt).collect();
-            idx2pnt.sort_by(|&i, &j| {
-                let zi = pnt2splat2[i].ndc_z;
-                let zj = pnt2splat2[j].ndc_z;
-                zi.partial_cmp(&zj).unwrap()
-            });
-            // idx2pnt.iter().enumerate().for_each(|(idx, &i_pnt)| println!("{} {}", idx, pnt2gs2[i_pnt].ndc_z));
-            idx2pnt
-        };
-
+        let (tile2idx_cpu, idx2pnt_cpu) = del_canvas_cpu::tile_acceleration::tile2pnt::<_,u32>(
+            &pnt2splat2, img_shape, tile_size);
         {
-            // visualize as Gaussian without tile acceleration
-            println!("gaussian_naive");
-            let now = std::time::Instant::now();
-            let mut img_data = vec![0f32; img_shape.1 * img_shape.0 * 3];
-            for (ih, iw) in itertools::iproduct!(0..img_shape.1, 0..img_shape.0) {
-                let t = [iw as f32 + 0.5, ih as f32 + 0.5];
-                let mut alpha_sum = 0f32;
-                let mut alpha_occu = 1f32;
-                for idx in (0..idx2pnt.len()).rev() { // draw from back
-                    let i_pnt = idx2pnt[idx];
-                    let pnt2 = &pnt2splat2[i_pnt];
-                    // front to back
-                    if !del_geo_core::aabb2::is_inlcude_point(&pnt2.aabb, &[t[0], t[1]]) {
-                        continue;
-                    }
-                    let t0 = [t[0] - pnt2.pos_pix[0], t[1] - pnt2.pos_pix[1]];
-                    let e =
-                        del_geo_core::mat2_sym::mult_vec_from_both_sides(&pnt2.sig_inv, &t0, &t0);
-                    let e = (-0.5 * e).exp();
-                    let e_out = alpha_occu * e;
-                    img_data[(ih * img_shape.0 + iw) * 3 + 0] += pnt2.rgb[0] * e_out;
-                    img_data[(ih * img_shape.0 + iw) * 3 + 1] += pnt2.rgb[1] * e_out;
-                    img_data[(ih * img_shape.0 + iw) * 3 + 2] += pnt2.rgb[2] * e_out;
-                    alpha_occu *= 1f32 - e;
-                    alpha_sum += e_out;
-                    if alpha_sum > 0.999 {
-                        break;
-                    }
-                }
-            }
-            del_canvas_cpu::write_png_from_float_image_rgb(
-                "../target/03_splat_gauss_test_splat3_to_splat2.png",
-                &img_shape,
-                &img_data,
-            )?;
-            println!("   Elapsed gaussian_naive: {:.2?}", now.elapsed());
+            // assert tile2idx
+            let tile2idx_gpu = dev.dtoh_sync_copy(&tile2idx_dev)?;
+            tile2idx_gpu
+                .iter()
+                .zip(tile2idx_cpu.iter())
+                .for_each(|(&a, &b)| {
+                    assert_eq!(a, b);
+                });
+        }
+        {
+            // assert idx2pnt
+            let idx2pnt_gpu = dev.dtoh_sync_copy(&idx2pnt_dev)?;
+            idx2pnt_gpu
+                .iter()
+                .zip(idx2pnt_cpu.iter())
+                .for_each(|(&a, &b)| {
+                    // println!("{} {} {} {}", a,b, pnt2splat2[a as usize].ndc_z, pnt2splat2[b as usize].ndc_z);
+                    assert_eq!(a, b);
+                });
         }
     }
 
+    {   // cpu rendering from Vec<Splat2>
+        let pnt2splat2 = dev.dtoh_sync_copy(&pnt2splat2_dev)?;
+        println!("gaussian_naive without tile acceleration");
+        let now = std::time::Instant::now();
+        del_canvas_cpu::splat_gaussian2z::rasterize_naive(
+            &pnt2splat2,
+            img_shape,
+            "../target/03_splat_gauss_test_splat3_to_splat2.png")?;
+        println!("   Elapsed gaussian_naive from Vec<Splat2>: {:.2?}", now.elapsed());
+    }
     Ok(())
 }

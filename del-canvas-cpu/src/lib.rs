@@ -7,17 +7,21 @@ pub mod canvas_gif;
 pub mod canvas_svg;
 pub mod color;
 pub mod colormap;
-pub mod gaussian_splatting;
 pub mod morphology;
 pub mod rasterize_aabb3;
 pub mod rasterize_circle;
 pub mod rasterize_line;
-pub mod rasterize_points3;
 pub mod rasterize_polygon;
 pub mod rasterize_triangle;
 pub mod raycast_trimesh2;
 pub mod raycast_trimesh3;
+pub mod splat_circlez;
+pub mod splat_gaussian2z;
+pub mod splat_point2;
+pub mod splat_point2z;
+pub mod splat_point3;
 pub mod texture;
+pub mod tile_acceleration;
 
 pub fn write_png_from_float_image_grayscale<Real, Path>(
     path: Path,

@@ -1,4 +1,4 @@
-use cudarc::driver::{CudaFunction, CudaSlice};
+use cudarc::driver::{CudaFunction, CudaSlice, DeviceSlice};
 use del_gl_core::gl;
 use del_gl_core::gl::types::GLfloat;
 use del_winit_glutin::app_internal;
@@ -12,22 +12,17 @@ use winit::event::{KeyEvent, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::keyboard::{Key, NamedKey};
 use winit::window::Window;
+use del_canvas_cuda::splat_gauss::Splat2;
 
 pub struct MyApp {
     pub appi: crate::app_internal::AppInternal,
     pub renderer: Option<del_gl_core::drawer_array_xyzuv::Drawer>,
-    pub tri2vtx: Vec<usize>,
-    pub vtx2xyz: Vec<f32>,
-    pub vtx2uv: Vec<f32>,
-    pub dev: std::sync::Arc<cudarc::driver::CudaDevice>,
-    // pub pix_to_tri: CudaFunction,
-    pub tri2vtx_dev: CudaSlice<u32>,
-    pub vtx2xyz_dev: CudaSlice<f32>,
-    pub bvhnodes_dev: CudaSlice<u32>,
-    pub aabbs_dev: CudaSlice<f32>,
     //
-    pub tex_shape: (usize, usize),
-    pub tex_data: Vec<f32>,
+    pub dev: std::sync::Arc<cudarc::driver::CudaDevice>,
+    pub pnt2splat3_dev: CudaSlice<del_canvas_cuda::splat_gauss::Splat3>,
+    pub pnt2splat2_dev: CudaSlice<del_canvas_cuda::splat_gauss::Splat2>,
+    pub pix2rgb_dev: CudaSlice<f32>,
+    //
     pub view_rot: del_geo_core::view_rotation::Trackball,
     pub view_prj: del_geo_core::view_projection::Perspective,
     pub ui_state: del_gl_core::view_ui_state::UiState,
@@ -38,54 +33,26 @@ impl MyApp {
         template: glutin::config::ConfigTemplateBuilder,
         display_builder: glutin_winit::DisplayBuilder,
     ) -> Self {
-        let (tri2vtx, vtx2xyz, vtx2uv) = {
-            let mut obj = del_msh_core::io_obj::WavefrontObj::<usize, f32>::new();
-            obj.load("../asset/spot_triangulated.obj").unwrap();
-            obj.unified_xyz_uv_as_trimesh()
-        };
-        let bvhnodes = del_msh_core::bvhnodes_morton::from_triangle_mesh(&tri2vtx, &vtx2xyz, 3);
-        let aabbs = del_msh_core::aabbs3::from_uniform_mesh_with_bvh(
-            0,
-            &bvhnodes,
-            Some((&tri2vtx, 3)),
-            &vtx2xyz,
-            None,
-        );
+        let file_path = "../asset/dog.ply";
+        let pnt2splat3 = del_msh_core::io_ply::read_3d_gauss_splat::<_, del_canvas_cuda::splat_gauss::Splat3>(file_path).unwrap();
         //println!("{:?}",img.color());
-        let (tex_data, tex_shape, bitdepth) =
-            del_canvas_cpu::load_image_as_float_array("../asset/spot_texture.png").unwrap();
-        assert_eq!(bitdepth, 3);
+
         let dev = cudarc::driver::CudaDevice::new(0).unwrap();
-        dev.load_ptx(
-            del_canvas_cuda_kernel::PIX2TRI.into(),
-            "my_module",
-            &["pix_to_tri"],
-        )
-        .unwrap();
-        // let pix_to_tri = dev.get_func("my_module", "pix_to_tri").unwrap();
-        let tri2vtx_dev = dev
-            .htod_copy(tri2vtx.iter().map(|&v| v as u32).collect())
-            .unwrap();
-        let vtx2xyz_dev = dev.htod_copy(vtx2xyz.clone()).unwrap();
-        let bvhnodes_dev = dev
-            .htod_copy(bvhnodes.iter().map(|&v| v as u32).collect())
-            .unwrap();
-        let aabbs_dev = dev.htod_copy(aabbs.clone()).unwrap();
+        let pnt2splat2_dev = {
+            let pnt2splat2 = vec![Splat2::default(); pnt2splat3.len()];
+            dev.htod_copy(pnt2splat2.clone()).unwrap()
+        };
+        let pnt2splat3_dev = dev.htod_copy(pnt2splat3).unwrap();
+        let pix2rgb_dev = dev.alloc_zeros::<f32>(1).unwrap();
         //
         Self {
             appi: app_internal::AppInternal::new(template, display_builder),
             renderer: None,
-            tri2vtx,
-            vtx2xyz,
-            vtx2uv,
             dev,
             // pix_to_tri,
-            tri2vtx_dev,
-            vtx2xyz_dev,
-            bvhnodes_dev,
-            aabbs_dev,
-            tex_data,
-            tex_shape: tex_shape,
+            pnt2splat3_dev,
+            pnt2splat2_dev,
+            pix2rgb_dev,
             ui_state: del_gl_core::view_ui_state::UiState::new(),
             view_rot: del_geo_core::view_rotation::Trackball::new(),
             view_prj: del_geo_core::view_projection::Perspective {
@@ -169,10 +136,10 @@ impl ApplicationHandler for MyApp {
                 // and the function is no-op, but it's wise to resize it for portability
                 // reasons.
                 if let Some(app_internal::AppState {
-                    gl_context,
-                    gl_surface,
-                    window: _,
-                }) = self.appi.state.as_ref()
+                                gl_context,
+                                gl_surface,
+                                window: _,
+                            }) = self.appi.state.as_ref()
                 {
                     gl_surface.resize(
                         gl_context,
@@ -188,10 +155,10 @@ impl ApplicationHandler for MyApp {
             WindowEvent::CloseRequested
             | WindowEvent::KeyboardInput {
                 event:
-                    KeyEvent {
-                        logical_key: Key::Named(NamedKey::Escape),
-                        ..
-                    },
+                KeyEvent {
+                    logical_key: Key::Named(NamedKey::Escape),
+                    ..
+                },
                 ..
             } => event_loop.exit(),
             _ => (),
@@ -212,13 +179,13 @@ impl ApplicationHandler for MyApp {
     fn about_to_wait(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
         use glutin::prelude::GlSurface;
         if let Some(app_internal::AppState {
-            gl_context,
-            gl_surface,
-            window,
-        }) = self.appi.state.as_ref()
+                        gl_context,
+                        gl_surface,
+                        window,
+                    }) = self.appi.state.as_ref()
         {
             let now = std::time::Instant::now();
-            let img_size = {
+            let img_shape = {
                 (
                     window.inner_size().width as usize,
                     window.inner_size().height as usize,
@@ -227,76 +194,40 @@ impl ApplicationHandler for MyApp {
             let cam_model = self.view_rot.mat4_col_major();
             let cam_projection = self
                 .view_prj
-                .mat4_col_major(img_size.0 as f32 / img_size.1 as f32);
+                .mat4_col_major(img_shape.0 as f32 / img_shape.1 as f32);
             let transform_world2ndc =
                 del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_model);
-            let transform_ndc2world =
-                del_geo_core::mat4_col_major::try_inverse(&transform_world2ndc).unwrap();
-            let mut pix2tri = self
-                .dev
-                .alloc_zeros::<u32>(img_size.1 * img_size.0)
-                .unwrap();
-            let transform_ndc2world_dev = self.dev.htod_copy(transform_ndc2world.to_vec()).unwrap();
-            let cfg = {
-                let num_threads = 256;
-                let num_blocks = (img_size.0 * img_size.1) / num_threads + 1;
-                cudarc::driver::LaunchConfig {
-                    grid_dim: (num_blocks as u32, 1, 1),
-                    block_dim: (num_threads as u32, 1, 1),
-                    shared_mem_bytes: 0,
-                }
-            };
-            let param = (
-                &mut pix2tri,
-                self.tri2vtx.len() / 3,
-                &self.tri2vtx_dev,
-                &self.vtx2xyz_dev,
-                img_size.0 as u32,
-                img_size.1 as u32,
-                &transform_ndc2world_dev,
-                &self.bvhnodes_dev,
-                &self.aabbs_dev,
-            );
-            //unsafe { self.pix_to_tri.clone().launch(cfg,param) }.unwrap();
-            let pix_to_tri = self.dev.get_func("my_module", "pix_to_tri").unwrap();
-            unsafe { pix_to_tri.launch(cfg, param) }.unwrap();
-            let pix2tri = self.dev.dtoh_sync_copy(&pix2tri).unwrap();
-            println!("   Elapsed pix2tri: {:.2?}", now.elapsed());
-            let now = std::time::Instant::now();
-            /*
-            for tri in pix2tri.iter() {
-                if *tri != u32::MAX {
-                    dbg!(tri);
-                }
+            let transform_world2ndc_dev = self.dev.htod_copy(transform_world2ndc.to_vec()).unwrap();
+            del_canvas_cuda::splat_gauss::pnt2splat3_to_pnt2splat2(
+                &self.dev,
+                &self.pnt2splat3_dev,
+                &mut self.pnt2splat2_dev,
+                &transform_world2ndc_dev,
+                (img_shape.0 as u32, img_shape.1 as u32),
+            ).unwrap();
+            let tile_size = 16usize;
+            let (tile2idx_dev, idx2pnt_dev) = del_canvas_cuda::splat_gauss::tile2idx_idx2pnt(
+                &self.dev,
+                (img_shape.0 as u32, img_shape.1 as u32), tile_size as u32,
+                &self.pnt2splat2_dev).unwrap();
+            if self.pix2rgb_dev.len() != img_shape.0 * img_shape.1 * 3 {
+                self.pix2rgb_dev = self.dev.alloc_zeros::<f32>(img_shape.0 * img_shape.1 * 3).unwrap();
             }
-             */
-            /*
-            let pix2tri = del_canvas_core::raycast_trimesh3::pix2tri(
-                &self.tri2vtx,
-                &self.vtx2xyz,
-                &self.bvhnodes,
-                &self.aabbs,
-                &img_size,
-                &transform_ndc2world,
-            );
-             */
-            let img_data = del_canvas_cpu::raycast_trimesh3::render_texture_from_pix2tri(
-                img_size,
-                &transform_ndc2world,
-                &self.tri2vtx,
-                &self.vtx2xyz,
-                &self.vtx2uv,
-                &pix2tri,
-                self.tex_shape,
-                &self.tex_data,
-                &del_canvas_cpu::texture::Interpolation::Bilinear,
-            );
+            self.dev.memset_zeros(&mut self.pix2rgb_dev);
+            del_canvas_cuda::splat_gauss::rasterize_pnt2splat2(
+                &self.dev, (img_shape.0 as u32, img_shape.1 as u32),
+                &mut self.pix2rgb_dev,
+                &self.pnt2splat2_dev,
+                tile_size as u32,
+                &tile2idx_dev,
+                &idx2pnt_dev).unwrap();
+            let img_data = self.dev.dtoh_sync_copy(&self.pix2rgb_dev).unwrap();
+            assert_eq!(img_data.len(), img_shape.0 * img_shape.1 * 3);
             let img_data: Vec<u8> = img_data
                 .iter()
                 .map(|v| (v * 255.0).clamp(0., 255.) as u8)
                 .collect();
             println!("   Elapsed frag: {:.2?}", now.elapsed());
-            assert_eq!(img_data.len(), img_size.0 * img_size.1 * 3);
             //println!("{:?}",img.color());
             let Some(ref rndr) = self.renderer else {
                 panic!();
@@ -309,8 +240,8 @@ impl ApplicationHandler for MyApp {
                     gl::TEXTURE_2D,
                     0,
                     gl::RGB.try_into().unwrap(),
-                    img_size.0.try_into().unwrap(),
-                    img_size.1.try_into().unwrap(),
+                    img_shape.0.try_into().unwrap(),
+                    img_shape.1.try_into().unwrap(),
                     0,
                     gl::RGB,
                     gl::UNSIGNED_BYTE,
@@ -336,8 +267,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .with_transparent(false)
             .with_title("01_texture_fullscrn")
             .with_inner_size(PhysicalSize {
-                width: 600,
-                height: 600,
+                width: 16 * 30,
+                height: 16 * 30,
             });
         glutin_winit::DisplayBuilder::new().with_window_attributes(Some(window_attributes))
     };

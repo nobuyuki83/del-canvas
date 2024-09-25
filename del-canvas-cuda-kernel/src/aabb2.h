@@ -43,4 +43,25 @@ auto translate(
 }
 
 
+__device__
+bool is_inlcude_point(
+    const float* aabb,
+    const float* p)
+{
+    if( p[0] < aabb[0] ){
+        return false;
+    }
+    if( p[1] < aabb[1] ){
+        return false;
+    }
+    if( p[0] > aabb[2] ){
+        return false;
+    }
+    if( p[1] > aabb[3] ){
+        return false;
+    }
+    return true;
 }
+
+
+} // namespace aabb2

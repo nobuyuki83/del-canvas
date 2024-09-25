@@ -426,3 +426,62 @@ pub fn diff_point2gauss(
     dw_point2gauss
 }
 
+pub trait Splat2 {
+    fn ndc_z(&self) -> f32;
+    fn aabb(&self) -> &[f32; 4];
+    fn property(&self) -> (&[f32; 2], &[f32; 3], &[f32; 3]);
+}
+
+/// rasterize 2D Gaussian splats without any acceleration for debugging
+pub fn rasterize_naive<S, Path>(
+    pnt2gs2: &[S],
+    img_shape: (usize, usize),
+    path: Path,
+) -> anyhow::Result<()>
+where
+    S: Splat2,
+    Path: AsRef<std::path::Path>,
+{
+    let idx2pnt = {
+        let num_pnt = pnt2gs2.len();
+        let mut idx2pnt: Vec<usize> = (0..num_pnt).collect();
+        idx2pnt.sort_by(|&i, &j| {
+            let zi = pnt2gs2[i].ndc_z();
+            let zj = pnt2gs2[j].ndc_z();
+            zi.partial_cmp(&zj).unwrap()
+        });
+        // idx2pnt.iter().enumerate().for_each(|(idx, &i_pnt)| println!("{} {}", idx, pnt2gs2[i_pnt].ndc_z));
+        idx2pnt
+    };
+    // visualize as Gaussian without tile acceleration
+    let mut img_data = vec![0f32; img_shape.1 * img_shape.0 * 3];
+    for (ih, iw) in itertools::iproduct!(0..img_shape.1, 0..img_shape.0) {
+        let t = [iw as f32 + 0.5, ih as f32 + 0.5];
+        let mut alpha_sum = 0f32;
+        let mut alpha_occu = 1f32;
+        for idx in (0..idx2pnt.len()).rev() {
+            // draw from back
+            let i_pnt = idx2pnt[idx];
+            let pnt2 = &pnt2gs2[i_pnt];
+            // front to back
+            if !del_geo_core::aabb2::is_inlcude_point(pnt2.aabb(), &[t[0], t[1]]) {
+                continue;
+            }
+            let (pos_pix, sig_inv, rgb) = pnt2.property();
+            let t0 = [t[0] - pos_pix[0], t[1] - pos_pix[1]];
+            let e = del_geo_core::mat2_sym::mult_vec_from_both_sides(sig_inv, &t0, &t0);
+            let e = (-0.5 * e).exp();
+            let e_out = alpha_occu * e;
+            img_data[(ih * img_shape.0 + iw) * 3 + 0] += rgb[0] * e_out;
+            img_data[(ih * img_shape.0 + iw) * 3 + 1] += rgb[1] * e_out;
+            img_data[(ih * img_shape.0 + iw) * 3 + 2] += rgb[2] * e_out;
+            alpha_occu *= 1f32 - e;
+            alpha_sum += e_out;
+            if alpha_sum > 0.999 {
+                break;
+            }
+        }
+    }
+    crate::write_png_from_float_image_rgb(path, &img_shape, &img_data)?;
+    Ok(())
+}

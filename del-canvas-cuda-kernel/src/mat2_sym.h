@@ -111,4 +111,14 @@ auto aabb2(
 }
 
 
+__device__
+float mult_vec_from_both_sides(
+    const float* m,
+    const float* b,
+    const float* c)
+{
+    return m[0] * b[0] * c[0] + m[1] * (b[0] * c[1] + b[1] * c[0]) + m[2] * b[1] * c[1];
 }
+
+
+} // namespace mat2_sym

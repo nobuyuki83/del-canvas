@@ -1,4 +1,3 @@
-use del_geo_nalgebra::tri3::height;
 use num_traits::AsPrimitive;
 
 pub fn draw_dda<Real, VAL>(

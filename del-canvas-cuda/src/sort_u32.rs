@@ -2,7 +2,7 @@ use cudarc::driver::{CudaDevice, CudaSlice, DeviceSlice};
 
 // An attempt at the gpu radix sort variant described in this paper:
 // https://vgc.poly.edu/~csilva/papers/cgf.pdf
-fn radix_sort_u32(
+pub fn radix_sort_u32(
     dev: &std::sync::Arc<CudaDevice>,
     d_in: &mut CudaSlice<u32>,
 ) -> anyhow::Result<()> {
