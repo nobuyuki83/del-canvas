@@ -6,7 +6,7 @@ fn main() -> anyhow::Result<()> {
     let pnt2splat3 = del_msh_core::io_ply::read_3d_gauss_splat::<_, Splat3>(file_path)?;
     // pnt2gs3.iter().enumerate().for_each(|(i_pnt, a)| { dbg!(i_pnt, a.xyz); } );
     let aabb3 = del_msh_core::vtx2point::aabb3_from_points(&pnt2splat3);
-    let img_shape = (800usize, 1200usize);
+    let img_shape = (800usize+1, 1200usize+1);
     let transform_world2ndc = {
         let cam_proj = del_geo_core::mat4_col_major::camera_perspective_blender(
             img_shape.0 as f32 / img_shape.1 as f32,
@@ -62,7 +62,7 @@ fn main() -> anyhow::Result<()> {
         println!("   Elapsed rasterize on GPU with tile: {:.2?}", now.elapsed());
         let pix2rgb = dev.dtoh_sync_copy(&pix2rgb_dev)?;
         del_canvas_cpu::write_png_from_float_image_rgb(
-            "../target/03_spat_gauss.png",
+            "../target/del_canvas_cuda__03_splat_gauss.png",
             &img_shape,
             &pix2rgb,
         )?;
@@ -92,7 +92,7 @@ fn main() -> anyhow::Result<()> {
         println!("   Elapsed rasterize on GPU with tile: {:.2?}", now.elapsed());
         let pix2rgb = dev.dtoh_sync_copy(&pix2rgb_dev)?;
         del_canvas_cpu::write_png_from_float_image_rgb(
-            "../target/03_spat_gauss_test_rasterize.png",
+            "../target/del_canvas_cuda__03_splat_gauss_test_rasterize.png",
             &img_shape,
             &pix2rgb,
         )?;
@@ -110,6 +110,7 @@ fn main() -> anyhow::Result<()> {
                 .iter()
                 .zip(tile2idx_cpu.iter())
                 .for_each(|(&a, &b)| {
+                    // println!("{} {}", a,b);
                     assert_eq!(a, b);
                 });
         }
@@ -130,10 +131,10 @@ fn main() -> anyhow::Result<()> {
         let pnt2splat2 = dev.dtoh_sync_copy(&pnt2splat2_dev)?;
         println!("gaussian_naive without tile acceleration");
         let now = std::time::Instant::now();
-        del_canvas_cpu::splat_gaussian2z::rasterize_naive(
+        del_canvas_cpu::splat_gaussian2::rasterize_naive(
             &pnt2splat2,
             img_shape,
-            "../target/03_splat_gauss_test_splat3_to_splat2.png")?;
+            "../target/del_canvas_cuda__03_splat_gauss_test_splat3_to_splat2.png")?;
         println!("   Elapsed gaussian_naive from Vec<Splat2>: {:.2?}", now.elapsed());
     }
     Ok(())

@@ -1,17 +1,14 @@
-use cudarc::driver::{CudaFunction, CudaSlice, DeviceSlice};
-use del_gl_core::gl;
-use del_gl_core::gl::types::GLfloat;
-use del_winit_glutin::app_internal;
+use cudarc::driver::{CudaSlice, DeviceSlice};
 use glutin::display::GlDisplay;
-//
-use cudarc::driver::LaunchAsync;
-use image::EncodableLayout;
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
 use winit::event::{KeyEvent, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::keyboard::{Key, NamedKey};
 use winit::window::Window;
+//
+use del_gl_core::gl;
+use del_winit_glutin::app_internal;
 use del_canvas_cuda::splat_gauss::Splat2;
 
 pub struct MyApp {
@@ -34,8 +31,27 @@ impl MyApp {
         display_builder: glutin_winit::DisplayBuilder,
     ) -> Self {
         let file_path = "../asset/dog.ply";
-        let pnt2splat3 = del_msh_core::io_ply::read_3d_gauss_splat::<_, del_canvas_cuda::splat_gauss::Splat3>(file_path).unwrap();
+        // let pnt2splat3 = del_msh_core::io_ply::read_3d_gauss_splat::<_, del_canvas_cuda::splat_gauss::Splat3>(file_path).unwrap();
         //println!("{:?}",img.color());
+        let pnt2splat3 = {
+            let mut pnt2splat3 = del_msh_core::io_ply::read_3d_gauss_splat::<_, del_canvas_cuda::splat_gauss::Splat3>(file_path).unwrap();
+            let aabb3 = del_msh_core::vtx2point::aabb3_from_points(&pnt2splat3);
+            let longest_edge = del_geo_core::aabb3::max_edge_size(&aabb3);
+            let scale = 1.5 / longest_edge;
+            let center = del_geo_core::aabb3::center(&aabb3);
+            pnt2splat3.iter_mut().for_each(|s| {
+                s.xyz[0] -= center[0];
+                s.xyz[1] -= center[1];
+                s.xyz[2] -= center[2];
+                s.xyz[0] *= scale;
+                s.xyz[1] *= scale;
+                s.xyz[2] *= scale;
+                s.scale[0] *= scale;
+                s.scale[1] *= scale;
+                s.scale[2] *= scale;
+            });
+            pnt2splat3
+        };
 
         let dev = cudarc::driver::CudaDevice::new(0).unwrap();
         let pnt2splat2_dev = {
@@ -213,7 +229,7 @@ impl ApplicationHandler for MyApp {
             if self.pix2rgb_dev.len() != img_shape.0 * img_shape.1 * 3 {
                 self.pix2rgb_dev = self.dev.alloc_zeros::<f32>(img_shape.0 * img_shape.1 * 3).unwrap();
             }
-            self.dev.memset_zeros(&mut self.pix2rgb_dev);
+            self.dev.memset_zeros(&mut self.pix2rgb_dev).unwrap();
             del_canvas_cuda::splat_gauss::rasterize_pnt2splat2(
                 &self.dev, (img_shape.0 as u32, img_shape.1 as u32),
                 &mut self.pix2rgb_dev,

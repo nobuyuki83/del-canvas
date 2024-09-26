@@ -20,6 +20,7 @@ struct Splat2 {
     float sig_inv[3];
     float aabb[4];
     float rgb[3];
+    float alpha;
     float ndc_z;
 };
 
@@ -62,6 +63,7 @@ void splat3_to_splat2(
     pnt2splat2[i_pnt].aabb[1] = aabb[1];
     pnt2splat2[i_pnt].aabb[2] = aabb[2];
     pnt2splat2[i_pnt].aabb[3] = aabb[3];
+    pnt2splat2[i_pnt].alpha = pnt2splat3[i_pnt].opacity;
     pnt2splat2[i_pnt].rgb[0] = pnt2splat3[i_pnt].rgb_dc[0];
     pnt2splat2[i_pnt].rgb[1] = pnt2splat3[i_pnt].rgb_dc[1];
     pnt2splat2[i_pnt].rgb[2] = pnt2splat3[i_pnt].rgb_dc[2];
@@ -91,7 +93,11 @@ void rasterize_splat_using_tile(
     const float t[2] = {float(ix) + 0.5f, float(iy) + 0.5f};
     float alpha_sum = 0.f;
     float alpha_occu = 1.f;
-    for(uint32_t idx=d_tile2idx[i_tile]; idx<d_tile2idx[i_tile+1];++idx){
+    // for(int32_t idx=int32_t(d_tile2idx[i_tile+1])-1; idx>=d_tile2idx[i_tile]; --idx){
+    // for(uint32_t idx=d_tile2idx[i_tile]; idx; ++idx){
+    const uint32_t num_pnt = d_tile2idx[i_tile+1] - d_tile2idx[i_tile];
+    for (uint32_t iidx=0;iidx<num_pnt;++iidx) {
+        uint32_t idx = d_tile2idx[i_tile] + num_pnt - 1 - iidx;
         const uint32_t i_pnt = d_idx2pnt[idx];
         const Splat2& pnt2 = d_pnt2splat[i_pnt];
         // front to back
@@ -100,7 +106,7 @@ void rasterize_splat_using_tile(
         }
         const float t0[2] = {t[0] - pnt2.pos_pix[0], t[1] - pnt2.pos_pix[1]};
         float _e = mat2_sym::mult_vec_from_both_sides(pnt2.sig_inv, t0, t0);
-        float e = expf(-0.5 * _e);
+        float e = expf(-0.5 * _e) * pnt2.alpha;
         float e_out = alpha_occu * e;
         d_pix2rgb[(iy * img_w + ix) * 3 + 0] += pnt2.rgb[0] * e_out;
         d_pix2rgb[(iy * img_w + ix) * 3 + 1] += pnt2.rgb[1] * e_out;
@@ -196,7 +202,9 @@ void fill_index_info(
                 continue;
             }
             uint32_t i_tile = iy * tile_w + ix;
-            uint32_t zi = float_to_uint32(splat.ndc_z);
+            float zp1 = splat.ndc_z + 1.f;
+            if( zp1 <= 0.f ){ zp1 = 0.f; }  // radix sort of float cannot handle negative value
+            uint32_t zi = float_to_uint32(zp1);
             uint64_t tiledepth= concatenate32To64(i_tile, zi);
             idx2tiledepth[pnt2idx[i_pnt] + cnt] = tiledepth;
             idx2pnt[pnt2idx[i_pnt] + cnt] = i_pnt;

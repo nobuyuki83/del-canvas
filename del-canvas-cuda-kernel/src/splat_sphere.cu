@@ -137,11 +137,9 @@ void fill_index_info(
                 continue;
             }
             uint32_t i_tile = iy * tile_w + ix;
-            uint32_t zi = float_to_uint32(splat.z);
-            {  // making the negative float value comparable
-                zi &= ~(1 << 31); // set zero to 31st bit
-                zi = ~zi; // invert bit
-            }
+            float zp1 = splat.z + 1.f;
+            if( zp1 <= 0.f ){ zp1 = 0.f; }  // radix sort of float cannot handle negative value
+            uint32_t zi = float_to_uint32(zp1);
             uint64_t tiledepth= concatenate32To64(i_tile, zi);
             idx2tiledepth[pnt2idx[i_pnt] + cnt] = tiledepth;
             idx2pnt[pnt2idx[i_pnt] + cnt] = i_pnt;

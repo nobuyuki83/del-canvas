@@ -14,9 +14,9 @@ where
     INDEX: num_traits::PrimInt + std::ops::AddAssign<INDEX> + AsPrimitive<usize>,
     usize: AsPrimitive<INDEX>,
 {
-    assert_eq!(img_shape.0 % tile_size, 0);
-    assert_eq!(img_shape.0 % tile_size, 0);
-    let tile_shape = (img_shape.0 / tile_size, img_shape.1 / tile_size);
+    let tile_shape = (
+        img_shape.0 / tile_size + if img_shape.0 % tile_size == 0 {0} else {1},
+        img_shape.1 / tile_size + if img_shape.1 % tile_size == 0 {0} else {1});
     let num_tile = tile_shape.0 * tile_shape.1;
     let mut tile2ind = vec![INDEX::zero(); num_tile + 1];
     for i_vtx in 0..pnt2circle.len() {
@@ -35,11 +35,12 @@ where
     let mut ind2tiledepth = Vec::<(usize, usize, f32)>::with_capacity(num_ind);
     for i_vtx in 0..pnt2circle.len() {
         let aabb2 = pnt2circle[i_vtx].aabb();
-        let depth = pnt2circle[i_vtx].ndc_z();
+        let mut depth = pnt2circle[i_vtx].ndc_z() + 1f32;
+        if depth < 0f32 { depth = 0f32; }
         let tiles = del_geo_core::aabb2::overlapping_tiles(&aabb2, tile_size, tile_shape);
         for &i_tile in tiles.iter() {
             ind2vtx[ind2tiledepth.len()] = i_vtx.as_();
-            ind2tiledepth.push((i_vtx, i_tile, -depth));
+            ind2tiledepth.push((i_vtx, i_tile, depth));
         }
     }
     assert_eq!(ind2tiledepth.len(), num_ind);

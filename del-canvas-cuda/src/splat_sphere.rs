@@ -145,15 +145,15 @@ pub fn splat(
     idx2pnt_dev: &cudarc::driver::CudaSlice<u32>,
 ) -> anyhow::Result<()>
 {
-    assert_eq!(img_shape.0 % tile_size, 0);
-    assert_eq!(img_shape.0 % tile_size, 0);
-    let tile_shape = (img_shape.0 / tile_size, img_shape.1 / tile_size);
+    let tile_shape = (
+        img_shape.0 / tile_size + if img_shape.0 % tile_size == 0 {0} else {1},
+        img_shape.1 / tile_size + if img_shape.1 % tile_size == 0 {0} else {1});
     // gpu splat
     let cfg = {
         cudarc::driver::LaunchConfig {
             grid_dim: (
-                (img_shape.0 / tile_size + 1) as u32,
-                (img_shape.1 / tile_size + 1) as u32,
+                tile_shape.0 as u32,
+                tile_shape.1 as u32,
                 1,
             ),
             block_dim: (tile_size as u32, tile_size as u32, 1),

@@ -1,4 +1,3 @@
-use cudarc::driver::{DevicePtrMut, DeviceRepr, DeviceSlice};
 use del_canvas_cuda::splat_sphere::Splat2;
 use del_canvas_cuda::splat_sphere::Splat3;
 use num_traits::AsPrimitive;
@@ -6,7 +5,7 @@ use num_traits::AsPrimitive;
 fn assert_tile2pnt(
     pnt2splat: &[Splat2],
     tile_shape: (usize, usize),
-    TILE_SIZE: usize,
+    tile_size: usize,
     tile2idx: &[u32],
     idx2pnt_gpu: &[u32])
 {
@@ -19,7 +18,7 @@ fn assert_tile2pnt(
             let p0 = pnt2splat[i_vtx].pos_pix;
             let rad = pnt2splat[i_vtx].rad_pix;
             let aabb2 = del_geo_core::aabb2::from_point(&p0, rad);
-            let tiles = del_geo_core::aabb2::overlapping_tiles(&aabb2, TILE_SIZE, tile_shape);
+            let tiles = del_geo_core::aabb2::overlapping_tiles(&aabb2, tile_size, tile_shape);
             for &i_tile in tiles.iter() {
                 tile2idx_cpu[i_tile + 1] += 1;
             }
@@ -44,11 +43,11 @@ fn assert_tile2pnt(
         let mut idx2pnt_cpu = vec![0usize; num_ind as usize];
         let mut ind2tiledepth = Vec::<(usize, usize, f32)>::with_capacity(num_ind as usize);
         for i_pnt in 0..pnt2splat.len() {
-            let p0 = pnt2splat[i_pnt].pos_pix;
-            let rad = pnt2splat[i_pnt].rad_pix;
-            let depth = pnt2splat[i_pnt].ndc_z;
-            let aabb2 = del_geo_core::aabb2::from_point(&p0, rad);
-            let tiles = del_geo_core::aabb2::overlapping_tiles(&aabb2, TILE_SIZE, tile_shape);
+            let pos_pix = pnt2splat[i_pnt].pos_pix;
+            let rad_pix = pnt2splat[i_pnt].rad_pix;
+            let depth = pnt2splat[i_pnt].ndc_z + 1f32;
+            let aabb2 = del_geo_core::aabb2::from_point(&pos_pix, rad_pix);
+            let tiles = del_geo_core::aabb2::overlapping_tiles(&aabb2, tile_size, tile_shape);
             for &i_tile in tiles.iter() {
                 idx2pnt_cpu[ind2tiledepth.len()] = i_pnt;
                 ind2tiledepth.push((i_pnt, i_tile, depth));
@@ -82,7 +81,7 @@ fn main() -> anyhow::Result<()> {
     let pnt2splat3 = del_msh_core::io_ply::read_xyzrgb::<_, Splat3>(file_path)?;
     let aabb3 = del_msh_core::vtx2point::aabb3_from_points(&pnt2splat3);
     let aabb3: [f32; 6] = aabb3.map(|v| v.as_());
-    let img_shape = (2000usize, 1200usize);
+    let img_shape = (2000usize+1, 1200usize+1);
     let transform_world2ndc = {
         let cam_proj = del_geo_core::mat4_col_major::camera_perspective_blender(
             img_shape.0 as f32 / img_shape.1 as f32,
@@ -144,10 +143,9 @@ fn main() -> anyhow::Result<()> {
         );
         for i_idx in 0..pnt2splat3.len() {
             let i_vtx = idx2vtx[i_idx];
-            let r0 = pnt2splat[i_vtx].pos_pix;
-            let ix = r0[0] as usize;
-            let iy = r0[1] as usize;
-            // dbg!(ix, iy);
+            let pos_pix = pnt2splat[i_vtx].pos_pix;
+            let ix = pos_pix[0] as usize;
+            let iy = pos_pix[1] as usize;
             let ipix = iy * img_shape.0 + ix;
             img_data[ipix][0] = (pnt2splat3[i_vtx].rgb[0] as f32) / 255.0;
             img_data[ipix][1] = (pnt2splat3[i_vtx].rgb[1] as f32) / 255.0;
@@ -163,9 +161,9 @@ fn main() -> anyhow::Result<()> {
     // ---------------------------------------------------------
     // draw circles with tiles
     const TILE_SIZE: usize = 16;
-    assert_eq!(img_shape.0 % TILE_SIZE, 0);
-    assert_eq!(img_shape.0 % TILE_SIZE, 0);
-    let tile_shape = (img_shape.0 / TILE_SIZE, img_shape.1 / TILE_SIZE);
+    let tile_shape = (
+        img_shape.0 / TILE_SIZE + if img_shape.0 % TILE_SIZE == 0 {0} else {1},
+        img_shape.1 / TILE_SIZE + if img_shape.1 % TILE_SIZE == 0 {0} else {1});
     let now = std::time::Instant::now();
     let (tile2idx_dev, idx2pnt_dev) = del_canvas_cuda::splat_sphere::tile2idx_idx2pnt(
         &dev,

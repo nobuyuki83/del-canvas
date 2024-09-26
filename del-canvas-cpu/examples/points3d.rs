@@ -19,13 +19,7 @@ struct Point {
 }
 
 impl del_canvas_cpu::splat_point2::Splat2 for Point {
-    fn pix_coord(&self) -> [f32; 2] {
-        [self.s[0], self.s[1]]
-    }
-
-    fn color(&self) -> [f32; 3] {
-        self.color
-    }
+    fn pos2_rgb(&self) -> ([f32; 2], [f32; 3]) { ([self.s[0], self.s[1]], self.color) }
 }
 
 fn main() -> anyhow::Result<()> {

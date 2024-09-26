@@ -50,15 +50,16 @@ pub struct Splat2 {
     pub sig_inv: [f32; 3],
     pub aabb: [f32; 4],
     pub rgb: [f32; 3],
-    pub ndc_z: f32,
+    pub alpha: f32,
+    pub ndc_z: f32
 }
 
 unsafe impl cudarc::driver::DeviceRepr for Splat2 {}
 
-impl del_canvas_cpu::splat_gaussian2z::Splat2 for Splat2 {
+impl del_canvas_cpu::splat_gaussian2::Splat2 for Splat2 {
     fn ndc_z(&self) -> f32 { self.ndc_z }
     fn aabb(&self) -> &[f32; 4] { &self.aabb }
-    fn property(&self) -> (&[f32; 2], &[f32; 3], &[f32; 3]) { (&self.pos_pix, &self.sig_inv, &self.rgb) }
+    fn property(&self) -> (&[f32; 2], &[f32; 3], &[f32; 3], f32) { (&self.pos_pix, &self.sig_inv, &self.rgb, self.alpha) }
 }
 
 impl del_canvas_cpu::tile_acceleration::Splat2 for Splat2{
@@ -102,15 +103,16 @@ pub fn rasterize_pnt2splat2(
     idx2pnt_dev: &cudarc::driver::CudaSlice<u32>
 ) -> anyhow::Result<()>
 {
-    assert_eq!(img_shape.0 % tile_size, 0);
-    assert_eq!(img_shape.0 % tile_size, 0);
-    let tile_shape = (img_shape.0 / tile_size, img_shape.1 / tile_size);
+    let tile_shape = (
+        img_shape.0 / tile_size + if img_shape.0 % tile_size == 0 {0} else {1},
+        img_shape.1 / tile_size + if img_shape.1 % tile_size == 0 {0} else {1});
+    assert_eq!(tile2idx_dev.len(), (tile_shape.0 * tile_shape.1 + 1) as usize);
     // gpu splat
     let cfg = {
         cudarc::driver::LaunchConfig {
             grid_dim: (
-                (img_shape.0 / tile_size + 1) as u32,
-                (img_shape.1 / tile_size + 1) as u32,
+                tile_shape.0 as u32,
+                tile_shape.1 as u32,
                 1,
             ),
             block_dim: (tile_size as u32, tile_size as u32, 1),
@@ -146,7 +148,9 @@ pub fn tile2idx_idx2pnt(
     cudarc::driver::CudaSlice<u32>,
     cudarc::driver::CudaSlice<u32>)>
 {
-    let tile_shape = (img_shape.0 / tile_size, img_shape.1 / tile_size);
+    let tile_shape = (
+        img_shape.0 / tile_size + if img_shape.0 % tile_size == 0 {0} else {1},
+        img_shape.1 / tile_size + if img_shape.1 % tile_size == 0 {0} else {1});
     let (tile2idx_dev, pnt2ind_dev) = {
         let num_pnt = pnt2splat_dev.len();
         let mut tile2idx_dev =

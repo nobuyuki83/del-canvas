@@ -20,6 +20,8 @@ where
             .unwrap();
         let r0 =
             del_geo_core::mat2x3_col_major::mult_vec3(&transform_ndc2pix, &[q0[0], q0[1], 1f32]);
+        if r0[0] < 0f32 || r0[0] >= img_shape.0 as f32 { continue; }
+        if r0[1] < 0f32 || r0[1] >= img_shape.1 as f32 { continue; }
         let ix = r0[0] as usize;
         let iy = r0[1] as usize;
         let ipix = iy * img_shape.0 + ix;
