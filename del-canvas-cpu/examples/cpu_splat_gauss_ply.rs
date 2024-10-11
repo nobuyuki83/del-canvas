@@ -82,7 +82,7 @@ fn world2pix(
 }
 
 fn main() -> anyhow::Result<()> {
-    let file_path = "asset/dog.ply";
+    let file_path = "C:/Users/nobuy/Downloads/ChilliPepperPlant.ply"; //"asset/dog.ply";
     let pnt2splat3 = {
         let mut pnt2splat3 = del_msh_core::io_ply::read_3d_gauss_splat::<_, Splat3>(file_path)?;
         let aabb3 = del_msh_core::vtx2point::aabb3_from_points(&pnt2splat3);

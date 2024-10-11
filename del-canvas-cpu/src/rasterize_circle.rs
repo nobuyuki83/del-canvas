@@ -32,13 +32,12 @@ where
 }
 
 /// * `transform` - 3x3 homogeneous transformation matrix with **column major** order
-#[allow(clippy::identity_op)]
 pub fn fill<Real, VAL>(
     img_data: &mut [VAL],
     width: usize,
     x: &[Real; 2],
-    transform: &[Real; 9],
-    rad: Real,
+    transform_world2pix: &[Real; 9],
+    rad_pix: Real,
     color: VAL,
 ) where
     Real: num_traits::Float + 'static + AsPrimitive<i64> + nalgebra::RealField,
@@ -46,9 +45,45 @@ pub fn fill<Real, VAL>(
     VAL: Copy,
 {
     let height = img_data.len() / width;
-    let a = del_geo_core::mat3_col_major::transform_homogeneous(transform, x).unwrap();
-    let pixs = pixels_in_point(a[0], a[1], rad, width, height);
+    let a = del_geo_core::mat3_col_major::transform_homogeneous(transform_world2pix, x).unwrap();
+    let pixs = pixels_in_point(a[0], a[1], rad_pix, width, height);
     for idata in pixs {
         img_data[idata] = color;
     }
+}
+
+
+#[allow(clippy::identity_op)]
+pub fn stroke_dda<Real, VAL>(
+    img_data: &mut [VAL],
+    width: usize,
+    x: &[Real; 2],
+    rad: Real,
+    transform: &[Real; 9],
+    color: VAL,
+) where
+    Real: num_traits::Float + 'static + AsPrimitive<i64> + nalgebra::RealField + AsPrimitive<usize>,
+    i64: AsPrimitive<Real>,
+    usize: AsPrimitive<Real>,
+    i32: AsPrimitive<Real>,
+    VAL: Copy
+{
+    let num_theta = 32;
+    let two = Real::one() + Real::one();
+    let dtheta: Real = two * Real::pi() / num_theta.as_();
+    for i_theta in 0..num_theta {
+        let theta0 = dtheta * i_theta.as_();
+        let theta1 = dtheta * ((i_theta + 1) % num_theta).as_();
+        let p0 = [
+            x[0] + rad * num_traits::Float::cos(theta0),
+            x[1] + rad * num_traits::Float::sin(theta0)];
+        let p1 = [
+            x[0] + rad * num_traits::Float::cos(theta1),
+            x[1] + rad * num_traits::Float::sin(theta1) ];
+        let q0 = del_geo_core::mat3_col_major::transform_homogeneous(&transform, &p0).unwrap();
+        let q1 = del_geo_core::mat3_col_major::transform_homogeneous(&transform, &p1).unwrap();
+        crate::rasterize_line::draw_dda(
+            img_data, width, &q0, &q1, color);
+    }
+
 }

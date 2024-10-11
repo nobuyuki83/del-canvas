@@ -31,10 +31,10 @@ del-canvas-cpu = { path = "del-canvas-cpu" }
 # del-geo-nalgebra ={ path = "../del-geo/del-geo-nalgebra"} #  "0.1.29" #
 # del-msh-core = { path = "../del-msh/del-msh-core"} # "0.1.34"
 # del-gl-core = {path = "../del-gl/del-gl-core" }
-# del-winit-glutin = {path = "../del-gl/del-winit-glutin"}
+# del-gl-winit-glutin = {path = "../del-gl/del-gl-winit-glutin"}
 #
-del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git", version = "0.1.31"}
-del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git", version = "0.1.31"}
+del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git"}
+del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git"}
 del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
 del-gl-core = {git = "https://github.com/nobuyuki83/del-gl.git"}
-del-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git"}
+del-gl-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git", version = "0.1.4"}

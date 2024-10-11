@@ -16,7 +16,7 @@ image = "0.25.2"
 del-msh-core = { workspace = true }
 del-geo-core = { workspace = true }
 del-gl-core = { workspace = true }
-del-winit-glutin = {  workspace = true }
+del-gl-winit-glutin = {  workspace = true }
 # internal workspace
 del-canvas-cpu = { workspace = true }
 
