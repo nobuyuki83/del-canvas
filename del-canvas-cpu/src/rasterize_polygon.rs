@@ -9,7 +9,7 @@ pub fn stroke<T, VAL>(
     width: usize,
     vtx2xy: &[T],
     transform_xy2pix: &[T; 9],
-    point_size: T,
+    thickness: T,
     color: VAL,
 ) where
     T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<usize>,
@@ -25,7 +25,7 @@ pub fn stroke<T, VAL>(
             &[vtx2xy[i * 2 + 0], vtx2xy[i * 2 + 1]],
             &[vtx2xy[j * 2 + 0], vtx2xy[j * 2 + 1]],
             transform_xy2pix,
-            point_size,
+            thickness,
             color,
         );
     }

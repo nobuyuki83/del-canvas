@@ -21,6 +21,7 @@ pub mod splat_point2;
 pub mod splat_point3;
 pub mod texture;
 pub mod tile_acceleration;
+pub mod colmap;
 
 pub fn write_png_from_float_image_grayscale<Real, Path>(
     path: Path,

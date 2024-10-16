@@ -3,6 +3,7 @@
 #include "mat2x3_col_major.h"
 #include "quaternion.h"
 #include "aabb2.h"
+#include "tile_acceleration.h"
 
 extern "C" {
 
@@ -93,8 +94,7 @@ void rasterize_splat_using_tile(
     const float t[2] = {float(ix) + 0.5f, float(iy) + 0.5f};
     float alpha_sum = 0.f;
     float alpha_occu = 1.f;
-    // for(int32_t idx=int32_t(d_tile2idx[i_tile+1])-1; idx>=d_tile2idx[i_tile]; --idx){
-    // for(uint32_t idx=d_tile2idx[i_tile]; idx; ++idx){
+    // iterate front (z large) to back (z small)
     const uint32_t num_pnt = d_tile2idx[i_tile+1] - d_tile2idx[i_tile];
     for (uint32_t iidx=0;iidx<num_pnt;++iidx) {
         uint32_t idx = d_tile2idx[i_tile] + num_pnt - 1 - iidx;
@@ -134,39 +134,12 @@ void count_splat_in_tile(
     //
     const Splat2& splat = pnt2splat[i_pnt];
     const float* aabb = splat.aabb;
+    const cuda::std::array<float,4> aabb0 {aabb[0], aabb[1], aabb[2], aabb[3]};
     //
-    float tile_size_f = float(tile_size);
-    int ix0 = int(floor(aabb[0] / tile_size_f));
-    int iy0 = int(floor(aabb[1] / tile_size_f));
-    int ix1 = int(floor(aabb[2] / tile_size_f))+1;
-    int iy1 = int(floor(aabb[3] / tile_size_f))+1;
-    uint32_t cnt = 0;
-    // printf("%d %d %d %d\n", ix0, iy0, ix1, iy1);
-    for(int ix = ix0; ix < ix1; ++ix ) {
-        if( ix < 0 || ix >= tile_w ){
-            continue;
-        }
-        for(int iy=iy0;iy<iy1;++iy) {
-            if( iy < 0 || iy >= tile_h ){
-                continue;
-            }
-            int i_tile = iy * tile_w + ix;
-            // printf("%d %d\n", i_pnt, i_tile);
-            atomicAdd(&tile2ind[i_tile], 1);
-            ++cnt;
-        }
-    }
-    pnt2ind[i_pnt] = cnt;
-}
-
-__device__ uint32_t float_to_uint32(float value) {
-    uint32_t result;
-    memcpy(&result, &value, sizeof(result));
-    return result;
-}
-
-__device__ uint64_t concatenate32To64(uint32_t a, uint32_t b) {
-    return ((uint64_t)b) | (((uint64_t)a) << 32);
+    tile_acceleration::count_splat_in_tile(
+        i_pnt, aabb0,
+        tile2ind, pnt2ind,
+        tile_w, tile_h, tile_size);
 }
 
 __global__
@@ -185,33 +158,11 @@ void fill_index_info(
     //
     const Splat2& splat = pnt2splat[i_pnt];
     const float* aabb = splat.aabb;
-    //
-    float tile_size_f = float(tile_size);
-    int ix0 = int(floor(aabb[0] / tile_size_f));
-    int iy0 = int(floor(aabb[1] / tile_size_f));
-    int ix1 = int(floor(aabb[2] / tile_size_f))+1;
-    int iy1 = int(floor(aabb[3] / tile_size_f))+1;
-    uint32_t cnt = 0;
-    // printf("%d %d %d %d\n", ix0, iy0, ix1, iy1);
-    for(int ix = ix0; ix < ix1; ++ix ) {
-        if( ix < 0 || ix >= tile_w ){
-            continue;
-        }
-        for(int iy=iy0;iy<iy1;++iy) {
-            if( iy < 0 || iy >= tile_h ){
-                continue;
-            }
-            uint32_t i_tile = iy * tile_w + ix;
-            float zp1 = splat.ndc_z + 1.f;
-            if( zp1 <= 0.f ){ zp1 = 0.f; }  // radix sort of float cannot handle negative value
-            uint32_t zi = float_to_uint32(zp1);
-            uint64_t tiledepth= concatenate32To64(i_tile, zi);
-            idx2tiledepth[pnt2idx[i_pnt] + cnt] = tiledepth;
-            idx2pnt[pnt2idx[i_pnt] + cnt] = i_pnt;
-            ++cnt;
-        }
-    }
-    // pnt2ind[i_pnt] = cnt;
+    const cuda::std::array<float,4> aabb0 {aabb[0], aabb[1], aabb[2], aabb[3]};
+    tile_acceleration::fill_index_info(
+        i_pnt, aabb0, splat.ndc_z,
+        pnt2idx, idx2tiledepth, idx2pnt,
+        tile_w, tile_h, tile_size);
 }
 
 

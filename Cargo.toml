@@ -23,6 +23,7 @@ anyhow = "1.0.86"
 arrayref = "0.3.8"
 itertools = "0.13.0"
 rand_chacha = "0.3.1"
+byteorder = "1.5.0"
 slice-of-array = "0.3.2"
 # internal
 del-canvas-cpu = { path = "del-canvas-cpu" }
@@ -37,4 +38,4 @@ del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git"}
 del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git"}
 del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
 del-gl-core = {git = "https://github.com/nobuyuki83/del-gl.git"}
-del-gl-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git", version = "0.1.4"}
+del-gl-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git"}
