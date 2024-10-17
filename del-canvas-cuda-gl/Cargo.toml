@@ -1,5 +1,5 @@
 [package]
-name = "del-canvas-cuda"
+name = "del-canvas-cuda-gl"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
@@ -23,10 +23,11 @@ cudarc = { version = "=0.11.8", features = ["std", "cublas", "cublaslt", "curand
 del-msh-core = { path = "../../del-msh/del-msh-core" }
 del-geo-core = { path = "../../del-geo/del-geo-core" }
 del-gl-core = { path = "../../del-gl/del-gl-core"}
-del-winit-glutin = {path = "../../del-gl/del-winit-glutin"}
+del-gl-winit-glutin = {path = "../../del-gl/del-gl-winit-glutin"}
 # internal
 del-canvas-cpu = { path = "../del-canvas-cpu" }
 del-canvas-cuda-kernel = { path = "../del-canvas-cuda-kernel" }
+del-canvas-cuda = { path = "../del-canvas-cuda" }
 
 [build-dependencies]
 gl_generator = "0.14"

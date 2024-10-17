@@ -4,6 +4,7 @@ pub mod sort_by_key_u64;
 pub mod sort_u32;
 pub mod sort_u64;
 pub mod splat_gauss;
+pub mod pix2tri;
 
 pub fn get_or_load_func(
     dev: &std::sync::Arc<cudarc::driver::CudaDevice>,

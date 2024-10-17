@@ -2,7 +2,7 @@ use cudarc::driver::{CudaDevice, CudaSlice, DeviceSlice};
 
 // An attempt at the gpu radix sort variant described in this paper:
 // https://vgc.poly.edu/~csilva/papers/cgf.pdf
-fn radix_sort_u32(
+pub fn radix_sort_u32(
     dev: &std::sync::Arc<CudaDevice>,
     d_in: &mut CudaSlice<u32>,
 ) -> anyhow::Result<()> {
@@ -155,7 +155,6 @@ fn test_u32() -> anyhow::Result<()> {
         1024 * 1024,
         1024 * 1024 + 1,
     ];
-    // let ns = [13usize];
     use rand::Rng;
     use rand_chacha::rand_core::SeedableRng;
     for n in ns {
@@ -166,9 +165,7 @@ fn test_u32() -> anyhow::Result<()> {
             vin
         };
         let mut vio_dev = dev.htod_copy::<u32>(vin.clone())?;
-        // let mut vout_dev = dev.alloc_zeros::<u32>(vin_dev.len())?;
         radix_sort_u32(&dev, &mut vio_dev)?;
-        // dbg!( dev.dtoh_sync_copy(&vin_dev));
         let vout0 = {
             // naive cpu computation
             let mut vout0 = vin.clone();
@@ -176,9 +173,12 @@ fn test_u32() -> anyhow::Result<()> {
             vout0
         };
         let vout = dev.dtoh_sync_copy(&vio_dev)?;
+        // println!("***********, {}, {}", n, 1024*1024);
         vout.iter().zip(vout0.iter()).for_each(|(a, b)| {
+            // println!("{} {}",a,b);
             assert_eq!(a, b);
         });
+
     }
     Ok(())
 }

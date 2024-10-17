@@ -108,7 +108,7 @@ pub fn draw_pixcenter<T, VAL>(
     p0: &[T; 2],
     p1: &[T; 2],
     transform_world2pix: &[T; 9],
-    rad: T,
+    thickness: T,
     color: VAL,
 ) where
     T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<usize>,
@@ -118,7 +118,7 @@ pub fn draw_pixcenter<T, VAL>(
     let height = img_data.len() / width;
     let a0 = del_geo_core::mat3_col_major::transform_homogeneous(transform_world2pix, p0).unwrap();
     let a1 = del_geo_core::mat3_col_major::transform_homogeneous(transform_world2pix, p1).unwrap();
-    let pixs = pixels_in_line(a0[0], a0[1], a1[0], a1[1], rad, width, height);
+    let pixs = pixels_in_line(a0[0], a0[1], a1[0], a1[1], thickness, width, height);
     for i_data in pixs {
         img_data[i_data] = color;
     }

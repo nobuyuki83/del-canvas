@@ -3,6 +3,7 @@
 #include "mat2x3_col_major.h"
 #include "quaternion.h"
 #include "aabb2.h"
+#include "tile_acceleration.h"
 
 extern "C" {
 
@@ -20,6 +21,7 @@ struct Splat2 {
     float sig_inv[3];
     float aabb[4];
     float rgb[3];
+    float alpha;
     float ndc_z;
 };
 
@@ -51,8 +53,6 @@ void splat3_to_splat2(
     const cuda::std::array<float,4> _aabb0 = mat2_sym::aabb2(sig_inv.data());
     const cuda::std::array<float,4> _aabb1 = aabb2::scale(_aabb0.data(), 3.f);
     const cuda::std::array<float,4> aabb = aabb2::translate(_aabb1.data(), pos_pix.data());
-    // printf("%d %lf %lf %lf\n", i_pnt, sig_inv[0], sig_inv[1], sig_inv[2]);
-    // printf("%d %f %f %f %f\n", i_pnt, aabb[0], aabb[1], aabb[2], aabb[3]);
     //
     pnt2splat2[i_pnt].ndc_z = pos_ndc[2];
     pnt2splat2[i_pnt].pos_pix[0] = pos_pix[0];
@@ -64,17 +64,107 @@ void splat3_to_splat2(
     pnt2splat2[i_pnt].aabb[1] = aabb[1];
     pnt2splat2[i_pnt].aabb[2] = aabb[2];
     pnt2splat2[i_pnt].aabb[3] = aabb[3];
+    pnt2splat2[i_pnt].alpha = pnt2splat3[i_pnt].opacity;
     pnt2splat2[i_pnt].rgb[0] = pnt2splat3[i_pnt].rgb_dc[0];
     pnt2splat2[i_pnt].rgb[1] = pnt2splat3[i_pnt].rgb_dc[1];
     pnt2splat2[i_pnt].rgb[2] = pnt2splat3[i_pnt].rgb_dc[2];
-/*
-
-   pnt2splat[i_pnt].rad = rad;
-   pnt2splat[i_pnt].rgb[0] = float(pnt2xyzrgb[i_pnt].rgb[0]) / 255.0;
-   pnt2splat[i_pnt].rgb[1] = float(pnt2xyzrgb[i_pnt].rgb[1]) / 255.0;
-   pnt2splat[i_pnt].rgb[2] = float(pnt2xyzrgb[i_pnt].rgb[2]) / 255.0;
-*/
 }
+
+
+__global__
+void rasterize_splat_using_tile(
+    uint32_t img_w,
+    uint32_t img_h,
+    float* d_pix2rgb,
+    uint32_t tile_w,
+    uint32_t tile_h,
+    uint32_t tile_size,
+    const uint32_t* d_tile2idx,
+    const uint32_t* d_idx2pnt,
+    const Splat2* d_pnt2splat)
+{
+    const uint32_t ix = blockDim.x * blockIdx.x + threadIdx.x;
+    if( ix >= img_w ){ return; }
+    //
+    const uint32_t iy = blockDim.y * blockIdx.y + threadIdx.y;
+    if( iy >= img_h ){ return; }
+    // const uint32_t i_pix = iy * img_w + ix;
+    //
+    const uint32_t i_tile = (iy / tile_size) * tile_w + (ix / tile_size);
+    const float t[2] = {float(ix) + 0.5f, float(iy) + 0.5f};
+    float alpha_sum = 0.f;
+    float alpha_occu = 1.f;
+    // iterate front (z large) to back (z small)
+    const uint32_t num_pnt = d_tile2idx[i_tile+1] - d_tile2idx[i_tile];
+    for (uint32_t iidx=0;iidx<num_pnt;++iidx) {
+        uint32_t idx = d_tile2idx[i_tile] + num_pnt - 1 - iidx;
+        const uint32_t i_pnt = d_idx2pnt[idx];
+        const Splat2& pnt2 = d_pnt2splat[i_pnt];
+        // front to back
+        if( !aabb2::is_inlcude_point(pnt2.aabb, t) ){
+            continue;
+        }
+        const float t0[2] = {t[0] - pnt2.pos_pix[0], t[1] - pnt2.pos_pix[1]};
+        float _e = mat2_sym::mult_vec_from_both_sides(pnt2.sig_inv, t0, t0);
+        float e = expf(-0.5 * _e) * pnt2.alpha;
+        float e_out = alpha_occu * e;
+        d_pix2rgb[(iy * img_w + ix) * 3 + 0] += pnt2.rgb[0] * e_out;
+        d_pix2rgb[(iy * img_w + ix) * 3 + 1] += pnt2.rgb[1] * e_out;
+        d_pix2rgb[(iy * img_w + ix) * 3 + 2] += pnt2.rgb[2] * e_out;
+        alpha_occu *= 1.f - e;
+        alpha_sum += e_out;
+        if( alpha_sum > 0.999 ){
+            break;
+        }
+    }
+}
+
+__global__
+void count_splat_in_tile(
+  uint32_t num_pnt,
+  const Splat2* pnt2splat,
+  uint32_t* tile2ind,
+  uint32_t* pnt2ind,
+  uint32_t tile_w,
+  uint32_t tile_h,
+  uint32_t tile_size)
+{
+    int i_pnt = blockDim.x * blockIdx.x + threadIdx.x;
+    if( i_pnt >= num_pnt ){ return; }
+    //
+    const Splat2& splat = pnt2splat[i_pnt];
+    const float* aabb = splat.aabb;
+    const cuda::std::array<float,4> aabb0 {aabb[0], aabb[1], aabb[2], aabb[3]};
+    //
+    tile_acceleration::count_splat_in_tile(
+        i_pnt, aabb0,
+        tile2ind, pnt2ind,
+        tile_w, tile_h, tile_size);
+}
+
+__global__
+void fill_index_info(
+  uint32_t num_pnt,
+  const Splat2* pnt2splat,
+  const uint32_t* pnt2idx,
+  uint64_t* idx2tiledepth,
+  uint32_t* idx2pnt,
+  uint32_t tile_w,
+  uint32_t tile_h,
+  uint32_t tile_size)
+{
+    int i_pnt = blockDim.x * blockIdx.x + threadIdx.x;
+    if( i_pnt >= num_pnt ){ return; }
+    //
+    const Splat2& splat = pnt2splat[i_pnt];
+    const float* aabb = splat.aabb;
+    const cuda::std::array<float,4> aabb0 {aabb[0], aabb[1], aabb[2], aabb[3]};
+    tile_acceleration::fill_index_info(
+        i_pnt, aabb0, splat.ndc_z,
+        pnt2idx, idx2tiledepth, idx2pnt,
+        tile_w, tile_h, tile_size);
+}
+
 
 
 }

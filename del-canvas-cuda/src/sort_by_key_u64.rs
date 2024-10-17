@@ -178,7 +178,7 @@ fn glbl_shuffle(
 fn test_u64() -> anyhow::Result<()> {
     let dev = cudarc::driver::CudaDevice::new(0)?;
     let ns = [
-        //13usize];
+        13usize,
         1023,
         1024,
         1024 * 1024 - 1,

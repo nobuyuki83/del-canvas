@@ -18,14 +18,8 @@ struct Point {
     pub aabb: [f32; 4],
 }
 
-impl del_canvas_cpu::rasterize_points3::Point2dWithColor for Point {
-    fn pix_coord(&self) -> [f32; 2] {
-        [self.s[0], self.s[1]]
-    }
-
-    fn color(&self) -> [f32; 3] {
-        self.color
-    }
+impl del_canvas_cpu::splat_point2::Splat2 for Point {
+    fn pos2_rgb(&self) -> ([f32; 2], [f32; 3]) { ([self.s[0], self.s[1]], self.color) }
 }
 
 fn main() -> anyhow::Result<()> {
@@ -155,7 +149,7 @@ fn main() -> anyhow::Result<()> {
             img_data[(i_y * img_size.0 + i_x) * 3 + 2] = point.color[2];
         }
          */
-        let img_data = del_canvas_cpu::rasterize_points3::points(&img_shape, &points);
+        let img_data = del_canvas_cpu::splat_point2::draw(&img_shape, &points);
         del_canvas_cpu::write_png_from_float_image_rgb(
             "target/points3d_pix.png",
             &img_shape,

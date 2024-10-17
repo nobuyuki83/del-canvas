@@ -20,6 +20,7 @@ arrayref = {workspace = true}
 itertools = {workspace = true}
 rand_chacha = {workspace = true}
 slice-of-array = {workspace = true}
+byteorder = {workspace = true}
 
 del-msh-core = { workspace = true }
 del-geo-core = { workspace = true }
