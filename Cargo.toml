@@ -4,7 +4,7 @@ resolver = "2"
 exclude = ["del-canvas-cuda-kernel", "del-canvas-cuda", "del-canvas-cuda-gl"]
 
 [workspace.package]
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 license = "MIT"
 description = "drawing primitives (e.g., triangles and lines) to bitmap images and gif animation."

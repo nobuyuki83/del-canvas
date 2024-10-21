@@ -48,17 +48,6 @@ impl del_canvas_cpu::splat_point2::NdcZ for Splat2 {
     fn ndc_z(&self) -> f32 { self.ndc_z }
 }
 
-impl del_canvas_cpu::tile_acceleration::Splat2 for Splat2 {
-    fn aabb(&self) -> [f32; 4] {
-        let p0 = self.pos_pix;
-        let rad = self.rad_pix;
-        del_geo_core::aabb2::from_point(&p0, rad)
-    }
-    fn ndc_z(&self) -> f32 {
-        self.ndc_z
-    }
-}
-
 fn main() -> anyhow::Result<()> {
     // let path = "/Users/nobuyuki/project/juice_box1.ply";
     let file_path = "asset/juice_box.ply";
@@ -153,8 +142,15 @@ fn main() -> anyhow::Result<()> {
     let tile_shape = (
         img_shape.0 / TILE_SIZE + if img_shape.0 % TILE_SIZE == 0 {0} else {1},
         img_shape.1 / TILE_SIZE + if img_shape.0 % TILE_SIZE == 0 {0} else {1});
+    let point2aabbdepth = |i_point: usize| {
+        let splat2 = &pnt2splat2[i_point];
+        let aabb = del_geo_core::aabb2::from_point(&splat2.pos_pix, splat2.rad_pix);
+        (aabb, splat2.ndc_z)
+    };
     let (tile2ind, ind2pnt) =
-        del_canvas_cpu::tile_acceleration::tile2pnt(&pnt2splat2, img_shape, TILE_SIZE);
+        del_canvas_cpu::tile_acceleration::tile2pnt(
+            pnt2splat2.len(),
+            point2aabbdepth, img_shape, TILE_SIZE);
     //
     println!("   Elapsed tile2pnt: {:.2?}", now.elapsed());
     let now = std::time::Instant::now();

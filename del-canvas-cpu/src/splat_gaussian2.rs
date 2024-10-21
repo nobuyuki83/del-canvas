@@ -275,8 +275,7 @@ fn test_transfer() {
 pub fn rasterize(
     point2gauss: &[f32],
     point2splat: &[f32],
-    tile2jdx: &[usize],
-    jdx2idx: &[usize],
+    tile2idx: &[usize],
     idx2point: &[usize],
     img_shape: (usize, usize),
     tile_size: usize,
@@ -290,13 +289,13 @@ pub fn rasterize(
         point2splat.len() / NDOF_SPLAT
     );
     let mut img_data = vec![0f32; img_shape.1 * img_shape.0 * 3];
+    let tile_shape: (usize, usize) = (img_shape.0 / tile_size, img_shape.1 / tile_size);
+    assert_eq!(tile_shape.0*tile_shape.1+1, tile2idx.len());
     for (ih, iw) in itertools::iproduct!(0..img_shape.1, 0..img_shape.0) {
-        let tile_shape: (usize, usize) = (img_shape.0 / tile_size, img_shape.1 / tile_size);
         let i_tile = (ih / tile_size) * tile_shape.0 + (iw / tile_size);
         let pos_pix = nalgebra::Vector2::<f32>::new(iw as f32 + 0.5, ih as f32 + 0.5);
         let mut transfer = 1f32;
-        for &idx in &jdx2idx[tile2jdx[i_tile]..tile2jdx[i_tile + 1]] {
-            let i_point = idx2point[idx];
+        for &i_point in &idx2point[tile2idx[i_tile]..tile2idx[i_tile + 1]] {
             let splat = Splat::new(arrayref::array_ref![
                 point2splat,
                 i_point * NDOF_SPLAT,
@@ -330,8 +329,7 @@ pub fn rasterize(
 pub fn diff_point2gauss(
     point2gauss: &[f32],
     point2splat: &[f32],
-    tile2jdx: &[usize],
-    jdx2idx: &[usize],
+    tile2idx: &[usize],
     idx2point: &[usize],
     img_shape: (usize, usize),
     tile_size: usize,
@@ -356,8 +354,7 @@ pub fn diff_point2gauss(
         let splats = {
             let mut splats = Vec::<(usize, f32, nalgebra::Vector3<f32>)>::with_capacity(8);
             let mut transfer = 1f32;
-            for &idx in &jdx2idx[tile2jdx[i_tile]..tile2jdx[i_tile + 1]] {
-                let i_point = idx2point[idx];
+            for &i_point in &idx2point[tile2idx[i_tile]..tile2idx[i_tile + 1]] {
                 let splat = Splat::new(arrayref::array_ref![
                     point2splat,
                     i_point * NDOF_SPLAT,
