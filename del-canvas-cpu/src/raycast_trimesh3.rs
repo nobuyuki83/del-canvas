@@ -6,7 +6,7 @@ pub fn pix2tri<Index>(
     tri2vtx: &[Index],
     vtx2xyz: &[f32],
     bvhnodes: &[Index],
-    aabbs: &[f32],
+    bvhnode2aabb: &[f32],
     img_shape: &(usize, usize), // (width, height)
     transform_ndc2world: &[f32; 16],
 ) -> Vec<Index>
@@ -20,6 +20,7 @@ where
         //
         let (ray_org, ray_dir) =
             crate::cam3::ray3_homogeneous((i_w, i_h), img_shape, transform_ndc2world);
+        /*
         let mut hits: Vec<(f32, usize)> = vec![];
         del_msh_core::bvh3::search_intersection_ray::<Index>(
             &mut hits,
@@ -29,7 +30,7 @@ where
                 tri2vtx,
                 vtx2xyz,
                 bvhnodes,
-                aabbs,
+                bvhnode2aabb,
             },
             0,
         );
@@ -38,6 +39,23 @@ where
             return Index::max_value();
         };
         i_tri.as_()
+            */
+        if let Some((_t, i_tri)) = del_msh_core::bvh3::search_first_intersection_ray(
+            &ray_org,
+            &ray_dir,
+            &del_msh_core::bvh3::TriMeshWithBvh {
+                tri2vtx,
+                vtx2xyz,
+                bvhnodes,
+                bvhnode2aabb,
+            },
+            0,
+            f32::INFINITY,
+        ) {
+            return i_tri.as_();
+        } else {
+            return Index::max_value();
+        }
     };
     let img: Vec<Index> = (0..img_shape.0 * img_shape.1)
         .into_par_iter()
@@ -53,7 +71,7 @@ pub fn render_depth_bvh(
     tri2vtx: &[usize],
     vtx2xyz: &[f32],
     bvhnodes: &[usize],
-    aabbs: &[f32],
+    bvhnode2aabb: &[f32],
 ) {
     let transform_world2ndc: [f32; 16] =
         nalgebra::Matrix4::<f32>::from_column_slice(transform_ndc2world)
@@ -68,7 +86,7 @@ pub fn render_depth_bvh(
             let (ray_org, ray_dir) =
                 crate::cam3::ray3_homogeneous((iw, ih), &image_size, transform_ndc2world);
             let mut hits: Vec<(f32, usize)> = vec![];
-            del_msh_core::bvh3::search_intersection_ray(
+            del_msh_core::bvh3::search_intersections_ray(
                 &mut hits,
                 &ray_org,
                 &ray_dir,
@@ -76,7 +94,7 @@ pub fn render_depth_bvh(
                     tri2vtx,
                     vtx2xyz,
                     bvhnodes,
-                    aabbs,
+                    bvhnode2aabb,
                 },
                 0,
             );

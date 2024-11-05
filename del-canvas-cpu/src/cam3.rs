@@ -31,6 +31,7 @@ where
     }
 }
 
+/// the ray start from the front plane and ends on the back plane
 pub fn ray3_homogeneous(
     pix_coord: (usize, usize),
     image_size: &(usize, usize),
@@ -38,17 +39,13 @@ pub fn ray3_homogeneous(
 ) -> ([f32; 3], [f32; 3]) {
     let x0 = 2. * (pix_coord.0 as f32 + 0.5f32) / (image_size.0 as f32) - 1.;
     let y0 = 1. - 2. * (pix_coord.1 as f32 + 0.5f32) / (image_size.1 as f32);
-    let ray_org =
+    let p0 =
         del_geo_core::mat4_col_major::transform_homogeneous(transform_ndc_to_world, &[x0, y0, 1.])
             .unwrap();
-    let ray_dir = del_geo_core::vec3::sub(
-        &del_geo_core::mat4_col_major::transform_homogeneous(
-            transform_ndc_to_world,
-            &[x0, y0, -1.],
-        )
-        .unwrap(),
-        &del_geo_core::mat4_col_major::transform_homogeneous(transform_ndc_to_world, &[x0, y0, 1.])
-            .unwrap(),
-    );
+    let p1 =
+        del_geo_core::mat4_col_major::transform_homogeneous(transform_ndc_to_world, &[x0, y0, -1.])
+            .unwrap();
+    let ray_org = p0.clone();
+    let ray_dir = del_geo_core::vec3::sub(&p1, &p0);
     (ray_org, ray_dir)
 }

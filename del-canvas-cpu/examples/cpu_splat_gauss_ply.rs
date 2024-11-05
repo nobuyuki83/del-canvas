@@ -1,4 +1,3 @@
-
 #[derive(Clone, Debug)]
 pub struct Splat3 {
     xyz: [f32; 3],
@@ -54,7 +53,7 @@ pub struct Splat2 {
     aabb: [f32; 4],
     rgb: [f32; 3],
     ndc_z: f32,
-    alpha: f32
+    alpha: f32,
 }
 
 impl del_canvas_cpu::splat_gaussian2::Splat2 for Splat2 {
@@ -114,11 +113,7 @@ fn main() -> anyhow::Result<()> {
             true,
         );
         let cam_modelview = del_geo_core::mat4_col_major::camera_external_blender(
-            &[
-                0f32,
-                0f32,
-                2.0f32,
-            ],
+            &[0f32, 0f32, 2.0f32],
             0f32,
             0f32,
             0f32,
@@ -133,7 +128,7 @@ fn main() -> anyhow::Result<()> {
         "target/del_canvas_cpu__splat_gauss__pix.png",
     )?;
 
-    let mut pnt2splat2 = Vec::< Splat2 >::with_capacity(pnt2splat3.len());
+    let mut pnt2splat2 = Vec::<Splat2>::with_capacity(pnt2splat3.len());
     for i_pnt in 0..pnt2splat3.len() {
         let gs3 = &pnt2splat3[i_pnt];
         let ndc0 =
@@ -159,7 +154,7 @@ fn main() -> anyhow::Result<()> {
             aabb,
             rgb: gs3.rgb_dc,
             ndc_z: ndc0[2],
-            alpha: gs3.opacity
+            alpha: gs3.opacity,
         };
         pnt2splat2.push(g2);
     }

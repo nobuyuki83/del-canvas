@@ -19,7 +19,9 @@ struct Point {
 }
 
 impl del_canvas_cpu::splat_point2::Splat2 for Point {
-    fn pos2_rgb(&self) -> ([f32; 2], [f32; 3]) { ([self.s[0], self.s[1]], self.color) }
+    fn pos2_rgb(&self) -> ([f32; 2], [f32; 3]) {
+        ([self.s[0], self.s[1]], self.color)
+    }
 }
 
 fn main() -> anyhow::Result<()> {
@@ -179,7 +181,7 @@ fn main() -> anyhow::Result<()> {
                 for &i_point in tile2gauss[i_tile].iter() {
                     let point = &points[i_point];
                     // front to back
-                    if !del_geo_core::aabb2::is_inlcude_point(&point.aabb, &[t[0], t[1]]) {
+                    if !del_geo_core::aabb2::is_include_point2(&point.aabb, &[t[0], t[1]]) {
                         continue;
                     }
                     let t0 = t - point.s;
@@ -250,7 +252,7 @@ fn main() -> anyhow::Result<()> {
                 let mut alpha_occu = 1f32;
                 for point in points.iter().rev() {
                     // front to back
-                    if !del_geo_core::aabb2::is_inlcude_point(&point.aabb, &[t[0], t[1]]) {
+                    if !del_geo_core::aabb2::is_include_point2(&point.aabb, &[t[0], t[1]]) {
                         continue;
                     }
                     let t0 = t - point.s;
@@ -285,7 +287,7 @@ fn main() -> anyhow::Result<()> {
             for iw in 0..img_shape.0 {
                 let t = nalgebra::Vector2::<f32>::new(iw as f32 + 0.5, ih as f32 + 0.5);
                 for point in points.iter().rev() {
-                    if !del_geo_core::aabb2::is_inlcude_point(&point.aabb, &[t[0], t[1]]) {
+                    if !del_geo_core::aabb2::is_include_point2(&point.aabb, &[t[0], t[1]]) {
                         continue;
                     }
                     let t0 = t - point.s;

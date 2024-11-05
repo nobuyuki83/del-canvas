@@ -101,7 +101,7 @@ impl<'a> Splat<'a> {
 
     fn is_include_point(&self, p: &nalgebra::Vector2<f32>) -> bool {
         let aabb = arrayref::array_ref![self.data, 5, 4];
-        del_geo_core::aabb2::is_inlcude_point(aabb, &[p[0], p[1]])
+        del_geo_core::aabb2::is_include_point2(aabb, &[p[0], p[1]])
     }
 
     fn alpha(&self, t: &nalgebra::Vector2<f32>) -> f32 {
@@ -290,7 +290,7 @@ pub fn rasterize(
     );
     let mut img_data = vec![0f32; img_shape.1 * img_shape.0 * 3];
     let tile_shape: (usize, usize) = (img_shape.0 / tile_size, img_shape.1 / tile_size);
-    assert_eq!(tile_shape.0*tile_shape.1+1, tile2idx.len());
+    assert_eq!(tile_shape.0 * tile_shape.1 + 1, tile2idx.len());
     for (ih, iw) in itertools::iproduct!(0..img_shape.1, 0..img_shape.0) {
         let i_tile = (ih / tile_size) * tile_shape.0 + (iw / tile_size);
         let pos_pix = nalgebra::Vector2::<f32>::new(iw as f32 + 0.5, ih as f32 + 0.5);
@@ -460,8 +460,10 @@ where
         for idx in (0..idx2pnt.len()).rev() {
             let i_pnt = idx2pnt[idx];
             let splat2 = &pnt2splat2[i_pnt];
-            if splat2.ndc_z() <= -1f32 || splat2.ndc_z() >= 1f32 { continue; }
-            if !del_geo_core::aabb2::is_inlcude_point(splat2.aabb(), &[t[0], t[1]]) {
+            if splat2.ndc_z() <= -1f32 || splat2.ndc_z() >= 1f32 {
+                continue;
+            }
+            if !del_geo_core::aabb2::is_include_point2(splat2.aabb(), &[t[0], t[1]]) {
                 continue;
             }
             let (pos_pix, sig_inv, rgb, alpha) = splat2.property();

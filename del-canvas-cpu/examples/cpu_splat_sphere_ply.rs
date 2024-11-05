@@ -45,7 +45,9 @@ impl del_canvas_cpu::splat_point2::Splat2 for Splat2 {
 }
 
 impl del_canvas_cpu::splat_point2::NdcZ for Splat2 {
-    fn ndc_z(&self) -> f32 { self.ndc_z }
+    fn ndc_z(&self) -> f32 {
+        self.ndc_z
+    }
 }
 
 fn main() -> anyhow::Result<()> {
@@ -54,7 +56,7 @@ fn main() -> anyhow::Result<()> {
     let pnt2splat3 = del_msh_core::io_ply::read_xyzrgb::<_, Splat3>(file_path)?;
     let aabb3 = del_msh_core::vtx2point::aabb3_from_points(&pnt2splat3);
     let aabb3: [f32; 6] = aabb3.map(|v| v.as_());
-    let img_shape = (1600usize+1, 960usize+1);
+    let img_shape = (1600usize + 1, 960usize + 1);
     let transform_world2ndc = {
         let cam_proj = del_geo_core::mat4_col_major::camera_perspective_blender(
             img_shape.0 as f32 / img_shape.1 as f32,
@@ -92,11 +94,20 @@ fn main() -> anyhow::Result<()> {
         for i_elem in 0..pnt2splat3.len() {
             let pos_world0 = pnt2splat3[i_elem].xyz();
             let pos_world0: [f32; 3] = pos_world0.map(|v| v.as_());
-            let ndc0 = del_geo_core::mat4_col_major::transform_homogeneous(&transform_world2ndc, &pos_world0).unwrap();
-            let pos_pix = del_geo_core::mat2x3_col_major::mult_vec3(&transform_ndc2pix, &[ndc0[0], ndc0[1], 1f32]);
+            let ndc0 = del_geo_core::mat4_col_major::transform_homogeneous(
+                &transform_world2ndc,
+                &pos_world0,
+            )
+            .unwrap();
+            let pos_pix = del_geo_core::mat2x3_col_major::mult_vec3(
+                &transform_ndc2pix,
+                &[ndc0[0], ndc0[1], 1f32],
+            );
             let rad_pix = {
-                let dqdp =
-                    del_geo_core::mat4_col_major::jacobian_transform(&transform_world2ndc, &pos_world0);
+                let dqdp = del_geo_core::mat4_col_major::jacobian_transform(
+                    &transform_world2ndc,
+                    &pos_world0,
+                );
                 let dqdp = del_geo_core::mat3_col_major::try_inverse(&dqdp).unwrap();
                 let dx = [dqdp[0], dqdp[1], dqdp[2]];
                 let dy = [dqdp[3], dqdp[4], dqdp[5]];
@@ -140,17 +151,20 @@ fn main() -> anyhow::Result<()> {
     let now = std::time::Instant::now();
     const TILE_SIZE: usize = 16;
     let tile_shape = (
-        img_shape.0 / TILE_SIZE + if img_shape.0 % TILE_SIZE == 0 {0} else {1},
-        img_shape.1 / TILE_SIZE + if img_shape.0 % TILE_SIZE == 0 {0} else {1});
+        img_shape.0 / TILE_SIZE + if img_shape.0 % TILE_SIZE == 0 { 0 } else { 1 },
+        img_shape.1 / TILE_SIZE + if img_shape.0 % TILE_SIZE == 0 { 0 } else { 1 },
+    );
     let point2aabbdepth = |i_point: usize| {
         let splat2 = &pnt2splat2[i_point];
         let aabb = del_geo_core::aabb2::from_point(&splat2.pos_pix, splat2.rad_pix);
         (aabb, splat2.ndc_z)
     };
-    let (tile2ind, ind2pnt) =
-        del_canvas_cpu::tile_acceleration::tile2pnt(
-            pnt2splat2.len(),
-            point2aabbdepth, img_shape, TILE_SIZE);
+    let (tile2ind, ind2pnt) = del_canvas_cpu::tile_acceleration::tile2pnt(
+        pnt2splat2.len(),
+        point2aabbdepth,
+        img_shape,
+        TILE_SIZE,
+    );
     //
     println!("   Elapsed tile2pnt: {:.2?}", now.elapsed());
     let now = std::time::Instant::now();
@@ -165,9 +179,12 @@ fn main() -> anyhow::Result<()> {
     for (iw, ih) in itertools::iproduct!(0..img_shape.0, 0..img_shape.1) {
         let i_tile = (ih / TILE_SIZE) * tile_shape.0 + (iw / TILE_SIZE);
         let i_pix = ih * img_shape.0 + iw;
-        for &i_pnt in &ind2pnt[tile2ind[i_tile]..tile2ind[i_tile + 1]] { // splat back to front
+        for &i_pnt in &ind2pnt[tile2ind[i_tile]..tile2ind[i_tile + 1]] {
+            // splat back to front
             let ndc_z = pnt2splat2[i_pnt].ndc_z;
-            if ndc_z <= -1f32 || ndc_z >= 1f32 { continue; }
+            if ndc_z <= -1f32 || ndc_z >= 1f32 {
+                continue;
+            }
             let pos_pix = pnt2splat2[i_pnt].pos_pix;
             let rad_pix = pnt2splat2[i_pnt].rad_pix;
             let pos_pixel_center = [iw as f32 + 0.5f32, ih as f32 + 0.5f32];

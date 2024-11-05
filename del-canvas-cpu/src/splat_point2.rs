@@ -1,5 +1,5 @@
 pub trait Splat2 {
-    fn pos2_rgb(&self) -> ([f32;2], [f32;3]);
+    fn pos2_rgb(&self) -> ([f32; 2], [f32; 3]);
 }
 
 pub fn draw<POINT: Splat2>(img_size: &(usize, usize), points: &[POINT]) -> Vec<f32> {
@@ -7,7 +7,7 @@ pub fn draw<POINT: Splat2>(img_size: &(usize, usize), points: &[POINT]) -> Vec<f
     for point in points.iter() {
         //let x = (point.pos_ndc[0] + 1.0) * 0.5 * (img_size.0 as f32);
         //let y = (1.0 - point.pos_ndc[1]) * 0.5 * (img_size.1 as f32);
-        let (scrn_pos,color) = point.pos2_rgb();
+        let (scrn_pos, color) = point.pos2_rgb();
         let i_x = scrn_pos[0] as usize;
         let i_y = scrn_pos[1] as usize;
         img_data[(i_y * img_size.0 + i_x) * 3] = color[0];
@@ -42,8 +42,10 @@ where
     let mut img_data = vec![[0f32, 0f32, 0f32]; img_shape.0 * img_shape.1];
     for i_idx in 0..pnt2splat.len() {
         let i_vtx = idx2pnt[i_idx];
-        let ndc_z =  pnt2splat[i_vtx].ndc_z();
-        if ndc_z <= -1f32 || ndc_z >= 1f32 { continue; } // clipping
+        let ndc_z = pnt2splat[i_vtx].ndc_z();
+        if ndc_z <= -1f32 || ndc_z >= 1f32 {
+            continue;
+        } // clipping
         let (r0, rgb) = pnt2splat[i_vtx].pos2_rgb();
         let ix = r0[0] as usize;
         let iy = r0[1] as usize;

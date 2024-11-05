@@ -9,15 +9,16 @@ pub fn tile2pnt<PNT2AABBDEPTH, INDEX>(
 where
     INDEX: num_traits::PrimInt + std::ops::AddAssign<INDEX> + AsPrimitive<usize>,
     usize: AsPrimitive<INDEX>,
-    PNT2AABBDEPTH: Fn(usize) -> ([f32;4],f32)
+    PNT2AABBDEPTH: Fn(usize) -> ([f32; 4], f32),
 {
     let tile_shape = (
-        img_shape.0 / tile_size + if img_shape.0 % tile_size == 0 {0} else {1},
-        img_shape.1 / tile_size + if img_shape.1 % tile_size == 0 {0} else {1});
+        img_shape.0 / tile_size + if img_shape.0 % tile_size == 0 { 0 } else { 1 },
+        img_shape.1 / tile_size + if img_shape.1 % tile_size == 0 { 0 } else { 1 },
+    );
     let num_tile = tile_shape.0 * tile_shape.1;
     let mut tile2ind = vec![INDEX::zero(); num_tile + 1];
     for i_vtx in 0..num_pnt {
-        let (aabb2,_depth) = pnt2aabbdepth(i_vtx);
+        let (aabb2, _depth) = pnt2aabbdepth(i_vtx);
         let tiles = del_geo_core::aabb2::overlapping_tiles(&aabb2, tile_size, tile_shape);
         for &i_tile in tiles.iter() {
             tile2ind[i_tile + 1] += INDEX::one();
@@ -31,9 +32,11 @@ where
     let mut ind2vtx = vec![INDEX::zero(); num_ind];
     let mut ind2tiledepth = Vec::<(usize, usize, f32)>::with_capacity(num_ind);
     for i_vtx in 0..num_pnt {
-        let (aabb2,depth) = pnt2aabbdepth(i_vtx);
+        let (aabb2, depth) = pnt2aabbdepth(i_vtx);
         let mut depth = depth + 1f32;
-        if depth < 0f32 { depth = 0f32; }
+        if depth < 0f32 {
+            depth = 0f32;
+        }
         let tiles = del_geo_core::aabb2::overlapping_tiles(&aabb2, tile_size, tile_shape);
         for &i_tile in tiles.iter() {
             ind2vtx[ind2tiledepth.len()] = i_vtx.as_();

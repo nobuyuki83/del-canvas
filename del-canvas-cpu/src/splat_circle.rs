@@ -25,7 +25,9 @@ where
     for idx in 0..pnt2splat.len() {
         let i_vtx = idx2vtx[idx];
         let ndc_z = pnt2splat[i_vtx].ndc_z();
-        if ndc_z <= -1f32 || ndc_z >= 1f32 { continue; }
+        if ndc_z <= -1f32 || ndc_z >= 1f32 {
+            continue;
+        }
         let (r0, rad_pix, rgb) = pnt2splat[i_vtx].property();
         let pixs = crate::rasterize_circle::pixels_in_point(
             r0[0],

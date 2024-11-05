@@ -42,7 +42,12 @@ impl del_gl_winit_glutin::app3::Content for Content {
         }
     }
 
-    fn compute_image(&mut self, img_shape: (usize, usize), cam_projection: &[f32; 16], cam_model: &[f32; 16]) -> Vec<u8> {
+    fn compute_image(
+        &mut self,
+        img_shape: (usize, usize),
+        cam_projection: &[f32; 16],
+        cam_model: &[f32; 16],
+    ) -> Vec<u8> {
         let transform_world2ndc =
             del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_model);
         let transform_ndc2world =
@@ -73,7 +78,6 @@ impl del_gl_winit_glutin::app3::Content for Content {
         img_data
     }
 }
-
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let template = glutin::config::ConfigTemplateBuilder::new()

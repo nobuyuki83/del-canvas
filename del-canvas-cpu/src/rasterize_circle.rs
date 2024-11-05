@@ -52,7 +52,6 @@ pub fn fill<Real, VAL>(
     }
 }
 
-
 #[allow(clippy::identity_op)]
 pub fn stroke_dda<Real, VAL>(
     img_data: &mut [VAL],
@@ -66,7 +65,7 @@ pub fn stroke_dda<Real, VAL>(
     i64: AsPrimitive<Real>,
     usize: AsPrimitive<Real>,
     i32: AsPrimitive<Real>,
-    VAL: Copy
+    VAL: Copy,
 {
     let num_theta = 32;
     let two = Real::one() + Real::one();
@@ -76,14 +75,14 @@ pub fn stroke_dda<Real, VAL>(
         let theta1 = dtheta * ((i_theta + 1) % num_theta).as_();
         let p0 = [
             x[0] + rad * num_traits::Float::cos(theta0),
-            x[1] + rad * num_traits::Float::sin(theta0)];
+            x[1] + rad * num_traits::Float::sin(theta0),
+        ];
         let p1 = [
             x[0] + rad * num_traits::Float::cos(theta1),
-            x[1] + rad * num_traits::Float::sin(theta1) ];
+            x[1] + rad * num_traits::Float::sin(theta1),
+        ];
         let q0 = del_geo_core::mat3_col_major::transform_homogeneous(&transform, &p0).unwrap();
         let q1 = del_geo_core::mat3_col_major::transform_homogeneous(&transform, &p1).unwrap();
-        crate::rasterize_line::draw_dda(
-            img_data, width, &q0, &q1, color);
+        crate::rasterize_line::draw_dda(img_data, width, &q0, &q1, color);
     }
-
 }
