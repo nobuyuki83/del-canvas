@@ -73,7 +73,11 @@ fn main() -> anyhow::Result<()> {
     { // draw image on GPu with tile2pnt computed on cpu
         let now = std::time::Instant::now();
         let pnt2splat2 = dev.dtoh_sync_copy(&pnt2splat2_dev)?;
-        let (tile2idx, idx2pnt) = del_canvas_cpu::tile_acceleration::tile2pnt::<_,u32>(&pnt2splat2, img_shape, tile_size);
+        let pnt2aabbdepth = |i_pnt: usize| {
+            (pnt2splat2[i_pnt].aabb, pnt2splat2[i_pnt].ndc_z)
+        };
+        let (tile2idx, idx2pnt) = del_canvas_cpu::tile_acceleration::tile2pnt::<_,u32>(
+            pnt2splat2.len(), pnt2aabbdepth, img_shape, tile_size);
         println!("num_idx: {}", idx2pnt.len());
         println!("   Elapsed tile2pnt on CPU: {:.2?}", now.elapsed());
         //
@@ -101,8 +105,11 @@ fn main() -> anyhow::Result<()> {
     {
         // check tile2pnt
         let pnt2splat2 = dev.dtoh_sync_copy(&pnt2splat2_dev)?;
+        let pnt2aabbdepth = |i_pnt: usize| {
+            (pnt2splat2[i_pnt].aabb, pnt2splat2[i_pnt].ndc_z)
+        };
         let (tile2idx_cpu, idx2pnt_cpu) = del_canvas_cpu::tile_acceleration::tile2pnt::<_,u32>(
-            &pnt2splat2, img_shape, tile_size);
+            pnt2splat2.len(), pnt2aabbdepth, img_shape, tile_size);
         {
             // assert tile2idx
             let tile2idx_gpu = dev.dtoh_sync_copy(&tile2idx_dev)?;

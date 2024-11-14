@@ -62,10 +62,12 @@ impl del_canvas_cpu::splat_gaussian2::Splat2 for Splat2 {
     fn property(&self) -> (&[f32; 2], &[f32; 3], &[f32; 3], f32) { (&self.pos_pix, &self.sig_inv, &self.rgb, self.alpha) }
 }
 
+/*
 impl del_canvas_cpu::tile_acceleration::Splat2 for Splat2{
     fn aabb(&self) -> [f32; 4] { self.aabb }
     fn ndc_z(&self) -> f32 { self.ndc_z }
 }
+ */
 
 // ---------------------------------
 // below: global funcs

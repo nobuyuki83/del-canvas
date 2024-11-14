@@ -7,7 +7,7 @@ fn main() -> anyhow::Result<()> {
         obj.unified_xyz_uv_as_trimesh()
     };
     let bvhnodes = del_msh_core::bvhnodes_morton::from_triangle_mesh(&tri2vtx, &vtx2xyz, 3);
-    let aabbs = del_msh_core::aabbs3::from_uniform_mesh_with_bvh(
+    let aabbs = del_msh_core::bvhnode2aabb3::from_uniform_mesh_with_bvh(
         0,
         &bvhnodes,
         Some((&tri2vtx, 3)),
