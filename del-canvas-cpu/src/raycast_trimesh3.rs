@@ -40,10 +40,10 @@ where
         };
         i_tri.as_()
             */
-        if let Some((_t, i_tri)) = del_msh_core::bvh3::search_first_intersection_ray(
+        if let Some((_t, i_tri)) = del_msh_core::search_bvh3::first_intersection_ray(
             &ray_org,
             &ray_dir,
-            &del_msh_core::bvh3::TriMeshWithBvh {
+            &del_msh_core::search_bvh3::TriMeshWithBvh {
                 tri2vtx,
                 vtx2xyz,
                 bvhnodes,
@@ -86,11 +86,11 @@ pub fn render_depth_bvh(
             let (ray_org, ray_dir) =
                 crate::cam3::ray3_homogeneous((iw, ih), &image_size, transform_ndc2world);
             let mut hits: Vec<(f32, usize)> = vec![];
-            del_msh_core::bvh3::search_intersections_ray(
+            del_msh_core::search_bvh3::intersections_ray(
                 &mut hits,
                 &ray_org,
                 &ray_dir,
-                &del_msh_core::bvh3::TriMeshWithBvh {
+                &del_msh_core::search_bvh3::TriMeshWithBvh {
                     tri2vtx,
                     vtx2xyz,
                     bvhnodes,

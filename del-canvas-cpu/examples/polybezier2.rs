@@ -25,7 +25,7 @@ fn hoge() {
             let p = nalgebra::Vector2::<f32>::new(i_w as f32 + 0.5f32, i_h as f32 + 0.5f32);
             let mut wn = 0.0f32;
             for i_loop in 0..loops.len() {
-                wn += del_msh_core::polyloop2::winding_number(&loops[i_loop].0, &p);
+                wn += del_msh_nalgebra::polyloop2::winding_number(&loops[i_loop].0, &p);
             }
             if wn.round() as i64 != 0 {
                 img_data[i_h * width + i_w] = 128;

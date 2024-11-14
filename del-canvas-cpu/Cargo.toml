@@ -23,8 +23,10 @@ slice-of-array = {workspace = true}
 byteorder = {workspace = true}
 
 del-msh-core = { workspace = true }
+del-msh-nalgebra = { workspace = true }
 del-geo-core = { workspace = true }
 del-geo-nalgebra = { workspace = true }
+
 #
 # del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git" }
 # del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git" }

@@ -38,7 +38,7 @@ pub fn draw_vtxcolor<Index, Real>(
             )
             .unwrap();
             let mut res: Vec<(Index, Real, Real)> = vec![];
-            del_msh_core::bvh2::search_including_point::<Real, Index>(
+            del_msh_core::search_bvh2::including_point::<Real, Index>(
                 &mut res,
                 trimesh.tri2vtx,
                 trimesh.vtx2xy,
@@ -73,7 +73,7 @@ fn test0() -> anyhow::Result<()> {
         0.03,
     );
     let bvhnodes = del_msh_core::bvhnodes_morton::from_triangle_mesh(&tri2vtx, &vtx2xy, 2);
-    let aabbs = del_msh_core::aabbs2::from_uniform_mesh_with_bvh(
+    let aabbs = del_msh_core::bvhnode2aabb2::from_uniform_mesh_with_bvh(
         0,
         &bvhnodes,
         Some((&tri2vtx, 3)),
