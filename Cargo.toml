@@ -1,7 +1,6 @@
 [workspace]
 members = ["del-canvas-cpu", "del-canvas-image"]
 resolver = "2"
-exclude = ["del-canvas-cuda-kernel", "del-canvas-cuda", "del-canvas-cuda-gl"]
 
 [workspace.package]
 version = "0.1.2"
@@ -28,21 +27,22 @@ slice-of-array = "0.3.2"
 # internal
 del-canvas-cpu = { path = "del-canvas-cpu" }
 del-canvas-image = {path = "del-canvas-image"}
-#
+
+# for develop
 # del-geo-core = { path = "../del-geo/del-geo-core"}
 # del-geo-nalgebra ={ path = "../del-geo/del-geo-nalgebra"}
 # del-msh-core = { path = "../del-msh/del-msh-core"}
 # del-msh-nalgebra = { path = "../del-msh/del-msh-nalgebra"}
 # del-gl-core = {path = "../del-gl/del-gl-core" }
 # del-gl-winit-glutin = {path = "../del-gl/del-gl-winit-glutin"}
-#
+# for github push
 del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git"}
 del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git"}
 del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
 del-msh-nalgebra = { git = "https://github.com/nobuyuki83/del-msh.git" }
 del-gl-core = {git = "https://github.com/nobuyuki83/del-gl.git"}
 del-gl-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git"}
-#
+# for deploy
 # del-geo-core = "0.1.32"
 # del-geo-nalgebra = "0.1.32"
 # del-msh-core = "0.1.36"

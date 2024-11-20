@@ -29,7 +29,7 @@ fn main() {
             let org = Vec3::new(i_w as f32 + 0.5f32, i_h as f32 + 0.5f32, 1f32);
             let org = transform_pix2glb * org;
             let dir = Vec3::new(0f32, 0f32, -1f32);
-            let Some((hit_pos, hit_normal, _depth)) = del_geo_nalgebra::sphere::intersection_ray(
+            let Some(t) = del_geo_nalgebra::sphere::intersection_ray(
                 &nalgebra::Vector3::new(0., 0., 0.),
                 0.5,
                 &org,
@@ -37,10 +37,12 @@ fn main() {
             ) else {
                 continue;
             };
+            let hit_pos = org + dir.scale(t);
+            let hit_normal = hit_pos.normalize();
             assert!((hit_normal.norm() - 1f32).abs() < 1.0e-5);
             // pointing in the direction from the root toward the tip
             let fiber_dir = Vec3::new(0., -1., 0.);
-            let fiber_dir = (fiber_dir - fiber_dir.dot(&hit_normal) * hit_normal).normalize();
+            let fiber_dir = (fiber_dir - hit_normal.scale(fiber_dir.dot(&hit_normal))).normalize();
             let binormal = fiber_dir.cross(&hit_normal);
             let w_i = (light_pos - hit_pos).normalize();
             let w_o = Vec3::new(0., 0., 1.);

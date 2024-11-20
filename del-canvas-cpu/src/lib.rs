@@ -1,5 +1,3 @@
-use num_traits::AsPrimitive;
-
 pub mod cam2;
 pub mod cam3;
 pub mod canvas_svg;
