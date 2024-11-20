@@ -215,7 +215,7 @@ fn main() {
         vec![nalgebra::Vector3::<Real>::new(0., 0., 0.); M * M];
 
     const FRAME_DT: Real = 1e-3;
-    let mut canvas = del_canvas_cpu::canvas_gif::Canvas::new(
+    let mut canvas = del_canvas_image::canvas_gif::Canvas::new(
         std::path::Path::new("target/0.gif"),
         (800, 800),
         &vec![0x112F41, 0xED553B, 0xF2B134, 0x068587],

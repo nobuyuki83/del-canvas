@@ -197,7 +197,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
     use ::slice_of_array::SliceFlatExt; // for flat
-    del_canvas_cpu::write_png_from_float_image_rgb(
+    del_canvas_image::write_png_from_float_image_rgb(
         "target/del_canvas_cpu__splat_sphere__tile.png",
         &img_shape,
         (&img_data).flat(),

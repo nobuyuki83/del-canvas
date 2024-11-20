@@ -76,7 +76,7 @@ fn main() -> anyhow::Result<()> {
         .iter()
         .map(|v| if *v == u32::MAX { 0f32 } else { 1f32 })
         .collect();
-    del_canvas_cpu::write_png_from_float_image_grayscale(
+    del_canvas_image::write_png_from_float_image_grayscale(
         "../target/raycast_trimesh3_cuda.png",
         &img_size,
         &pix2flag,

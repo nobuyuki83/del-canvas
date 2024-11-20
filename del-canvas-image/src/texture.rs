@@ -3,7 +3,8 @@ pub enum Interpolation {
     Bilinear,
 }
 
-pub fn bilinear<const NDIM: usize>(
+/// coordinate (0., 0.) is the center ot the texel
+pub fn bilinear_integer_center<const NDIM: usize>(
     pix: &[f32; 2],
     tex_shape: &(usize, usize),
     tex_data: &[f32],
@@ -33,7 +34,9 @@ pub fn bilinear<const NDIM: usize>(
     res
 }
 
-pub fn nearest<const NDIM: usize>(
+
+/// coordinate (0., 0.) is the center ot the texel
+pub fn nearest_integer_center<const NDIM: usize>(
     pix: &[f32; 2],
     tex_shape: &(usize, usize),
     tex_data: &[f32],

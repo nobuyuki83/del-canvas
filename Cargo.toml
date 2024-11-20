@@ -1,5 +1,5 @@
 [workspace]
-members = ["del-canvas-cpu", "del-canvas-cpu-gl"]
+members = ["del-canvas-cpu", "del-canvas-image"]
 resolver = "2"
 exclude = ["del-canvas-cuda-kernel", "del-canvas-cuda", "del-canvas-cuda-gl"]
 
@@ -27,6 +27,7 @@ byteorder = "1.5.0"
 slice-of-array = "0.3.2"
 # internal
 del-canvas-cpu = { path = "del-canvas-cpu" }
+del-canvas-image = {path = "del-canvas-image"}
 #
 # del-geo-core = { path = "../del-geo/del-geo-core"}
 # del-geo-nalgebra ={ path = "../del-geo/del-geo-nalgebra"}

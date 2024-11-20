@@ -55,6 +55,6 @@ where
         img_data[ipix][2] = rgb[2];
     }
     use ::slice_of_array::SliceFlatExt; // for flat
-    crate::write_png_from_float_image_rgb(path, &img_shape, (&img_data).flat())?;
+    del_canvas_image::write_png_from_float_image_rgb(path, &img_shape, (&img_data).flat())?;
     Ok(())
 }

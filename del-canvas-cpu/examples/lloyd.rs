@@ -1,6 +1,6 @@
 fn main() {
     let mut reng = rand::thread_rng();
-    let mut canvas = del_canvas_cpu::canvas_gif::Canvas::new(
+    let mut canvas = del_canvas_image::canvas_gif::Canvas::new(
         "target/lloyd.gif",
         (300, 300),
         &vec![0xffffff, 0x000000, 0xff0000],

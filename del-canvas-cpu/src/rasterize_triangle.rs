@@ -55,7 +55,7 @@ fn test0() -> anyhow::Result<()> {
         &trans_xy2pix,
         1f32,
     );
-    crate::write_png_from_float_image_grayscale(
+    del_canvas_image::write_png_from_float_image_grayscale(
         "../target/rasterize_triangle-test0.png",
         &img_size,
         &img_data,

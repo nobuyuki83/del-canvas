@@ -152,7 +152,7 @@ fn main() -> anyhow::Result<()> {
         }
          */
         let img_data = del_canvas_cpu::splat_point2::draw(&img_shape, &points);
-        del_canvas_cpu::write_png_from_float_image_rgb(
+        del_canvas_image::write_png_from_float_image_rgb(
             "target/points3d_pix.png",
             &img_shape,
             &img_data,
@@ -232,7 +232,7 @@ fn main() -> anyhow::Result<()> {
                    .flat_map(pix2rgb)
                    .collect();
         */
-        del_canvas_cpu::write_png_from_float_image_rgb(
+        del_canvas_image::write_png_from_float_image_rgb(
             "target/points3d_gaussian_tile.png",
             &img_shape,
             &img_data,
@@ -270,7 +270,7 @@ fn main() -> anyhow::Result<()> {
                 }
             }
         }
-        del_canvas_cpu::write_png_from_float_image_rgb(
+        del_canvas_image::write_png_from_float_image_rgb(
             "target/points3d_gaussian.png",
             &img_shape,
             &img_data,
@@ -302,7 +302,7 @@ fn main() -> anyhow::Result<()> {
                 }
             }
         }
-        del_canvas_cpu::write_png_from_float_image_rgb(
+        del_canvas_image::write_png_from_float_image_rgb(
             "target/points3d_ellipse.png",
             &img_shape,
             &img_data,

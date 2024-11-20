@@ -481,6 +481,6 @@ where
             }
         }
     }
-    crate::write_png_from_float_image_rgb(path, &img_shape, &img_data)?;
+    del_canvas_image::write_png_from_float_image_rgb(path, &img_shape, &img_data)?;
     Ok(())
 }
