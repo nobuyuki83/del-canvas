@@ -36,8 +36,8 @@ fn parse_pbrt_file(
     file_path: &str,
 ) -> anyhow::Result<(Vec<TriangleMesh>, f32, [f32; 16], (usize, usize))> {
     let scene = pbrt4::Scene::from_file(file_path)?;
-    let (camera_fov, transform_cam_glbl2lcl, img_shape)
-        = del_canvas_raycast::parse_pbrt::hoge(&scene);
+    let (camera_fov, transform_cam_glbl2lcl, img_shape) =
+        del_canvas_raycast::parse_pbrt::hoge(&scene);
     let mut materials: Vec<[f32; 3]> = vec![];
     for material in scene.materials {
         match material {
@@ -61,7 +61,8 @@ fn parse_pbrt_file(
                 scale,
             } => {
                 let spectrum =
-                    del_canvas_raycast::parse_pbrt::spectrum_from_light_entity(&area_light).unwrap();
+                    del_canvas_raycast::parse_pbrt::spectrum_from_light_entity(&area_light)
+                        .unwrap();
                 lights.push((spectrum, two_sided));
             }
             _ => {}
@@ -70,7 +71,8 @@ fn parse_pbrt_file(
     let mut shapes: Vec<TriangleMesh> = vec![Default::default(); scene.shapes.len()];
     for (i_shape, shape_entity) in scene.shapes.iter().enumerate() {
         let (material_idx, light_idx, tri2vtx, vtx2xyz, normal) =
-            del_canvas_raycast::parse_pbrt::trimesh3_from_shape_entity(&shape_entity, file_path).unwrap();
+            del_canvas_raycast::parse_pbrt::trimesh3_from_shape_entity(&shape_entity, file_path)
+                .unwrap();
         shapes[i_shape].vtx2xyz = vtx2xyz.clone();
         shapes[i_shape].tri2vtx = tri2vtx.clone();
         shapes[i_shape].vtx2nrm = normal.clone();
@@ -283,12 +285,12 @@ fn main() -> anyhow::Result<()> {
                         continue;
                     } // backside of light
                     if let Some((_t, i_trimsh, _i_tri)) =
-                        intersection_ray_trimeshs(&hit_pos, &uvec_from_hit_to_light, &trimeshs) {
+                        intersection_ray_trimeshs(&hit_pos, &uvec_from_hit_to_light, &trimeshs)
+                    {
                         if i_trimsh != i_trimesh_light {
                             continue;
                         }
-                    }
-                    else {
+                    } else {
                         continue;
                     };
                     let l_i = trimeshs[i_trimesh_light].spectrum.unwrap().0;

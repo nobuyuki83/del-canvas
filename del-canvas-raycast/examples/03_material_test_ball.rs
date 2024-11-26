@@ -14,11 +14,13 @@ fn parse() -> anyhow::Result<(Vec<Shape>, f32, [f32; 16], (usize, usize))> {
     let scene = pbrt4::Scene::from_file(path_file)?;
     // dbg!(scene.shapes.len());
     let mut shapes: Vec<Shape> = vec![];
-    let (camera_fov, transform_cam_glbl2lcl, img_shape) = del_canvas_raycast::parse_pbrt::hoge(&scene);
+    let (camera_fov, transform_cam_glbl2lcl, img_shape) =
+        del_canvas_raycast::parse_pbrt::hoge(&scene);
     for shape_entity in scene.shapes {
         let transform = shape_entity.transform.to_cols_array();
         let (_, _, tri2vtx, vtx2xyz, _) =
-            del_canvas_raycast::parse_pbrt::trimesh3_from_shape_entity(&shape_entity, path_file).unwrap();
+            del_canvas_raycast::parse_pbrt::trimesh3_from_shape_entity(&shape_entity, path_file)
+                .unwrap();
         let bvhnodes = del_msh_core::bvhnodes_morton::from_triangle_mesh(&tri2vtx, &vtx2xyz, 3);
         let bvhnode2aabb = del_msh_core::bvhnode2aabb3::from_uniform_mesh_with_bvh(
             0,
