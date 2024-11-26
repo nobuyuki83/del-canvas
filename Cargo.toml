@@ -1,5 +1,6 @@
 [workspace]
-members = ["del-canvas-cpu", "del-canvas-image"]
+members = ["del-canvas-cpu", "del-canvas-image", "del-canvas-splat-cudarc"]
+exclude = ["del-canvas-splat-cudarc-kernel"]
 resolver = "2"
 
 [workspace.package]
@@ -9,6 +10,13 @@ license = "MIT"
 description = "drawing primitives (e.g., triangles and lines) to bitmap images and gif animation."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace.dependencies.cudarc]
+version = "*"
+features = [
+    "std", "cublas", "cublaslt", "curand", "driver", "nvrtc",
+    "f16", "cuda-version-from-build-system", "dynamic-linking"]
+default-features=false
 
 [workspace.dependencies]
 num-traits = "0.2.19"
@@ -27,6 +35,8 @@ slice-of-array = "0.3.2"
 # internal
 del-canvas-cpu = { path = "del-canvas-cpu" }
 del-canvas-image = {path = "del-canvas-image"}
+del-canvas-splat-cudarc = {path = "del-canvas-splat-cudarc"}
+del-canvas-splat-cudarc-kernel = {path = "del-canvas-splat-cudarc-kernel"}
 
 # for develop
 # del-geo-core = { path = "../del-geo/del-geo-core"}
@@ -35,6 +45,8 @@ del-canvas-image = {path = "del-canvas-image"}
 # del-msh-nalgebra = { path = "../del-msh/del-msh-nalgebra"}
 # del-gl-core = {path = "../del-gl/del-gl-core" }
 # del-gl-winit-glutin = {path = "../del-gl/del-gl-winit-glutin"}
+# del-cudarc-util = {path="../del-cudarc/del-cudarc-util"}
+
 # for github push
 del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git"}
 del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git"}
@@ -42,6 +54,8 @@ del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
 del-msh-nalgebra = { git = "https://github.com/nobuyuki83/del-msh.git" }
 del-gl-core = {git = "https://github.com/nobuyuki83/del-gl.git"}
 del-gl-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git"}
+del-cudarc-util = { git="https://github.com/nobuyuki83/del-cudarc.git"}
+
 # for deploy
 # del-geo-core = "0.1.32"
 # del-geo-nalgebra = "0.1.32"
