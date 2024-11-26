@@ -1,6 +1,9 @@
+#[cfg(feature = "cuda")]
 use del_canvas_splat_cudarc::splat_gauss::Splat2;
+#[cfg(feature = "cuda")]
 use del_canvas_splat_cudarc::splat_gauss::Splat3;
 
+#[cfg(feature = "cuda")]
 fn main() -> anyhow::Result<()> {
     let file_path = "asset/dog.ply";
     let pnt2splat3 = del_msh_core::io_ply::read_3d_gauss_splat::<_, Splat3>(file_path)?;
@@ -166,3 +169,6 @@ fn main() -> anyhow::Result<()> {
     }
     Ok(())
 }
+
+#[cfg(not(feature = "cuda"))]
+fn main() {}

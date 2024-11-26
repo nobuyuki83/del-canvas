@@ -1,7 +1,11 @@
+#[cfg(feature = "cuda")]
 use del_canvas_splat_cudarc::splat_sphere::Splat2;
+#[cfg(feature = "cuda")]
 use del_canvas_splat_cudarc::splat_sphere::Splat3;
+
 use num_traits::AsPrimitive;
 
+#[cfg(feature = "cuda")]
 fn assert_tile2pnt(
     pnt2splat: &[Splat2],
     tile_shape: (usize, usize),
@@ -74,6 +78,7 @@ fn assert_tile2pnt(
     } // assert "idx2pnt" using cpu
 }
 
+#[cfg(feature = "cuda")]
 fn main() -> anyhow::Result<()> {
     // let path = "/Users/nobuyuki/project/juice_box1.ply";
     let file_path = "asset/juice_box.ply";
@@ -238,3 +243,6 @@ fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[cfg(not(feature = "cuda"))]
+fn main() {}
