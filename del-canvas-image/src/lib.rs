@@ -1,10 +1,9 @@
-pub mod texture;
 pub mod canvas_bitmap;
 pub mod canvas_gif;
 pub mod color;
 pub mod colormap;
 pub mod morphology;
-
+pub mod texture;
 
 use num_traits::AsPrimitive;
 

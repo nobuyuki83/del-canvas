@@ -95,8 +95,11 @@ pub fn pnt2splat3_to_pnt2splat2(
         img_shape.1,
     );
     use cudarc::driver::LaunchAsync;
-    let splat3_to_splat2 =
-        del_cudarc_util::get_or_load_func(&dev, "splat3_to_splat2", del_canvas_splat_cudarc_kernel::SPLAT_GAUSS)?;
+    let splat3_to_splat2 = del_cudarc_util::get_or_load_func(
+        &dev,
+        "splat3_to_splat2",
+        del_canvas_splat_cudarc_kernel::SPLAT_GAUSS,
+    )?;
     unsafe { splat3_to_splat2.launch(cfg, param) }?;
     Ok(())
 }
@@ -218,8 +221,11 @@ pub fn tile2idx_idx2pnt(
             16u32,
         );
         use cudarc::driver::LaunchAsync;
-        let count_splat_in_tile =
-            del_cudarc_util::get_or_load_func(&dev, "fill_index_info", del_canvas_splat_cudarc_kernel::SPLAT_GAUSS)?;
+        let count_splat_in_tile = del_cudarc_util::get_or_load_func(
+            &dev,
+            "fill_index_info",
+            del_canvas_splat_cudarc_kernel::SPLAT_GAUSS,
+        )?;
         unsafe { count_splat_in_tile.launch(cfg, param) }?;
         del_cudarc_util::sort_by_key_u64::radix_sort_by_key_u64(
             &dev,

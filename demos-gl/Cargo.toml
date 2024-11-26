@@ -1,0 +1,27 @@
+[package]
+name = "demos-gl"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description.workspace = true
+
+[dependencies]
+glutin = "0.32.1"
+glutin-winit = "0.5.0"
+winit = "0.30.5"
+raw-window-handle = "0.6.2"
+image.workspace = true
+#
+# workspace
+del-msh-core.workspace = true
+del-geo-core.workspace = true
+del-gl-core.workspace = true
+del-gl-winit-glutin.workspace = true
+del-canvas-raycast.workspace = true
+del-canvas-image.workspace = true
+
+[build-dependencies]
+gl_generator = "0.14"
+cfg_aliases = "0.2.1"
+
+

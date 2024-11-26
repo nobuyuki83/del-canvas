@@ -1,5 +1,12 @@
 [workspace]
-members = ["del-canvas-cpu", "del-canvas-image", "del-canvas-splat-cudarc"]
+members = [
+    "del-canvas-cpu",
+    "del-canvas-image",
+    "del-canvas-splat-cudarc",
+    "del-canvas-raycast",
+    "demos-cudarc-gl",
+    "demos-gl"
+]
 exclude = ["del-canvas-splat-cudarc-kernel"]
 resolver = "2"
 
@@ -32,29 +39,44 @@ itertools = "0.13.0"
 rand_chacha = "0.3.1"
 byteorder = "1.5.0"
 slice-of-array = "0.3.2"
+glutin = "0.32.1"
+glutin-winit = "0.5.0"
+raw-window-handle = "0.6.2"
+winit = "0.30.5"
+cfg_aliases = "0.2.1"
+gl_generator = "0.14.0"
+ply-rs = "0.1.3"
 # internal
 del-canvas-cpu = { path = "del-canvas-cpu" }
 del-canvas-image = {path = "del-canvas-image"}
 del-canvas-splat-cudarc = {path = "del-canvas-splat-cudarc"}
 del-canvas-splat-cudarc-kernel = {path = "del-canvas-splat-cudarc-kernel"}
+del-canvas-raycast = {path="del-canvas-raycast"}
 
 # for develop
 # del-geo-core = { path = "../del-geo/del-geo-core"}
 # del-geo-nalgebra ={ path = "../del-geo/del-geo-nalgebra"}
 # del-msh-core = { path = "../del-msh/del-msh-core"}
 # del-msh-nalgebra = { path = "../del-msh/del-msh-nalgebra"}
+# del-msh-cudarc = {path = "../del-msh/del-msh-cudarc", features = ["cuda"]}
+# del-msh-cudarc-kernel = {path = "../del-msh/del-msh-cudarc-kernel"}
 # del-gl-core = {path = "../del-gl/del-gl-core" }
 # del-gl-winit-glutin = {path = "../del-gl/del-gl-winit-glutin"}
 # del-cudarc-util = {path="../del-cudarc/del-cudarc-util"}
+# del-raycast-core = {path = "../del-raycast/del-raycast-core"}
+# pbrt4 = { path = "../pbrt4" }
 
 # for github push
 del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git"}
 del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git"}
 del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
 del-msh-nalgebra = { git = "https://github.com/nobuyuki83/del-msh.git" }
+del-msh-cudarc = {git = "https://github.com/nobuyuki83/del-msh.git", features = ["cuda"]}
+del-msh-cudarc-kernel = {git = "https://github.com/nobuyuki83/del-msh.git"}
 del-gl-core = {git = "https://github.com/nobuyuki83/del-gl.git"}
 del-gl-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git"}
 del-cudarc-util = { git="https://github.com/nobuyuki83/del-cudarc.git"}
+pbrt4 = { git = "https://github.com/nobuyuki83/pbrt4.git" }
 
 # for deploy
 # del-geo-core = "0.1.32"

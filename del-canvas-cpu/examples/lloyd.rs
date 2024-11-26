@@ -17,7 +17,8 @@ fn main() {
     );
     for _iter in 0..50 {
         canvas.clear(0);
-        let site2cell = { del_msh_nalgebra::voronoi2::voronoi_cells(&vtxl2xy, &site2xy, |_v| true) };
+        let site2cell =
+            { del_msh_nalgebra::voronoi2::voronoi_cells(&vtxl2xy, &site2xy, |_v| true) };
         let mut site2xy_new = del_msh_core::vtx2xdim::to_array_of_nalgebra_vector(&site2xy);
         for i_site in 0..site2xy.len() / 2 {
             let vtxc2xy = &site2cell[i_site].vtx2xy;

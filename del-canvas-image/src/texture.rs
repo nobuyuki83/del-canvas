@@ -34,7 +34,6 @@ pub fn bilinear_integer_center<const NDIM: usize>(
     res
 }
 
-
 /// coordinate (0., 0.) is the center ot the texel
 pub fn nearest_integer_center<const NDIM: usize>(
     pix: &[f32; 2],
