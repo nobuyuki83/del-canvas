@@ -1,6 +1,6 @@
 fn main() -> anyhow::Result<()> {
     let (tex_shape, tex_data) = {
-        let pfm = del_canvas_raycast::io_pfm::PFM::read_from(
+        let pfm = del_raycast::io_pfm::PFM::read_from(
             "asset/material-testball/textures/envmap.pfm",
         )?;
         ((pfm.w, pfm.h), pfm.data)
@@ -40,7 +40,7 @@ fn main() -> anyhow::Result<()> {
     img.resize(img_shape.0 * img_shape.1, image::Rgb([0_f32; 3]));
     for ih in 0..img_shape.1 {
         for iw in 0..img_shape.0 {
-            let (ray_org, ray_dir) = del_canvas_raycast::cam_pbrt::cast_ray(
+            let (ray_org, ray_dir) = del_raycast::cam_pbrt::cast_ray(
                 iw,
                 ih,
                 img_shape,

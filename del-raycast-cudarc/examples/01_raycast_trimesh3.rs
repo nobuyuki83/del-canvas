@@ -43,7 +43,7 @@ fn main() -> anyhow::Result<()> {
         del_geo_core::mat4_col_major::try_inverse(&transform_world2ndc).unwrap();
     //
     dev.load_ptx(
-        del_canvas_raycast_cudarc_kernel::PIX2TRI.into(),
+        del_raycast_cudarc_kernel::PIX2TRI.into(),
         "my_module",
         &["pix_to_tri"],
     )?;

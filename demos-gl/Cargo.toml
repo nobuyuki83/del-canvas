@@ -17,7 +17,7 @@ del-msh-core.workspace = true
 del-geo-core.workspace = true
 del-gl-core.workspace = true
 del-gl-winit-glutin.workspace = true
-del-canvas-raycast.workspace = true
+del-raycast.workspace = true
 del-canvas-image.workspace = true
 
 [build-dependencies]

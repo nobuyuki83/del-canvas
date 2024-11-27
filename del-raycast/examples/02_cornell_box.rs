@@ -37,7 +37,7 @@ fn parse_pbrt_file(
 ) -> anyhow::Result<(Vec<TriangleMesh>, f32, [f32; 16], (usize, usize))> {
     let scene = pbrt4::Scene::from_file(file_path)?;
     let (camera_fov, transform_cam_glbl2lcl, img_shape) =
-        del_canvas_raycast::parse_pbrt::hoge(&scene);
+        del_raycast::parse_pbrt::hoge(&scene);
     let mut materials: Vec<[f32; 3]> = vec![];
     for material in scene.materials {
         match material {
@@ -61,7 +61,7 @@ fn parse_pbrt_file(
                 scale,
             } => {
                 let spectrum =
-                    del_canvas_raycast::parse_pbrt::spectrum_from_light_entity(&area_light)
+                    del_raycast::parse_pbrt::spectrum_from_light_entity(&area_light)
                         .unwrap();
                 lights.push((spectrum, two_sided));
             }
@@ -71,7 +71,7 @@ fn parse_pbrt_file(
     let mut shapes: Vec<TriangleMesh> = vec![Default::default(); scene.shapes.len()];
     for (i_shape, shape_entity) in scene.shapes.iter().enumerate() {
         let (material_idx, light_idx, tri2vtx, vtx2xyz, normal) =
-            del_canvas_raycast::parse_pbrt::trimesh3_from_shape_entity(&shape_entity, file_path)
+            del_raycast::parse_pbrt::trimesh3_from_shape_entity(&shape_entity, file_path)
                 .unwrap();
         shapes[i_shape].vtx2xyz = vtx2xyz.clone();
         shapes[i_shape].tri2vtx = tri2vtx.clone();
@@ -149,7 +149,7 @@ fn main() -> anyhow::Result<()> {
         let mut img = vec![image::Rgb([0f32; 3]); img_shape.0 * img_shape.1];
         for iw in 0..img_shape.0 {
             for ih in 0..img_shape.1 {
-                let (ray_org, ray_dir) = del_canvas_raycast::cam_pbrt::cast_ray(
+                let (ray_org, ray_dir) = del_raycast::cam_pbrt::cast_ray(
                     iw,
                     ih,
                     img_shape,
@@ -189,7 +189,7 @@ fn main() -> anyhow::Result<()> {
         let mut img = vec![image::Rgb([0f32; 3]); img_shape.0 * img_shape.1];
         for iw in 0..img_shape.0 {
             for ih in 0..img_shape.1 {
-                let (ray_org, ray_dir) = del_canvas_raycast::cam_pbrt::cast_ray(
+                let (ray_org, ray_dir) = del_raycast::cam_pbrt::cast_ray(
                     iw,
                     ih,
                     img_shape,
@@ -231,7 +231,7 @@ fn main() -> anyhow::Result<()> {
         let mut img = vec![image::Rgb([0f32; 3]); img_shape.0 * img_shape.1];
         for iw in 0..img_shape.0 {
             for ih in 0..img_shape.1 {
-                let (ray_org, ray_dir) = del_canvas_raycast::cam_pbrt::cast_ray(
+                let (ray_org, ray_dir) = del_raycast::cam_pbrt::cast_ray(
                     iw,
                     ih,
                     img_shape,
@@ -318,7 +318,7 @@ fn main() -> anyhow::Result<()> {
         img.resize(img_shape.0 * img_shape.1, image::Rgb([0_f32; 3]));
         for iw in 0..img_shape.0 {
             for ih in 0..img_shape.1 {
-                let (ray0_org, ray0_dir) = del_canvas_raycast::cam_pbrt::cast_ray(
+                let (ray0_org, ray0_dir) = del_raycast::cam_pbrt::cast_ray(
                     iw,
                     ih,
                     img_shape,
@@ -345,7 +345,7 @@ fn main() -> anyhow::Result<()> {
                 } else {
                     nrm1
                 };
-                let ray1_dir: [f32; 3] = del_canvas_raycast::sampling::hemisphere_cos_weighted(
+                let ray1_dir: [f32; 3] = del_raycast::sampling::hemisphere_cos_weighted(
                     &nalgebra::Vector3::<f32>::new(nrm1[0], nrm1[1], nrm1[2]),
                     &[rng.gen::<f32>(), rng.gen::<f32>()],
                 )

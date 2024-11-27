@@ -1,11 +1,15 @@
 [package]
-name = "del-canvas-raycast-cudarc"
+name = "del-raycast-cudarc"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [features]
-cuda = ["dep:del-msh-cudarc", "dep:del-cudarc", "dep:cudarc", "dep:del-canvas-raycast-cudarc-kernel"]
+cuda = [
+    "dep:del-msh-cudarc",
+    "dep:del-cudarc",
+    "dep:cudarc",
+    "dep:del-raycast-cudarc-kernel"]
 
 [dependencies]
 arrayref.workspace = true
@@ -21,4 +25,4 @@ del-canvas-image.workspace = true
 cudarc = {workspace = true, optional = true }
 del-cudarc = {workspace = true, optional = true }
 del-msh-cudarc = { workspace = true, optional = true }
-del-canvas-raycast-cudarc-kernel = { workspace = true, optional = true }
+del-raycast-cudarc-kernel = { workspace = true, optional = true }

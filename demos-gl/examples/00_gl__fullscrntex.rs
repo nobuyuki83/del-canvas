@@ -52,7 +52,7 @@ impl del_gl_winit_glutin::app3::Content for Content {
             del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_model);
         let transform_ndc2world =
             del_geo_core::mat4_col_major::try_inverse(&transform_world2ndc).unwrap();
-        let pix2tri = del_canvas_raycast::raycast_trimesh3::pix2tri(
+        let pix2tri = del_raycast::raycast_trimesh3::pix2tri(
             &self.tri2vtx,
             &self.vtx2xyz,
             &self.bvhnodes,
@@ -60,7 +60,7 @@ impl del_gl_winit_glutin::app3::Content for Content {
             &img_shape,
             &transform_ndc2world,
         );
-        let img_data = del_canvas_raycast::raycast_trimesh3::render_texture_from_pix2tri(
+        let img_data = del_raycast::raycast_trimesh3::render_texture_from_pix2tri(
             img_shape,
             &transform_ndc2world,
             &self.tri2vtx,

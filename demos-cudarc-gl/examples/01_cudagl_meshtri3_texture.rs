@@ -81,7 +81,7 @@ impl del_gl_winit_glutin::app3::Content for Content {
             .alloc_zeros::<u32>(img_shape.1 * img_shape.0)
             .unwrap();
         let transform_ndc2world_dev = self.dev.htod_copy(transform_ndc2world.to_vec()).unwrap();
-        del_canvas_raycast_cudarc::pix2tri::pix2tri(
+        del_raycast_cudarc::pix2tri::pix2tri(
             &self.dev,
             img_shape,
             &mut pix2tri_dev,
@@ -112,7 +112,7 @@ impl del_gl_winit_glutin::app3::Content for Content {
             &transform_ndc2world,
         );
          */
-        let img_data = del_canvas_raycast::raycast_trimesh3::render_texture_from_pix2tri(
+        let img_data = del_raycast::raycast_trimesh3::render_texture_from_pix2tri(
             img_shape,
             &transform_ndc2world,
             &self.tri2vtx,

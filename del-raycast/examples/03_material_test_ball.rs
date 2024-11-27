@@ -15,11 +15,11 @@ fn parse() -> anyhow::Result<(Vec<Shape>, f32, [f32; 16], (usize, usize))> {
     // dbg!(scene.shapes.len());
     let mut shapes: Vec<Shape> = vec![];
     let (camera_fov, transform_cam_glbl2lcl, img_shape) =
-        del_canvas_raycast::parse_pbrt::hoge(&scene);
+        del_raycast::parse_pbrt::hoge(&scene);
     for shape_entity in scene.shapes {
         let transform = shape_entity.transform.to_cols_array();
         let (_, _, tri2vtx, vtx2xyz, _) =
-            del_canvas_raycast::parse_pbrt::trimesh3_from_shape_entity(&shape_entity, path_file)
+            del_raycast::parse_pbrt::trimesh3_from_shape_entity(&shape_entity, path_file)
                 .unwrap();
         let bvhnodes = del_msh_core::bvhnodes_morton::from_triangle_mesh(&tri2vtx, &vtx2xyz, 3);
         let bvhnode2aabb = del_msh_core::bvhnode2aabb3::from_uniform_mesh_with_bvh(
@@ -73,7 +73,7 @@ fn main() -> anyhow::Result<()> {
     img.resize(img_shape.0 * img_shape.1, image::Rgb([0_f32; 3]));
     for ih in 0..img_shape.1 {
         for iw in 0..img_shape.0 {
-            let (ray_org, ray_dir) = del_canvas_raycast::cam_pbrt::cast_ray(
+            let (ray_org, ray_dir) = del_raycast::cam_pbrt::cast_ray(
                 iw,
                 ih,
                 img_shape,

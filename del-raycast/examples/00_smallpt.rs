@@ -99,7 +99,7 @@ fn radiance(r: &Ray, depth: i64, spheres: &[Sphere], rng: &mut rand::rngs::Threa
     }
     let hit_pos_offset = hit_pos + hit_nrm.scale(1.0e-3);
     let next_dir = match obj.refl {
-        ReflT::DIFF => del_canvas_raycast::sampling::hemisphere_cos_weighted(
+        ReflT::DIFF => del_raycast::sampling::hemisphere_cos_weighted(
             &hit_nrm,
             &[rng.gen::<Real>(), rng.gen::<Real>()],
         ),
@@ -177,7 +177,7 @@ fn main() {
     ];
     let mut rng = rand::thread_rng();
     let samps = 5;
-    let cam = del_canvas_raycast::cam3::Camera3::new(
+    let cam = del_raycast::cam3::Camera3::new(
         1024,
         768,
         Vector::new(50., 52., 295.6),
@@ -194,8 +194,8 @@ fn main() {
                 for sx in 0..2 {
                     // 2x2 subpixel cols
                     for _s in 0..samps {
-                        let dx = del_canvas_raycast::sampling::tent(rng.gen::<Real>());
-                        let dy = del_canvas_raycast::sampling::tent(rng.gen::<Real>());
+                        let dx = del_raycast::sampling::tent(rng.gen::<Real>());
+                        let dy = del_raycast::sampling::tent(rng.gen::<Real>());
                         let sx = sx as Real;
                         let x0 = (sx as Real + 0.5 + dx) / 2. + x as Real;
                         let y0 = (sy as Real + 0.5 + dy) / 2. + y as Real;

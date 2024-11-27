@@ -2,13 +2,15 @@
 members = [
     "del-canvas-cpu",
     "del-canvas-image",
-    "del-canvas-raycast-cudarc",
+    "del-raycast",
+    "del-raycast-cudarc",
     "del-canvas-splat-cudarc",
-    "del-canvas-raycast",
     "demos-cudarc-gl",
     "demos-gl"
 ]
-exclude = ["del-canvas-splat-cudarc-kernel", "del-canvas-raycast-cudarc-kernel"]
+exclude = [
+    "del-canvas-splat-cudarc-kernel",
+    "del-raycast-cudarc-kernel"]
 resolver = "2"
 
 [workspace.package]
@@ -53,9 +55,9 @@ del-canvas-cpu = { path = "del-canvas-cpu" }
 del-canvas-image = {path = "del-canvas-image"}
 del-canvas-splat-cudarc = {path = "del-canvas-splat-cudarc"}
 del-canvas-splat-cudarc-kernel = {path = "del-canvas-splat-cudarc-kernel"}
-del-canvas-raycast = {path="del-canvas-raycast"}
-del-canvas-raycast-cudarc = {path = "del-canvas-raycast-cudarc"}
-del-canvas-raycast-cudarc-kernel = {path = "del-canvas-raycast-cudarc-kernel"}
+del-raycast = {path="del-raycast"}
+del-raycast-cudarc = {path = "del-raycast-cudarc"}
+del-raycast-cudarc-kernel = {path = "del-raycast-cudarc-kernel"}
 
 # for develop
 # del-geo-core = { path = "../del-geo/del-geo-core"}
