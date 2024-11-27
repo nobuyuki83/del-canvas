@@ -61,7 +61,7 @@ pub fn tile2idx_idx2pnt(
         let count_splat_in_tile = del_cudarc::get_or_load_func(
             &dev,
             "count_splat_in_tile",
-            del_canvas_splat_cudarc_kernel::SPLAT_SPHERE,
+            del_splat_cudarc_kernel::SPLAT_SPHERE,
         )?;
         unsafe { count_splat_in_tile.launch(cfg, param) }?;
         (tile2idx_dev, pnt2idx_dev)
@@ -103,7 +103,7 @@ pub fn tile2idx_idx2pnt(
         let count_splat_in_tile = del_cudarc::get_or_load_func(
             &dev,
             "fill_index_info",
-            del_canvas_splat_cudarc_kernel::SPLAT_SPHERE,
+            del_splat_cudarc_kernel::SPLAT_SPHERE,
         )?;
         unsafe { count_splat_in_tile.launch(cfg, param) }?;
         del_cudarc::sort_by_key_u64::radix_sort_by_key_u64(
@@ -138,7 +138,7 @@ pub fn pnt2splat3_to_pnt2splat2(
     let xyzrgb_to_splat = del_cudarc::get_or_load_func(
         &dev,
         "splat3_to_splat2",
-        del_canvas_splat_cudarc_kernel::SPLAT_SPHERE,
+        del_splat_cudarc_kernel::SPLAT_SPHERE,
     )?;
     unsafe { xyzrgb_to_splat.launch(cfg, param) }?;
     Ok(())
@@ -180,7 +180,7 @@ pub fn splat(
     let count_splat_in_tile = del_cudarc::get_or_load_func(
         &dev,
         "rasterize_splat_using_tile",
-        del_canvas_splat_cudarc_kernel::SPLAT_SPHERE,
+        del_splat_cudarc_kernel::SPLAT_SPHERE,
     )?;
     unsafe { count_splat_in_tile.launch(cfg, param) }?;
     Ok(())

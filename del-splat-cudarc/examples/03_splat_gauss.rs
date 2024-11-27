@@ -1,7 +1,7 @@
 #[cfg(feature = "cuda")]
-use del_canvas_splat_cudarc::splat_gauss::Splat2;
+use del_splat_cudarc::splat_gauss::Splat2;
 #[cfg(feature = "cuda")]
-use del_canvas_splat_cudarc::splat_gauss::Splat3;
+use del_splat_cudarc::splat_gauss::Splat3;
 
 #[cfg(feature = "cuda")]
 fn main() -> anyhow::Result<()> {
@@ -40,7 +40,7 @@ fn main() -> anyhow::Result<()> {
         dev.htod_copy(pnt2splat2.clone())?
     };
     let transform_world2ndc_dev = dev.htod_copy(transform_world2ndc.to_vec())?;
-    del_canvas_splat_cudarc::splat_gauss::pnt2splat3_to_pnt2splat2(
+    del_splat_cudarc::splat_gauss::pnt2splat3_to_pnt2splat2(
         &dev,
         &pnt2splat3_dev,
         &mut pnt2splat2_dev,
@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
         (img_shape.0 as u32, img_shape.1 as u32),
     )?;
     let tile_size = 16usize;
-    let (tile2idx_dev, idx2pnt_dev) = del_canvas_splat_cudarc::splat_gauss::tile2idx_idx2pnt(
+    let (tile2idx_dev, idx2pnt_dev) = del_splat_cudarc::splat_gauss::tile2idx_idx2pnt(
         &dev,
         (img_shape.0 as u32, img_shape.1 as u32),
         tile_size as u32,
@@ -57,7 +57,7 @@ fn main() -> anyhow::Result<()> {
     {
         let now = std::time::Instant::now();
         let mut pix2rgb_dev = dev.alloc_zeros::<f32>(img_shape.0 * img_shape.1 * 3)?;
-        del_canvas_splat_cudarc::splat_gauss::rasterize_pnt2splat2(
+        del_splat_cudarc::splat_gauss::rasterize_pnt2splat2(
             &dev,
             (img_shape.0 as u32, img_shape.1 as u32),
             &mut pix2rgb_dev,
@@ -97,7 +97,7 @@ fn main() -> anyhow::Result<()> {
         //
         let now = std::time::Instant::now();
         let mut pix2rgb_dev = dev.alloc_zeros::<f32>(img_shape.0 * img_shape.1 * 3)?;
-        del_canvas_splat_cudarc::splat_gauss::rasterize_pnt2splat2(
+        del_splat_cudarc::splat_gauss::rasterize_pnt2splat2(
             &dev,
             (img_shape.0 as u32, img_shape.1 as u32),
             &mut pix2rgb_dev,

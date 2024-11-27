@@ -9,7 +9,7 @@ license.workspace = true
 cuda = [
     "dep:cudarc",
     "dep:del-msh-cudarc",
-    "dep:del-canvas-splat-cudarc",
+    "dep:del-splat-cudarc",
     "dep:del-raycast-cudarc"]
 
 
@@ -33,7 +33,7 @@ del-raycast.workspace = true
 
 cudarc = { workspace = true, optional = true }
 del-msh-cudarc = { workspace = true, optional = true }
-del-canvas-splat-cudarc = { workspace = true, optional = true }
+del-splat-cudarc = { workspace = true, optional = true }
 del-raycast-cudarc = { workspace = true, optional = true }
 
 [build-dependencies]

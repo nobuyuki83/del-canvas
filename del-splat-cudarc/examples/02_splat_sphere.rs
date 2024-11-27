@@ -1,7 +1,7 @@
 #[cfg(feature = "cuda")]
-use del_canvas_splat_cudarc::splat_sphere::Splat2;
+use del_splat_cudarc::splat_sphere::Splat2;
 #[cfg(feature = "cuda")]
-use del_canvas_splat_cudarc::splat_sphere::Splat3;
+use del_splat_cudarc::splat_sphere::Splat3;
 
 use num_traits::AsPrimitive;
 
@@ -116,7 +116,7 @@ fn main() -> anyhow::Result<()> {
         dev.htod_copy(pnt2splat.clone())?
     };
     let transform_world2ndc_dev = dev.htod_copy(transform_world2ndc.to_vec())?;
-    del_canvas_splat_cudarc::splat_sphere::pnt2splat3_to_pnt2splat2(
+    del_splat_cudarc::splat_sphere::pnt2splat3_to_pnt2splat2(
         &dev,
         &pnt2xyzrgb_dev,
         &mut pnt2splat_dev,
@@ -170,7 +170,7 @@ fn main() -> anyhow::Result<()> {
         img_shape.1 / TILE_SIZE + if img_shape.1 % TILE_SIZE == 0 { 0 } else { 1 },
     );
     let now = std::time::Instant::now();
-    let (tile2idx_dev, idx2pnt_dev) = del_canvas_splat_cudarc::splat_sphere::tile2idx_idx2pnt(
+    let (tile2idx_dev, idx2pnt_dev) = del_splat_cudarc::splat_sphere::tile2idx_idx2pnt(
         &dev,
         (tile_shape.0 as u32, tile_shape.1 as u32),
         &pnt2splat_dev,
@@ -187,7 +187,7 @@ fn main() -> anyhow::Result<()> {
     {
         let mut pix2rgb_dev = dev.alloc_zeros::<f32>(img_shape.0 * img_shape.1 * 3)?;
         let now = std::time::Instant::now();
-        del_canvas_splat_cudarc::splat_sphere::splat(
+        del_splat_cudarc::splat_sphere::splat(
             &dev,
             (img_shape.0 as u32, img_shape.1 as u32),
             &mut pix2rgb_dev,

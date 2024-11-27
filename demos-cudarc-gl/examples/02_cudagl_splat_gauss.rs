@@ -1,7 +1,7 @@
 #[cfg(feature = "cuda")]
 use cudarc::driver::{CudaSlice, DeviceSlice};
 #[cfg(feature = "cuda")]
-use del_canvas_splat_cudarc::splat_gauss::Splat2;
+use del_splat_cudarc::splat_gauss::Splat2;
 
 use winit::dpi::PhysicalSize;
 use winit::event_loop::EventLoop;
@@ -11,8 +11,8 @@ use winit::window::Window;
 #[cfg(feature = "cuda")]
 pub struct Content {
     pub dev: std::sync::Arc<cudarc::driver::CudaDevice>,
-    pub pnt2splat3_dev: CudaSlice<del_canvas_splat_cudarc::splat_gauss::Splat3>,
-    pub pnt2splat2_dev: CudaSlice<del_canvas_splat_cudarc::splat_gauss::Splat2>,
+    pub pnt2splat3_dev: CudaSlice<del_splat_cudarc::splat_gauss::Splat3>,
+    pub pnt2splat2_dev: CudaSlice<del_splat_cudarc::splat_gauss::Splat2>,
     pub pix2rgb_dev: CudaSlice<f32>,
 }
 
@@ -29,7 +29,7 @@ impl del_gl_winit_glutin::app3::Content for Content {
         let pnt2splat3 = {
             let mut pnt2splat3 = del_msh_core::io_ply::read_3d_gauss_splat::<
                 _,
-                del_canvas_splat_cudarc::splat_gauss::Splat3,
+                del_splat_cudarc::splat_gauss::Splat3,
             >(file_path)
             .unwrap();
             let aabb3 = del_msh_core::vtx2point::aabb3_from_points(&pnt2splat3);
@@ -77,7 +77,7 @@ impl del_gl_winit_glutin::app3::Content for Content {
         let transform_world2ndc =
             del_geo_core::mat4_col_major::mult_mat(&cam_projection, &cam_model);
         let transform_world2ndc_dev = self.dev.htod_copy(transform_world2ndc.to_vec()).unwrap();
-        del_canvas_splat_cudarc::splat_gauss::pnt2splat3_to_pnt2splat2(
+        del_splat_cudarc::splat_gauss::pnt2splat3_to_pnt2splat2(
             &self.dev,
             &self.pnt2splat3_dev,
             &mut self.pnt2splat2_dev,
@@ -86,7 +86,7 @@ impl del_gl_winit_glutin::app3::Content for Content {
         )
         .unwrap();
         let tile_size = 16usize;
-        let (tile2idx_dev, idx2pnt_dev) = del_canvas_splat_cudarc::splat_gauss::tile2idx_idx2pnt(
+        let (tile2idx_dev, idx2pnt_dev) = del_splat_cudarc::splat_gauss::tile2idx_idx2pnt(
             &self.dev,
             (img_shape.0 as u32, img_shape.1 as u32),
             tile_size as u32,
@@ -100,7 +100,7 @@ impl del_gl_winit_glutin::app3::Content for Content {
                 .unwrap();
         }
         self.dev.memset_zeros(&mut self.pix2rgb_dev).unwrap();
-        del_canvas_splat_cudarc::splat_gauss::rasterize_pnt2splat2(
+        del_splat_cudarc::splat_gauss::rasterize_pnt2splat2(
             &self.dev,
             (img_shape.0 as u32, img_shape.1 as u32),
             &mut self.pix2rgb_dev,

@@ -1,12 +1,12 @@
 [package]
-name = "del-canvas-splat-cudarc"
+name = "del-splat-cudarc"
 description = "hogehoge"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [features]
-cuda = ["dep:cudarc", "dep:del-canvas-splat-cudarc-kernel", "dep:del-cudarc"]
+cuda = ["dep:cudarc", "dep:del-splat-cudarc-kernel", "dep:del-cudarc"]
 
 [dependencies]
 anyhow.workspace = true
@@ -21,7 +21,7 @@ del-canvas-image.workspace = true
 
 cudarc = { workspace = true, optional = true }
 del-cudarc = { workspace = true, optional = true }
-del-canvas-splat-cudarc-kernel = {workspace = true, optional = true }
+del-splat-cudarc-kernel = {workspace = true, optional = true }
 # kernel-util.workspace = true
 
 # [build-dependencies]

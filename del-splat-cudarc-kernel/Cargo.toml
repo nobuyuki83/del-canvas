@@ -1,5 +1,5 @@
 [package]
-name = "del-canvas-splat-cudarc-kernel"
+name = "del-splat-cudarc-kernel"
 description = "hogehoge"
 
 [dependencies]

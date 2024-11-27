@@ -4,12 +4,12 @@ members = [
     "del-canvas-image",
     "del-raycast",
     "del-raycast-cudarc",
-    "del-canvas-splat-cudarc",
+    "del-splat-cudarc",
     "demos-cudarc-gl",
     "demos-gl"
 ]
 exclude = [
-    "del-canvas-splat-cudarc-kernel",
+    "del-splat-cudarc-kernel",
     "del-raycast-cudarc-kernel"]
 resolver = "2"
 
@@ -53,8 +53,8 @@ ply-rs = "0.1.3"
 # internal
 del-canvas-cpu = { path = "del-canvas-cpu" }
 del-canvas-image = {path = "del-canvas-image"}
-del-canvas-splat-cudarc = {path = "del-canvas-splat-cudarc"}
-del-canvas-splat-cudarc-kernel = {path = "del-canvas-splat-cudarc-kernel"}
+del-splat-cudarc = {path = "del-splat-cudarc"}
+del-splat-cudarc-kernel = {path = "del-splat-cudarc-kernel"}
 del-raycast = {path="del-raycast"}
 del-raycast-cudarc = {path = "del-raycast-cudarc"}
 del-raycast-cudarc-kernel = {path = "del-raycast-cudarc-kernel"}
