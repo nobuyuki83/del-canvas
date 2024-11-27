@@ -47,6 +47,7 @@ winit = "0.30.5"
 cfg_aliases = "0.2.1"
 gl_generator = "0.14.0"
 ply-rs = "0.1.3"
+
 # internal
 del-canvas-cpu = { path = "del-canvas-cpu" }
 del-canvas-image = {path = "del-canvas-image"}
