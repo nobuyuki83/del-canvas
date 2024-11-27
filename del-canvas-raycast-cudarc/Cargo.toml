@@ -5,7 +5,7 @@ edition.workspace = true
 license.workspace = true
 
 [features]
-cuda = ["dep:del-msh-cudarc", "dep:del-cudarc-util", "dep:cudarc", "dep:del-canvas-raycast-cudarc-kernel"]
+cuda = ["dep:del-msh-cudarc", "dep:del-cudarc", "dep:cudarc", "dep:del-canvas-raycast-cudarc-kernel"]
 
 [dependencies]
 arrayref.workspace = true
@@ -19,6 +19,6 @@ del-canvas-image.workspace = true
 
 # cuda dependent
 cudarc = {workspace = true, optional = true }
-del-cudarc-util = {workspace = true, optional = true }
+del-cudarc = {workspace = true, optional = true }
 del-msh-cudarc = { workspace = true, optional = true }
 del-canvas-raycast-cudarc-kernel = { workspace = true, optional = true }

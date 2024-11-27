@@ -78,7 +78,7 @@ del-msh-cudarc = {git = "https://github.com/nobuyuki83/del-msh.git", features = 
 del-msh-cudarc-kernel = {git = "https://github.com/nobuyuki83/del-msh.git"}
 del-gl-core = {git = "https://github.com/nobuyuki83/del-gl.git"}
 del-gl-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git"}
-del-cudarc-util = { git="https://github.com/nobuyuki83/del-cudarc.git"}
+del-cudarc = { git="https://github.com/nobuyuki83/del-cudarc.git"}
 pbrt4 = { git = "https://github.com/nobuyuki83/pbrt4.git" }
 
 # for deploy

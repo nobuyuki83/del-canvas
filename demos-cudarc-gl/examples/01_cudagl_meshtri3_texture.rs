@@ -41,12 +41,6 @@ impl del_gl_winit_glutin::app3::Content for Content {
             del_canvas_image::load_image_as_float_array("asset/spot/spot_texture.png").unwrap();
         assert_eq!(bitdepth, 3);
         let dev = cudarc::driver::CudaDevice::new(0).unwrap();
-        dev.load_ptx(
-            del_msh_cudarc_kernel::PIX2TRI.into(),
-            "my_module",
-            &["pix_to_tri"],
-        )
-        .unwrap();
         // let pix_to_tri = dev.get_func("my_module", "pix_to_tri").unwrap();
         let tri2vtx_dev = dev
             .htod_copy(tri2vtx.iter().map(|&v| v as u32).collect())
@@ -87,7 +81,7 @@ impl del_gl_winit_glutin::app3::Content for Content {
             .alloc_zeros::<u32>(img_shape.1 * img_shape.0)
             .unwrap();
         let transform_ndc2world_dev = self.dev.htod_copy(transform_ndc2world.to_vec()).unwrap();
-        del_msh_cudarc::pix2tri::pix2tri(
+        del_canvas_raycast_cudarc::pix2tri::pix2tri(
             &self.dev,
             img_shape,
             &mut pix2tri_dev,

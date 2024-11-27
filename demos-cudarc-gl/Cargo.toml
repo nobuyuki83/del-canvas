@@ -6,7 +6,12 @@ edition.workspace = true
 license.workspace = true
 
 [features]
-cuda = ["dep:cudarc", "dep:del-msh-cudarc", "dep:del-canvas-splat-cudarc", "dep:del-msh-cudarc-kernel"]
+cuda = [
+    "dep:cudarc",
+    "dep:del-msh-cudarc",
+    "dep:del-canvas-splat-cudarc",
+    "dep:del-canvas-raycast-cudarc"]
+
 
 [dependencies]
 anyhow.workspace = true
@@ -28,8 +33,8 @@ del-canvas-raycast.workspace = true
 
 cudarc = { workspace = true, optional = true }
 del-msh-cudarc = { workspace = true, optional = true }
-del-msh-cudarc-kernel = { workspace = true, optional = true }
 del-canvas-splat-cudarc = { workspace = true, optional = true }
+del-canvas-raycast-cudarc = { workspace = true, optional = true }
 
 [build-dependencies]
 gl_generator.workspace = true

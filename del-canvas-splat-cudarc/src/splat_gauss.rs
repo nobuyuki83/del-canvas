@@ -95,7 +95,7 @@ pub fn pnt2splat3_to_pnt2splat2(
         img_shape.1,
     );
     use cudarc::driver::LaunchAsync;
-    let splat3_to_splat2 = del_cudarc_util::get_or_load_func(
+    let splat3_to_splat2 = del_cudarc::get_or_load_func(
         &dev,
         "splat3_to_splat2",
         del_canvas_splat_cudarc_kernel::SPLAT_GAUSS,
@@ -141,7 +141,7 @@ pub fn rasterize_pnt2splat2(
         pnt2splat2_dev,
     );
     use cudarc::driver::LaunchAsync;
-    let count_splat_in_tile = del_cudarc_util::get_or_load_func(
+    let count_splat_in_tile = del_cudarc::get_or_load_func(
         &dev,
         "rasterize_splat_using_tile",
         del_canvas_splat_cudarc_kernel::SPLAT_GAUSS,
@@ -179,7 +179,7 @@ pub fn tile2idx_idx2pnt(
             16u32,
         );
         use cudarc::driver::LaunchAsync;
-        let count_splat_in_tile = del_cudarc_util::get_or_load_func(
+        let count_splat_in_tile = del_cudarc::get_or_load_func(
             &dev,
             "count_splat_in_tile",
             del_canvas_splat_cudarc_kernel::SPLAT_GAUSS,
@@ -189,12 +189,12 @@ pub fn tile2idx_idx2pnt(
     };
     let tile2idx_dev = {
         let mut tmp = dev.alloc_zeros(tile2idx_dev.len())?;
-        del_cudarc_util::cumsum::sum_scan_blelloch(&dev, &mut tmp, &tile2idx_dev)?;
+        del_cudarc::cumsum::sum_scan_blelloch(&dev, &mut tmp, &tile2idx_dev)?;
         tmp
     };
     let pnt2idx_dev = {
         let mut tmp = dev.alloc_zeros::<u32>(pnt2ind_dev.len())?;
-        del_cudarc_util::cumsum::sum_scan_blelloch(&dev, &mut tmp, &pnt2ind_dev)?;
+        del_cudarc::cumsum::sum_scan_blelloch(&dev, &mut tmp, &pnt2ind_dev)?;
         tmp
     };
     let num_ind = dev.dtoh_sync_copy(&pnt2idx_dev)?.last().unwrap().to_owned(); // todo: send only last element to cpu
@@ -221,13 +221,13 @@ pub fn tile2idx_idx2pnt(
             16u32,
         );
         use cudarc::driver::LaunchAsync;
-        let count_splat_in_tile = del_cudarc_util::get_or_load_func(
+        let count_splat_in_tile = del_cudarc::get_or_load_func(
             &dev,
             "fill_index_info",
             del_canvas_splat_cudarc_kernel::SPLAT_GAUSS,
         )?;
         unsafe { count_splat_in_tile.launch(cfg, param) }?;
-        del_cudarc_util::sort_by_key_u64::radix_sort_by_key_u64(
+        del_cudarc::sort_by_key_u64::radix_sort_by_key_u64(
             &dev,
             &mut idx2tiledepth_dev,
             &mut idx2pnt_dev,

@@ -6,7 +6,7 @@ edition.workspace = true
 license.workspace = true
 
 [features]
-cuda = ["dep:cudarc", "dep:del-canvas-splat-cudarc-kernel", "dep:del-cudarc-util"]
+cuda = ["dep:cudarc", "dep:del-canvas-splat-cudarc-kernel", "dep:del-cudarc"]
 
 [dependencies]
 anyhow.workspace = true
@@ -20,7 +20,7 @@ del-canvas-cpu.workspace = true
 del-canvas-image.workspace = true
 
 cudarc = { workspace = true, optional = true }
-del-cudarc-util = { workspace = true, optional = true }
+del-cudarc = { workspace = true, optional = true }
 del-canvas-splat-cudarc-kernel = {workspace = true, optional = true }
 # kernel-util.workspace = true
 
