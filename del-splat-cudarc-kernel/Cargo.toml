@@ -6,3 +6,4 @@ description = "hogehoge"
 
 [build-dependencies]
 bindgen_cuda = "0.1.5"
+del-geo-cpp-headers = {path="../../del-geo/del-geo-cpp-headers"}

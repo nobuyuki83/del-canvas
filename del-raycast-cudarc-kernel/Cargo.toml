@@ -1,8 +1,0 @@
-[package]
-name = "del-raycast-cudarc-kernel"
-description = "hogehoge"
-
-[dependencies]
-
-[build-dependencies]
-bindgen_cuda = "0.1.5"
