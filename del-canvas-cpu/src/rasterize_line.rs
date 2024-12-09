@@ -38,13 +38,13 @@ pub fn draw_dda<Real, VAL>(
 }
 
 /// * `transform` - 3x3 homogeneous transformation matrix with **column major** order
-pub fn draw_dda_with_transformation<Real>(
-    img_data: &mut [u8],
+pub fn draw_dda_with_transformation<Real, VAL>(
+    img_data: &mut [VAL],
     width: usize,
     p0: &[Real; 2],
     p1: &[Real; 2],
     transform: &[Real; 9],
-    i_color: u8,
+    i_color: VAL,
 ) where
     Real: num_traits::Float
         + std::fmt::Debug
@@ -54,6 +54,7 @@ pub fn draw_dda_with_transformation<Real>(
         + Copy
         + AsPrimitive<usize>,
     usize: AsPrimitive<Real>,
+    VAL: Copy,
 {
     let q0 = del_geo_core::mat3_col_major::transform_homogeneous(transform, p0).unwrap();
     let q1 = del_geo_core::mat3_col_major::transform_homogeneous(transform, p1).unwrap();

@@ -1,7 +1,7 @@
 pub struct Canvas {
     pub width: usize,
     pub height: usize,
-    data: Vec<u8>,
+    pub data: Vec<u8>,
 }
 
 impl Canvas {

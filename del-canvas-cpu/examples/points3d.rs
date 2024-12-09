@@ -43,7 +43,7 @@ fn main() -> anyhow::Result<()> {
             let val01_b = reng.gen::<f32>();
             let barycrd =
                 del_msh_core::sampling::sample_uniformly_trimesh(&cumsumarea, val01_a, val01_b);
-            let tri = del_msh_core::trimesh3::to_tri3(barycrd.0, &tri2vtx, &vtx2xyz);
+            let tri = del_msh_core::trimesh3::to_tri3(&tri2vtx, &vtx2xyz, barycrd.0);
             let pos_world = tri.position_from_barycentric_coordinates(barycrd.1, barycrd.2);
             let normal_world = del_geo_core::vec3::normalized(&tri.normal());
             let color = [

@@ -12,12 +12,12 @@ pub fn bilinear_integer_center<const NDIM: usize>(
     let rx = pix[0] - pix[0].floor();
     let ix0 = pix[0].floor() as i64;
     if ix0 < 0 || ix0 >= tex_shape.0 as i64 {
-        todo!();
+        return [0f32; NDIM];
     }
     let ry = pix[1] - pix[1].floor();
     let iy0 = pix[1].floor() as i64;
     if iy0 < 0 || iy0 >= tex_shape.1 as i64 {
-        todo!();
+        return [0f32; NDIM];
     }
     //
     let ix0 = ix0 as usize;
