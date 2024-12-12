@@ -1,14 +1,5 @@
-[workspace]
-members = [
-    "del-canvas-cpu",
-    "del-canvas-image",
-    "del-splat-cudarc",
-    "examples-cudarc-gl"]
-exclude = [
-    "del-splat-cudarc-kernel"]
-resolver = "2"
-
-[workspace.package]
+[package]
+name = "del-canvas"
 version = "0.1.2"
 edition = "2021"
 license = "MIT"
@@ -16,66 +7,25 @@ description = "drawing primitives (e.g., triangles and lines) to bitmap images a
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[workspace.dependencies.cudarc]
-version = "*"
-features = [
-    "std", "cublas", "cublaslt", "curand", "driver", "nvrtc",
-    "f16", "cuda-version-from-build-system", "dynamic-linking"]
-default-features=false
-
-[workspace.dependencies]
+[dependencies]
 num-traits = "0.2.19"
-png = "0.17.13"
+image = "0.25.5"
+png = "0.17.15"
+nalgebra = "0.33.2"
+anyhow = "1.0.94"
 gif = "0.13.1"
-image = "0.25.1"
-nalgebra = "0.33.0"
-rand = "0.8.5"
-rayon = "1.10.0"
-anyhow = "1.0.86"
-arrayref = "0.3.8"
-itertools = "0.13.0"
-rand_chacha = "0.3.1"
-byteorder = "1.5.0"
-slice-of-array = "0.3.2"
-glutin = "0.32.1"
-glutin-winit = "0.5.0"
-raw-window-handle = "0.6.2"
-winit = "0.30.5"
-cfg_aliases = "0.2.1"
-gl_generator = "0.14.0"
-ply-rs = "0.1.3"
-
-# internal
-del-canvas-cpu = { path = "del-canvas-cpu" }
-del-canvas-image = {path = "del-canvas-image"}
-del-splat-cudarc = {path = "del-splat-cudarc"}
-del-splat-cudarc-kernel = {path = "del-splat-cudarc-kernel"}
 
 # for develop
 # del-geo-core = { path = "../del-geo/del-geo-core"}
 # del-geo-nalgebra ={ path = "../del-geo/del-geo-nalgebra"}
 # del-msh-core = { path = "../del-msh/del-msh-core"}
 # del-msh-nalgebra = { path = "../del-msh/del-msh-nalgebra"}
-# del-msh-cudarc = {path = "../del-msh/del-msh-cudarc", features = ["cuda"]}
-# del-msh-cudarc-kernel = {path = "../del-msh/del-msh-cudarc-kernel"}
-# del-gl-core = {path = "../del-gl/del-gl-core" }
-# del-gl-winit-glutin = {path = "../del-gl/del-gl-winit-glutin"}
-# del-cudarc-util = {path="../del-cudarc/del-cudarc-util"}
-# del-raycast-core = {path = "../del-raycast/del-raycast-core"}
-# pbrt4 = { path = "../pbrt4" }
 
 # for github push
 del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git"}
 del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git"}
 del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
 del-msh-nalgebra = { git = "https://github.com/nobuyuki83/del-msh.git" }
-del-msh-cudarc = {git = "https://github.com/nobuyuki83/del-msh.git", features = ["cuda"]}
-del-msh-cudarc-kernel = {git = "https://github.com/nobuyuki83/del-msh.git"}
-del-gl-core = {git = "https://github.com/nobuyuki83/del-gl.git"}
-del-gl-winit-glutin = {git = "https://github.com/nobuyuki83/del-gl.git"}
-del-cudarc = { git="https://github.com/nobuyuki83/del-cudarc.git"}
-del-raycast-cudarc = { git="https://github.com/nobuyuki83/del-raycast.git"}
-pbrt4 = { git = "https://github.com/nobuyuki83/pbrt4.git" }
 
 # for deploy
 # del-geo-core = "0.1.32"
