@@ -109,7 +109,6 @@ impl crate::canvas_svg::Canvas {
     }
 }
 
-
 #[test]
 fn hoge() {
     let str2 = "M 457.60409,474.77081 H 347.66161 \
@@ -198,13 +197,7 @@ fn hoge1() {
             let j_vtx = (i_vtx + 1) % vtxp2xy.len();
             let p0 = vtxp2xy[i_vtx];
             let p1 = vtxp2xy[j_vtx];
-            crate::rasterize::line::draw_dda(
-                &mut img_data,
-                width,
-                &[p0.x, p0.y],
-                &[p1.x, p1.y],
-                0,
-            );
+            crate::rasterize::line::draw_dda(&mut img_data, width, &[p0.x, p0.y], &[p1.x, p1.y], 0);
         }
     }
     let file = std::fs::File::create("target/r1.png").unwrap();
@@ -215,5 +208,3 @@ fn hoge1() {
     let mut writer = encoder.write_header().unwrap();
     writer.write_image_data(&img_data).unwrap(); // Save
 }
-
-

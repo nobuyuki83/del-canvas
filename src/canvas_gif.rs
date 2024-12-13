@@ -6,7 +6,7 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    pub fn new<Path>(path_: Path, size: (usize, usize), palette: &Vec<i32>) -> Self
+    pub fn new<Path>(path_: Path, size: (usize, usize), palette: &Vec<i32>) -> anyhow::Result<Self>
     where
         Path: AsRef<std::path::Path>,
     {
@@ -22,25 +22,23 @@ impl Canvas {
                 res
             };
             gif::Encoder::new(
-                std::fs::File::create(path_).unwrap(),
-                size.0.try_into().unwrap(),
-                size.1.try_into().unwrap(),
+                std::fs::File::create(path_)?,
+                size.0 as u16,
+                size.1 as u16,
                 &global_palette,
             )
         };
         match res_encoder {
-            Err(_e) => Self {
-                width: size.0,
-                height: size.1,
-                data: vec![0; size.0 * size.1],
-                gif_enc: None,
-            },
-            Ok(t) => Self {
-                width: size.0,
-                height: size.1,
-                data: vec![0; size.0 * size.1],
-                gif_enc: Some(t),
-            },
+            Err(_e) => Err(anyhow::Error::new(_e)),
+            Ok(t) => {
+                let s = Self {
+                    width: size.0,
+                    height: size.1,
+                    data: vec![0; size.0 * size.1],
+                    gif_enc: Some(t),
+                };
+                Ok(s)
+            }
         }
     }
 

@@ -1,13 +1,13 @@
+pub mod cam2;
+pub mod cam3;
 pub mod canvas_bitmap;
 pub mod canvas_gif;
 pub mod canvas_svg;
 pub mod color;
 pub mod colormap;
 pub mod morphology;
-pub mod texture;
 pub mod rasterize;
-pub mod cam2;
-pub mod cam3;
+pub mod texture;
 
 use num_traits::AsPrimitive;
 

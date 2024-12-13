@@ -45,7 +45,7 @@ pub fn ray3_homogeneous(
     let p1 =
         del_geo_core::mat4_col_major::transform_homogeneous(transform_ndc_to_world, &[x0, y0, -1.])
             .unwrap();
-    let ray_org = p0.clone();
+    let ray_org = p0;
     let ray_dir = del_geo_core::vec3::sub(&p1, &p0);
     (ray_org, ray_dir)
 }

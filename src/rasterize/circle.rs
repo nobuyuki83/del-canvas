@@ -81,8 +81,8 @@ pub fn stroke_dda<Real, VAL>(
             x[0] + rad * num_traits::Float::cos(theta1),
             x[1] + rad * num_traits::Float::sin(theta1),
         ];
-        let q0 = del_geo_core::mat3_col_major::transform_homogeneous(&transform, &p0).unwrap();
-        let q1 = del_geo_core::mat3_col_major::transform_homogeneous(&transform, &p1).unwrap();
+        let q0 = del_geo_core::mat3_col_major::transform_homogeneous(transform, &p0).unwrap();
+        let q1 = del_geo_core::mat3_col_major::transform_homogeneous(transform, &p1).unwrap();
         crate::rasterize::line::draw_dda(img_data, width, &q0, &q1, color);
     }
 }
