@@ -86,3 +86,53 @@ where
     assert_eq!(img_trg.len(), width * height * depth);
     Ok((img_trg, (width, height), depth))
 }
+
+pub fn write_hdr_file<P>(
+    path_output: P,
+    img_shape: (usize, usize),
+    img: &[f32],
+) -> anyhow::Result<()>
+where P: AsRef<std::path::Path>
+{
+    // write output
+    let file1 = std::fs::File::create(path_output)?;
+    use image::codecs::hdr::HdrEncoder;
+    let enc = HdrEncoder::new(file1);
+    let img: &[image::Rgb<f32>] =
+        unsafe { std::slice::from_raw_parts(img.as_ptr() as _, img.len() / 3) };
+    let _ = enc.encode(&img, img_shape.0, img_shape.1);
+    Ok(())
+}
+
+pub fn write_hdr_file_mse_rgb_error_map(
+    target_file: String,
+    img_shape: (usize, usize),
+    ground_truth: &[f32],
+    img: &[f32],
+) {
+    assert_eq!(img.len(), img_shape.0 * img_shape.1 * 3);
+    assert_eq!(ground_truth.len(), img_shape.0 * img_shape.1 * 3);
+    let err = |a: &[f32], b: &[f32]| -> image::Rgb<f32> {
+        let sq = (a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2) + (a[2] - b[2]).powi(2);
+        image::Rgb([sq; 3])
+    };
+    let img_error: Vec<image::Rgb<f32>> = img
+        .chunks(3)
+        .zip(ground_truth.chunks(3))
+        .map(|(a, b)| err(a, b))
+        .collect();
+    use image::codecs::hdr::HdrEncoder;
+    let file = std::fs::File::create(target_file).unwrap();
+    let enc = HdrEncoder::new(file);
+    let _ = enc.encode(&img_error, img_shape.0, img_shape.1);
+}
+
+pub fn rmse_error(gt: &[f32], rhs: &[f32]) -> f32 {
+    let up: f32 = gt
+        .iter()
+        .zip(rhs.iter())
+        .map(|(&l, &r)| (l - r) * (l - r))
+        .sum();
+    let down: f32 = gt.iter().map(|&v| v * v).sum();
+    up / down
+}
