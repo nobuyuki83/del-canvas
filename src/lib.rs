@@ -92,7 +92,8 @@ pub fn write_hdr_file<P>(
     img_shape: (usize, usize),
     img: &[f32],
 ) -> anyhow::Result<()>
-where P: AsRef<std::path::Path>
+where
+    P: AsRef<std::path::Path>,
 {
     // write output
     let file1 = std::fs::File::create(path_output)?;
@@ -100,7 +101,7 @@ where P: AsRef<std::path::Path>
     let enc = HdrEncoder::new(file1);
     let img: &[image::Rgb<f32>] =
         unsafe { std::slice::from_raw_parts(img.as_ptr() as _, img.len() / 3) };
-    let _ = enc.encode(&img, img_shape.0, img_shape.1);
+    let _ = enc.encode(img, img_shape.0, img_shape.1);
     Ok(())
 }
 

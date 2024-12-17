@@ -31,9 +31,9 @@ pub fn wireframe_dda<DATA>(
     ];
     use del_geo_core::mat2x3_col_major::mult_vec3;
     use del_geo_core::mat4_col_major::transform_homogeneous;
-    for i_edge in 0..edge2vtx.len() {
-        let i0_vtx = edge2vtx[i_edge][0];
-        let i1_vtx = edge2vtx[i_edge][1];
+    for node2vtx in edge2vtx.iter() {
+        let i0_vtx = node2vtx[0];
+        let i1_vtx = node2vtx[1];
         let p0 = del_geo_core::aabb3::xyz_from_hex_index(aabb3, i0_vtx);
         let p1 = del_geo_core::aabb3::xyz_from_hex_index(aabb3, i1_vtx);
         let q0 = transform_homogeneous(transform_world2ndc, &p0).unwrap();
