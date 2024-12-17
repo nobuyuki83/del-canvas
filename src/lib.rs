@@ -136,3 +136,29 @@ pub fn rmse_error(gt: &[f32], rhs: &[f32]) -> f32 {
     let down: f32 = gt.iter().map(|&v| v * v).sum();
     up / down
 }
+
+pub fn expand_image(
+    (img_width_in, img_height_in): (usize, usize),
+    img_data_in: &[f32],
+    ratio: usize,
+) -> ((usize, usize), Vec<f32>) {
+    let img_width_out = img_width_in * ratio;
+    let img_height_out = img_height_in * ratio;
+    let mut img_data_out = vec![0f32; img_height_out * img_width_out * 3];
+    for iwi in 0..img_width_in {
+        for ihi in 0..img_height_in {
+            let pix_in =
+                &img_data_in[(ihi * img_width_in + iwi) * 3..(ihi * img_width_in + iwi) * 3 + 3];
+            for k in 0..ratio {
+                for l in 0..ratio {
+                    let iwo = iwi * ratio + k;
+                    let iho = ihi * ratio + l;
+                    let pix_out = &mut img_data_out
+                        [(iho * img_width_out + iwo) * 3..(iho * img_width_out + iwo) * 3 + 3];
+                    pix_out.copy_from_slice(pix_in);
+                }
+            }
+        }
+    }
+    ((img_width_out, img_height_out), img_data_out)
+}
