@@ -110,7 +110,7 @@ pub fn write_hdr_file_mse_rgb_error_map(
     img_shape: (usize, usize),
     ground_truth: &[f32],
     img: &[f32],
-) {
+) -> anyhow::Result<()> {
     assert_eq!(img.len(), img_shape.0 * img_shape.1 * 3);
     assert_eq!(ground_truth.len(), img_shape.0 * img_shape.1 * 3);
     let err = |a: &[f32], b: &[f32]| -> image::Rgb<f32> {
@@ -123,9 +123,10 @@ pub fn write_hdr_file_mse_rgb_error_map(
         .map(|(a, b)| err(a, b))
         .collect();
     use image::codecs::hdr::HdrEncoder;
-    let file = std::fs::File::create(target_file).unwrap();
+    let file = std::fs::File::create(target_file)?;
     let enc = HdrEncoder::new(file);
     let _ = enc.encode(&img_error, img_shape.0, img_shape.1);
+    Ok(())
 }
 
 pub fn rmse_error(gt: &[f32], rhs: &[f32]) -> f32 {
