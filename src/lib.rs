@@ -13,7 +13,7 @@ use num_traits::AsPrimitive;
 
 pub fn write_png_from_float_image_grayscale<Real, Path>(
     path: Path,
-    img_shape: &(usize, usize),
+    img_shape: (usize, usize),
     img: &[Real],
 ) -> anyhow::Result<()>
 where
@@ -142,21 +142,24 @@ pub fn rmse_error(gt: &[f32], rhs: &[f32]) -> f32 {
 pub fn expand_image(
     (img_width_in, img_height_in): (usize, usize),
     img_data_in: &[f32],
+    num_channel: usize,
     ratio: usize,
-) -> ((usize, usize), Vec<f32>) {
+) -> ((usize, usize), Vec<f32>)
+{
+    assert_eq!(img_width_in * img_height_in * num_channel, img_data_in.len());
     let img_width_out = img_width_in * ratio;
     let img_height_out = img_height_in * ratio;
-    let mut img_data_out = vec![0f32; img_height_out * img_width_out * 3];
+    let mut img_data_out = vec![0f32; img_height_out * img_width_out * num_channel];
     for iwi in 0..img_width_in {
         for ihi in 0..img_height_in {
             let pix_in =
-                &img_data_in[(ihi * img_width_in + iwi) * 3..(ihi * img_width_in + iwi) * 3 + 3];
+                &img_data_in[(ihi * img_width_in + iwi) * num_channel..(ihi * img_width_in + iwi + 1) * num_channel];
             for k in 0..ratio {
                 for l in 0..ratio {
                     let iwo = iwi * ratio + k;
                     let iho = ihi * ratio + l;
                     let pix_out = &mut img_data_out
-                        [(iho * img_width_out + iwo) * 3..(iho * img_width_out + iwo) * 3 + 3];
+                        [(iho * img_width_out + iwo) * num_channel..(iho * img_width_out + iwo+1) * num_channel];
                     pix_out.copy_from_slice(pix_in);
                 }
             }
