@@ -10,9 +10,9 @@ description = "drawing primitives (e.g., triangles and lines) to bitmap images a
 [dependencies]
 num-traits = "0.2.19"
 image = "0.25.5"
-png = "0.17.15"
+png = "0.17.16"
 nalgebra = "0.33.2"
-anyhow = "1.0.94"
+anyhow = "1.0.95"
 gif = "0.13.1"
 
 # for develop
@@ -22,13 +22,14 @@ gif = "0.13.1"
 # del-msh-nalgebra = { path = "../del-msh/del-msh-nalgebra"}
 
 # for github push
-del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git"}
-del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git"}
-del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
-del-msh-nalgebra = { git = "https://github.com/nobuyuki83/del-msh.git" }
+# del-geo-core = { git = "https://github.com/nobuyuki83/del-geo.git"}
+# del-geo-nalgebra = { git = "https://github.com/nobuyuki83/del-geo.git"}
+# del-msh-core = { git = "https://github.com/nobuyuki83/del-msh.git" }
+# del-msh-nalgebra = { git = "https://github.com/nobuyuki83/del-msh.git" }
 
 # for deploy
-# del-geo-core = "0.1.32"
-# del-geo-nalgebra = "0.1.32"
-# del-msh-core = "0.1.36"
+del-geo-core = "0.1.33"
+del-geo-nalgebra = "0.1.33"
+del-msh-core = "0.1.37"
+del-msh-nalgebra = "0.1.39"
 
