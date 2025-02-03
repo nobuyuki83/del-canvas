@@ -40,7 +40,7 @@ pub fn fill<Real, VAL>(
     rad_pix: Real,
     color: VAL,
 ) where
-    Real: num_traits::Float + 'static + AsPrimitive<i64> + nalgebra::RealField,
+    Real: num_traits::Float + 'static + AsPrimitive<i64>,
     i64: AsPrimitive<Real>,
     VAL: Copy,
 {
@@ -61,7 +61,12 @@ pub fn stroke_dda<Real, VAL>(
     transform: &[Real; 9],
     color: VAL,
 ) where
-    Real: num_traits::Float + 'static + AsPrimitive<i64> + nalgebra::RealField + AsPrimitive<usize>,
+    Real: num_traits::Float
+        + num_traits::FloatConst
+        + 'static
+        + AsPrimitive<i64>
+        + AsPrimitive<usize>
+        + std::fmt::Debug,
     i64: AsPrimitive<Real>,
     usize: AsPrimitive<Real>,
     i32: AsPrimitive<Real>,
@@ -69,7 +74,7 @@ pub fn stroke_dda<Real, VAL>(
 {
     let num_theta = 32;
     let two = Real::one() + Real::one();
-    let dtheta: Real = two * Real::pi() / num_theta.as_();
+    let dtheta: Real = two * Real::PI() / num_theta.as_();
     for i_theta in 0..num_theta {
         let theta0 = dtheta * i_theta.as_();
         let theta1 = dtheta * ((i_theta + 1) % num_theta).as_();

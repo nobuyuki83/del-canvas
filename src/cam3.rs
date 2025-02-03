@@ -3,31 +3,42 @@ use num_traits::AsPrimitive;
 pub struct Camera3<T> {
     pub w: usize,
     pub h: usize,
-    o: nalgebra::Vector3<T>,
-    d: nalgebra::Vector3<T>,
-    cx: nalgebra::Vector3<T>,
-    cy: nalgebra::Vector3<T>,
+    o: [T; 3],
+    d: [T; 3],
+    cx: [T; 3],
+    cy: [T; 3],
 }
 
 impl<T> Camera3<T>
 where
-    T: nalgebra::RealField + 'static + Copy,
+    T: num_traits::Float + 'static + Copy,
     f64: AsPrimitive<T>,
     usize: AsPrimitive<T>,
 {
-    pub fn new(w: usize, h: usize, o: nalgebra::Vector3<T>, d: nalgebra::Vector3<T>) -> Self {
+    pub fn new(w: usize, h: usize, o: &[T; 3], d: &[T; 3]) -> Self {
+        use del_geo_core::vec3::Vec3;
+        let half = T::one() / (T::one() + T::one());
         let d = d.normalize();
-        let cx =
-            nalgebra::Vector3::<T>::new(w.as_() * 0.5135.as_() / h.as_(), T::zero(), T::zero());
-        let cy = cx.cross(&d).normalize() * 0.5135.as_();
-        Camera3 { w, h, o, d, cx, cy }
+        let cx = [w.as_() * 0.5135.as_() / h.as_(), T::zero(), T::zero()];
+        let cy = cx.cross(&d).normalize().scale(half);
+        Camera3 {
+            w,
+            h,
+            o: *o,
+            d,
+            cx,
+            cy,
+        }
     }
 
-    pub fn ray(&self, x0: T, y0: T) -> (nalgebra::Vector3<T>, nalgebra::Vector3<T>) {
-        let d = self.cx * (x0 / self.w.as_() - 0.5.as_())
-            + self.cy * (y0 / self.h.as_() - 0.5.as_())
-            + self.d;
-        (self.o + d * 140.as_(), d.normalize())
+    pub fn ray(&self, x0: T, y0: T) -> ([T; 3], [T; 3]) {
+        use del_geo_core::vec3::Vec3;
+        let d = del_geo_core::vec3::add_three(
+            &self.cx.scale(x0 / self.w.as_() - 0.5.as_()),
+            &self.cy.scale(y0 / self.h.as_() - 0.5.as_()),
+            &self.d,
+        );
+        (self.o.add(&d.scale(140.as_())), d.normalize())
     }
 }
 

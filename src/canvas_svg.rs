@@ -33,7 +33,7 @@ impl crate::canvas_svg::Canvas {
     pub fn polyloop(
         &mut self,
         vtx2xy: &[f32],
-        transform_xy2pix: &nalgebra::Matrix3<f32>,
+        transform_xy2pix: &[f32; 9],
         stroke_color: Option<i32>,
         stroke_width: Option<f32>,
         fill: Option<i32>,
@@ -64,16 +64,16 @@ impl crate::canvas_svg::Canvas {
         &mut self,
         x: f32,
         y: f32,
-        transform_xy2pix: &nalgebra::Matrix3<f32>,
+        transform_xy2pix: &[f32; 9],
         radius: f32,
         color: &str,
     ) {
-        let p = nalgebra::Vector3::<f32>::new(x, y, 1.);
-        let q = transform_xy2pix * p;
+        let p = [x, y, 1.];
+        let q = del_geo_core::mat3_col_major::mult_vec(transform_xy2pix, &p);
         let s = format!(
             "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"{}\" />",
-            q.x / q.z,
-            q.y / q.z,
+            q[0] / q[2],
+            q[1] / q[2],
             radius,
             color
         );
@@ -86,19 +86,19 @@ impl crate::canvas_svg::Canvas {
         y1: f32,
         x2: f32,
         y2: f32,
-        transform_xy2pix: &nalgebra::Matrix3<f32>,
+        transform_xy2pix: &[f32; 9],
         stroke_width: Option<f32>,
     ) {
-        let p1 = nalgebra::Vector3::<f32>::new(x1, y1, 1.);
-        let q1 = transform_xy2pix * p1;
-        let p2 = nalgebra::Vector3::<f32>::new(x2, y2, 1.);
-        let q2 = transform_xy2pix * p2;
+        let p1 = [x1, y1, 1.];
+        let q1 = del_geo_core::mat3_col_major::mult_vec(transform_xy2pix, &p1);
+        let p2 = [x2, y2, 1.];
+        let q2 = del_geo_core::mat3_col_major::mult_vec(transform_xy2pix, &p2);
         let s = format!(
             "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"black\" {} />",
-            q1.x / q1.z,
-            q1.y / q1.z,
-            q2.x / q2.z,
-            q2.y / q2.z,
+            q1[0] / q1[2],
+            q1[1] / q1[2],
+            q2[0] / q2[2],
+            q2[1] / q2[2],
             if stroke_width.is_some() {
                 format!("stroke-width=\"{}\"", stroke_width.unwrap())
             } else {
@@ -134,10 +134,12 @@ fn hoge() {
     // winding number
     for i_w in 0..width {
         for i_h in 0..height {
-            let p = nalgebra::Vector2::<f32>::new(i_w as f32 + 0.5f32, i_h as f32 + 0.5f32);
+            let p = [i_w as f32 + 0.5f32, i_h as f32 + 0.5f32];
             let mut wn = 0.0f32;
             for i_loop in 0..loops.len() {
-                wn += del_msh_nalgebra::polyloop2::winding_number(&loops[i_loop].0, &p);
+                use slice_of_array::SliceFlatExt;
+                let loop0 = loops[i_loop].0.flat();
+                wn += del_msh_core::polyloop2::winding_number(loop0, &p);
             }
             if wn.round() as i64 != 0 {
                 img_data[i_h * width + i_w] = 128;
@@ -154,8 +156,8 @@ fn hoge() {
             crate::rasterize::line::draw_pixcenter(
                 &mut img_data,
                 width,
-                &[p0.x, p0.y],
-                &[p1.x, p1.y],
+                p0,
+                p1,
                 &[1., 0., 0., 0., 1., 0., 0., 0., 1.],
                 3.0,
                 0,
@@ -197,7 +199,7 @@ fn hoge1() {
             let j_vtx = (i_vtx + 1) % vtxp2xy.len();
             let p0 = vtxp2xy[i_vtx];
             let p1 = vtxp2xy[j_vtx];
-            crate::rasterize::line::draw_dda(&mut img_data, width, &[p0.x, p0.y], &[p1.x, p1.y], 0);
+            crate::rasterize::line::draw_dda(&mut img_data, width, &p0, &p1, 0);
         }
     }
     let file = std::fs::File::create("target/r1.png").unwrap();

@@ -112,7 +112,7 @@ pub fn draw_pixcenter<T, VAL>(
     thickness: T,
     color: VAL,
 ) where
-    T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<usize>,
+    T: num_traits::Float + num_traits::AsPrimitive<usize>,
     usize: AsPrimitive<T>,
     VAL: Copy,
 {

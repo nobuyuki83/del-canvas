@@ -11,7 +11,7 @@ pub fn stroke<T, VAL>(
     thickness: T,
     color: VAL,
 ) where
-    T: num_traits::Float + nalgebra::RealField + num_traits::AsPrimitive<usize>,
+    T: num_traits::Float + num_traits::AsPrimitive<usize>,
     usize: AsPrimitive<T>,
     VAL: Copy,
 {
@@ -60,7 +60,7 @@ pub fn fill<T, VAL>(
             let h: T = ih.as_() + half; // pixel center
             let p = del_geo_core::mat3_col_major::transform_homogeneous(&transform_pix2xy, &[w, h])
                 .unwrap();
-            let wn = del_msh_core::polyloop2::winding_number_(vtx2xy, &p);
+            let wn = del_msh_core::polyloop2::winding_number(vtx2xy, &p);
             if (wn - T::one()).round() == T::zero() {
                 img_data[ih * width + iw] = color;
             }
