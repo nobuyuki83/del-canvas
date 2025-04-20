@@ -1,5 +1,6 @@
 use num_traits::AsPrimitive;
 
+/// draw line using DDA method.
 pub fn draw_dda<Real, VAL>(
     img_data: &mut [VAL],
     width: usize,

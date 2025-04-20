@@ -40,7 +40,7 @@ impl crate::canvas_svg::Canvas {
     ) {
         let s = format!(
             "<polygon points=\"{}\" {} {} {} />",
-            del_msh_core::polyloop2::to_svg(vtx2xy, transform_xy2pix),
+            polyloop2_to_svg(vtx2xy, transform_xy2pix),
             if stroke_color.is_some() {
                 format!("stroke=\"#{:06X}\"", stroke_color.unwrap())
             } else {
@@ -124,9 +124,9 @@ fn hoge() {
     M 165.13281,263.08599 q 5.77046,0 10.02238,0.30371 4.25192,0 6.9853,0 58.91944,0 88.68288,-25.51151 \
     30.06714,-25.51152 30.06714,-64.99362 0,-38.57098 -24.29668,-62.56395 -23.99297,-24.296679 \
     -63.77879,-24.296679 -17.61509,0 -47.68223,5.770461 z";
-    let strs = del_msh_core::io_svg::svg_outline_path_from_shape(str2);
+    let strs = svg_outline_path_from_shape(str2);
     // dbg!(&strs);
-    let loops = del_msh_core::io_svg::svg_loops_from_outline_path(&strs);
+    let loops = svg_loops_from_outline_path(&strs);
     // dbg!(&loops);
     // dbg!(loops.len());
     let (width, height) = (512usize, 512usize);
@@ -139,7 +139,7 @@ fn hoge() {
             for i_loop in 0..loops.len() {
                 use slice_of_array::SliceFlatExt;
                 let loop0 = loops[i_loop].0.flat();
-                wn += del_msh_core::polyloop2::winding_number(loop0, &p);
+                wn += crate::rasterize::polygon::winding_number(loop0, &p);
             }
             if wn.round() as i64 != 0 {
                 img_data[i_h * width + i_w] = 128;
@@ -188,13 +188,13 @@ fn hoge1() {
     M 165.13281,263.08599 q 5.77046,0 10.02238,0.30371 4.25192,0 6.9853,0 58.91944,0 88.68288,-25.51151 \
     30.06714,-25.51152 30.06714,-64.99362 0,-38.57098 -24.29668,-62.56395 -23.99297,-24.296679 \
     -63.77879,-24.296679 -17.61509,0 -47.68223,5.770461 z";
-    let strs = del_msh_core::io_svg::svg_outline_path_from_shape(str2);
-    let loops = del_msh_core::io_svg::svg_loops_from_outline_path(&strs);
+    let strs = svg_outline_path_from_shape(str2);
+    let loops = svg_loops_from_outline_path(&strs);
     // dbg!(&loops);
     let (width, height) = (512usize, 512usize);
     let mut img_data = vec![255u8; height * width];
     for (vtx2xy, seg2vtx, is_close) in &loops {
-        let vtxp2xy = del_msh_core::io_svg::polybezier2polyloop(&vtx2xy, &seg2vtx, *is_close, 0.01);
+        let vtxp2xy = polybezier2polyloop(&vtx2xy, &seg2vtx, *is_close, 0.01);
         for i_vtx in 0..vtxp2xy.len() {
             let j_vtx = (i_vtx + 1) % vtxp2xy.len();
             let p0 = vtxp2xy[i_vtx];
@@ -209,4 +209,282 @@ fn hoge1() {
     encoder.set_depth(png::BitDepth::Eight);
     let mut writer = encoder.write_header().unwrap();
     writer.write_image_data(&img_data).unwrap(); // Save
+}
+
+pub fn polyloop2_to_svg<Real>(vtx2xy: &[Real], transform: &[Real; 9]) -> String
+where
+    Real: std::fmt::Display + Copy + num_traits::Float,
+{
+    let mut res = String::new();
+    for ivtx in 0..vtx2xy.len() / 2 {
+        let x = vtx2xy[ivtx * 2];
+        let y = vtx2xy[ivtx * 2 + 1];
+        let a = del_geo_core::mat3_col_major::transform_homogeneous(transform, &[x, y]).unwrap();
+        res += format!("{} {}", a[0], a[1]).as_str();
+        if ivtx != vtx2xy.len() / 2 - 1 {
+            res += ",";
+        }
+    }
+    res
+}
+
+pub fn svg_outline_path_from_shape(s0: &str) -> Vec<String> {
+    let s0 = s0.as_bytes();
+    let mut imark = 0;
+    let mut strs = Vec::<String>::new();
+    for i in 0..s0.len() {
+        if s0[i].is_ascii_digit() {
+            continue;
+        }
+        if s0[i] == b',' {
+            strs.push(std::str::from_utf8(&s0[imark..i]).unwrap().to_string());
+            imark = i + 1; // mark should be the beginning position of the string so move next
+        }
+        if s0[i] == b' ' {
+            // sometimes the space act as delimiter in the SVG (inkscape version)
+            if i > imark {
+                strs.push(std::str::from_utf8(&s0[imark..i]).unwrap().to_string());
+            }
+            imark = i + 1; // mark should be the beginning position of the string so move next
+        }
+        if s0[i] == b'-' {
+            if i > imark {
+                strs.push(std::str::from_utf8(&s0[imark..i]).unwrap().to_string());
+            }
+            imark = i;
+        }
+        if s0[i].is_ascii_alphabetic() {
+            if i > imark {
+                strs.push(std::str::from_utf8(&s0[imark..i]).unwrap().to_string());
+            }
+            strs.push(std::str::from_utf8(&[s0[i]]).unwrap().to_string()); // push tag
+            imark = i + 1;
+        }
+    }
+    if s0.len() > imark {
+        strs.push(
+            std::str::from_utf8(&s0[imark..s0.len()])
+                .unwrap()
+                .to_string(),
+        );
+    }
+    strs
+}
+
+#[allow(clippy::identity_op)]
+pub fn svg_loops_from_outline_path(strs: &[String]) -> Vec<(Vec<[f32; 2]>, Vec<usize>, bool)> {
+    use del_geo_core::vec2::Vec2;
+    let hoge = |s0: &str, s1: &str| [s0.parse::<f32>().unwrap(), s1.parse::<f32>().unwrap()];
+    let mut loops: Vec<(Vec<[f32; 2]>, Vec<usize>, bool)> = vec![];
+    let mut vtxl2xy: Vec<[f32; 2]> = vec![];
+    let mut seg2vtxl: Vec<usize> = vec![0];
+    assert!(strs[0] == "M" || strs[0] == "m");
+    // assert!(strs[strs.len() - 1] == "Z" || strs[strs.len() - 1] == "z");
+    let mut pos_cur = [0f32; 2];
+    let mut is = 0;
+    loop {
+        if strs[is] == "M" {
+            // start absolute
+            is += 1;
+            pos_cur = hoge(&strs[is + 0], &strs[is + 1]);
+            vtxl2xy.push(pos_cur);
+            is += 2;
+        } else if strs[is] == "m" {
+            // start relative
+            is += 1;
+            pos_cur = pos_cur.add(&hoge(&strs[is + 0], &strs[is + 1]));
+            vtxl2xy.push(pos_cur);
+            is += 2;
+        } else if strs[is] == "l" {
+            // line relative
+            is += 1;
+            loop {
+                seg2vtxl.push(vtxl2xy.len());
+                let p1 = pos_cur.add(&hoge(&strs[is + 0], &strs[is + 1]));
+                vtxl2xy.push(p1);
+                pos_cur = p1;
+                is += 2;
+                if strs[is].as_bytes()[0].is_ascii_alphabetic() {
+                    break;
+                }
+            }
+        } else if strs[is] == "L" {
+            // line absolute
+            is += 1;
+            loop {
+                seg2vtxl.push(vtxl2xy.len());
+                let p1 = hoge(&strs[is + 0], &strs[is + 1]);
+                vtxl2xy.push(p1);
+                pos_cur = p1;
+                is += 2;
+                if strs[is].as_bytes()[0].is_ascii_alphabetic() {
+                    break;
+                }
+            }
+        } else if strs[is] == "v" {
+            // vertical relative
+            seg2vtxl.push(vtxl2xy.len());
+            let p1 = pos_cur.add(&[0., strs[is + 1].parse::<f32>().unwrap()]);
+            vtxl2xy.push(p1);
+            pos_cur = p1;
+            is += 2;
+        } else if strs[is] == "V" {
+            // vertical absolute
+            seg2vtxl.push(vtxl2xy.len());
+            let p1 = [pos_cur[0], strs[is + 1].parse::<f32>().unwrap()];
+            vtxl2xy.push(p1);
+            pos_cur = p1;
+            is += 2;
+        } else if strs[is] == "H" {
+            // horizontal absolute
+            seg2vtxl.push(vtxl2xy.len());
+            let p1 = [strs[is + 1].parse::<f32>().unwrap(), pos_cur[1]];
+            vtxl2xy.push(p1);
+            pos_cur = p1;
+            is += 2;
+        } else if strs[is] == "h" {
+            // horizontal relative
+            seg2vtxl.push(vtxl2xy.len());
+            let dh = strs[is + 1].parse::<f32>().unwrap();
+            let p1 = pos_cur.add(&[dh, 0.]);
+            vtxl2xy.push(p1);
+            pos_cur = p1;
+            is += 2;
+        } else if strs[is] == "q" {
+            // relative
+            is += 1;
+            loop {
+                // loop for poly quadratic Bézeir curve
+                let pm0 = pos_cur.add(&hoge(&strs[is + 0], &strs[is + 1]));
+                let p1 = pos_cur.add(&hoge(&strs[is + 2], &strs[is + 3]));
+                vtxl2xy.push(pm0);
+                seg2vtxl.push(vtxl2xy.len());
+                vtxl2xy.push(p1);
+                pos_cur = p1;
+                is += 4;
+                if is == strs.len() {
+                    loops.push((vtxl2xy.clone(), seg2vtxl.clone(), false));
+                    break;
+                }
+                if strs[is].as_bytes()[0].is_ascii_alphabetic() {
+                    break;
+                }
+            }
+        } else if strs[is] == "Q" {
+            // absolute
+            is += 1;
+            loop {
+                // loop for poly-Bezeir curve
+                let pm0 = hoge(&strs[is + 0], &strs[is + 1]);
+                let p1 = hoge(&strs[is + 2], &strs[is + 3]);
+                vtxl2xy.push(pm0);
+                seg2vtxl.push(vtxl2xy.len());
+                vtxl2xy.push(p1);
+                pos_cur = p1;
+                is += 4;
+                if strs[is].as_bytes()[0].is_ascii_alphabetic() {
+                    break;
+                }
+            }
+        } else if strs[is] == "c" {
+            // relative
+            is += 1;
+            loop {
+                // loop for poly cubic Bézeir curve
+                let pm0 = pos_cur.add(&hoge(&strs[is + 0], &strs[is + 1]));
+                let pm1 = pos_cur.add(&hoge(&strs[is + 2], &strs[is + 3]));
+                let p1 = pos_cur.add(&hoge(&strs[is + 4], &strs[is + 5]));
+                vtxl2xy.push(pm0);
+                vtxl2xy.push(pm1);
+                seg2vtxl.push(vtxl2xy.len());
+                vtxl2xy.push(p1);
+                pos_cur = p1;
+                is += 6;
+                if is == strs.len() {
+                    loops.push((vtxl2xy.clone(), seg2vtxl.clone(), false));
+                    break;
+                }
+                if strs[is].as_bytes()[0].is_ascii_alphabetic() {
+                    break;
+                }
+            }
+        } else if strs[is] == "z" || strs[is] == "Z" {
+            let pe = vtxl2xy[0];
+            let ps = vtxl2xy[vtxl2xy.len() - 1];
+            let _dist0 = ps.sub(&pe).norm();
+            loops.push((vtxl2xy.clone(), seg2vtxl.clone(), true));
+            vtxl2xy.clear();
+            seg2vtxl = vec![0];
+            is += 1;
+        } else {
+            dbg!("error!--> ", &strs[is]);
+            break;
+        }
+        if is == strs.len() {
+            break;
+        }
+    }
+    loops
+}
+pub fn polybezier2polyloop(
+    vtx2xy: &[[f32; 2]],
+    seg2vtx: &[usize],
+    is_close: bool,
+    edge_length: f32,
+) -> Vec<[f32; 2]> {
+    use del_geo_core::vec2::Vec2;
+    let mut ret: Vec<[f32; 2]> = vec![];
+    let num_seg = seg2vtx.len() - 1;
+    for i_seg in 0..num_seg {
+        let (is_vtx, ie_vtx) = (seg2vtx[i_seg], seg2vtx[i_seg + 1]);
+        let ps = &vtx2xy[is_vtx];
+        let pe = &vtx2xy[ie_vtx];
+        if ie_vtx - is_vtx == 1 {
+            let len = pe.sub(ps).norm();
+            let ndiv = (len / edge_length) as usize;
+            for i in 0..ndiv {
+                let r = i as f32 / ndiv as f32;
+                let p = ps.scale(1f32 - r).add(&pe.scale(r));
+                ret.push(p);
+            }
+        } else if ie_vtx - is_vtx == 2 {
+            // quadratic bezier
+            let pc = &vtx2xy[is_vtx + 1];
+            let ndiv = 10;
+            for idiv in 0..ndiv {
+                let t0 = idiv as f32 / ndiv as f32;
+                let p0 = del_geo_core::bezier_quadratic::eval(ps, pc, pe, t0);
+                ret.push(p0);
+            }
+        } else if ie_vtx - is_vtx == 3 {
+            // cubic bezier
+            let pc0 = &vtx2xy[is_vtx + 1];
+            let pc1 = &vtx2xy[is_vtx + 2];
+            let samples = del_geo_core::bezier_cubic::sample_uniform_length(
+                del_geo_core::bezier_cubic::ControlPoints::<'_, f32, 2> {
+                    p0: ps,
+                    p1: pc0,
+                    p2: pc1,
+                    p3: pe,
+                },
+                edge_length,
+                true,
+                false,
+                30,
+            );
+            ret.extend(samples);
+        }
+    }
+    if is_close {
+        let ps = &vtx2xy[vtx2xy.len() - 1];
+        let pe = &vtx2xy[0];
+        let len = pe.sub(ps).norm();
+        let ndiv = (len / edge_length) as usize;
+        for i in 0..ndiv {
+            let r = i as f32 / ndiv as f32;
+            let p = ps.scale(1f32 - r).add(&pe.scale(r));
+            ret.push(p);
+        }
+    }
+    ret
 }
