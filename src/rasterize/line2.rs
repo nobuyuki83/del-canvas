@@ -1,14 +1,14 @@
 use num_traits::AsPrimitive;
 
 /// draw line using DDA method.
-pub fn draw_dda<Real, VAL>(
+pub fn draw_dda_pixel_coordinate<Real, VAL>(
     img_data: &mut [VAL],
     width: usize,
     p0: &[Real; 2],
     p1: &[Real; 2],
     i_color: VAL,
 ) where
-    Real: num_traits::Float + 'static + Copy + AsPrimitive<usize> + std::fmt::Debug,
+    Real: num_traits::Float + 'static + AsPrimitive<usize> + std::fmt::Debug,
     usize: AsPrimitive<Real>,
     VAL: Copy,
 {
@@ -39,7 +39,7 @@ pub fn draw_dda<Real, VAL>(
 }
 
 /// * `transform` - 3x3 homogeneous transformation matrix with **column major** order
-pub fn draw_dda_with_transformation<Real, VAL>(
+pub fn draw_dda<Real, VAL>(
     img_data: &mut [VAL],
     width: usize,
     p0: &[Real; 2],
@@ -47,19 +47,13 @@ pub fn draw_dda_with_transformation<Real, VAL>(
     transform: &[Real; 9],
     i_color: VAL,
 ) where
-    Real: num_traits::Float
-        + std::fmt::Debug
-        + std::ops::MulAssign
-        + std::ops::AddAssign
-        + 'static
-        + Copy
-        + AsPrimitive<usize>,
+    Real: num_traits::Float + std::fmt::Debug + 'static + AsPrimitive<usize>,
     usize: AsPrimitive<Real>,
     VAL: Copy,
 {
     let q0 = del_geo_core::mat3_col_major::transform_homogeneous(transform, p0).unwrap();
     let q1 = del_geo_core::mat3_col_major::transform_homogeneous(transform, p1).unwrap();
-    draw_dda(img_data, width, &q0, &q1, i_color);
+    draw_dda_pixel_coordinate(img_data, width, &q0, &q1, i_color);
 }
 
 pub fn pixels_in_line<Real>(

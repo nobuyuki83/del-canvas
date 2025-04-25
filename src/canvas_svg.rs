@@ -139,7 +139,7 @@ fn hoge() {
             for i_loop in 0..loops.len() {
                 use slice_of_array::SliceFlatExt;
                 let loop0 = loops[i_loop].0.flat();
-                wn += crate::rasterize::polygon::winding_number(loop0, &p);
+                wn += crate::rasterize::polygon2::winding_number(loop0, &p);
             }
             if wn.round() as i64 != 0 {
                 img_data[i_h * width + i_w] = 128;
@@ -153,7 +153,7 @@ fn hoge() {
             let j_vtx = (i_vtx + 1) % num_vtx;
             let p0 = &vtx2xy[i_vtx];
             let p1 = &vtx2xy[j_vtx];
-            crate::rasterize::line::draw_pixcenter(
+            crate::rasterize::line2::draw_pixcenter(
                 &mut img_data,
                 width,
                 p0,
@@ -199,7 +199,7 @@ fn hoge1() {
             let j_vtx = (i_vtx + 1) % vtxp2xy.len();
             let p0 = vtxp2xy[i_vtx];
             let p1 = vtxp2xy[j_vtx];
-            crate::rasterize::line::draw_dda(&mut img_data, width, &p0, &p1, 0);
+            crate::rasterize::line2::draw_dda_pixel_coordinate(&mut img_data, width, &p0, &p1, 0);
         }
     }
     let file = std::fs::File::create("target/r1.png").unwrap();

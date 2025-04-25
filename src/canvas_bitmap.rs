@@ -27,18 +27,15 @@ impl Canvas {
     }
      */
 
-    pub fn write(&mut self, path_: &std::path::Path) {
+    pub fn write<P: AsRef<std::path::Path>>(&mut self, path_: P) -> anyhow::Result<()> {
         // For reading and opening files
-        let file = std::fs::File::create(path_).unwrap();
+        let file = std::fs::File::create(path_)?;
         let w = std::io::BufWriter::new(file);
-        let mut encoder = png::Encoder::new(
-            w,
-            self.width.try_into().unwrap(),
-            self.height.try_into().unwrap(),
-        ); // Width is 2 pixels and height is 1.
+        let mut encoder = png::Encoder::new(w, self.width.try_into()?, self.height.try_into()?); // Width is 2 pixels and height is 1.
         encoder.set_color(png::ColorType::Rgb);
         encoder.set_depth(png::BitDepth::Eight);
-        let mut writer = encoder.write_header().unwrap();
-        writer.write_image_data(&self.data).unwrap(); // Save
+        let mut writer = encoder.write_header()?;
+        writer.write_image_data(&self.data)?; // Save
+        Ok(())
     }
 }

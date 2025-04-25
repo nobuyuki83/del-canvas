@@ -18,11 +18,11 @@ pub fn stroke<T, VAL>(
     let n = vtx2xy.len() / 2;
     for i in 0..n {
         let j = (i + 1) % n;
-        crate::rasterize::line::draw_pixcenter(
+        crate::rasterize::line2::draw_pixcenter(
             img_data,
             width,
-            &[vtx2xy[i * 2 + 0], vtx2xy[i * 2 + 1]],
-            &[vtx2xy[j * 2 + 0], vtx2xy[j * 2 + 1]],
+            &[vtx2xy[i * 2], vtx2xy[i * 2 + 1]],
+            &[vtx2xy[j * 2], vtx2xy[j * 2 + 1]],
             transform_xy2pix,
             thickness,
             color,
@@ -88,6 +88,8 @@ fn test0() -> anyhow::Result<()> {
     )?;
     Ok(())
 }
+
+// -----------------------------------
 
 pub fn aabb2<Real>(vtx2xy: &[Real]) -> [Real; 4]
 where

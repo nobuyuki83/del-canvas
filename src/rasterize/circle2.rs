@@ -88,6 +88,6 @@ pub fn stroke_dda<Real, VAL>(
         ];
         let q0 = del_geo_core::mat3_col_major::transform_homogeneous(transform, &p0).unwrap();
         let q1 = del_geo_core::mat3_col_major::transform_homogeneous(transform, &p1).unwrap();
-        crate::rasterize::line::draw_dda(img_data, width, &q0, &q1, color);
+        crate::rasterize::line2::draw_dda_pixel_coordinate(img_data, width, &q0, &q1, color);
     }
 }

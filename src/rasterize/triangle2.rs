@@ -17,14 +17,12 @@ pub fn fill<Index, Real, VAL>(
 {
     let half = Real::one() / (Real::one() + Real::one());
     let img_height = pix2color.len() / img_width;
-    let q0: [Real; 2] =
-        del_geo_core::mat3_col_major::transform_homogeneous(transform_xy2pix, p0).unwrap();
-    let q1: [Real; 2] =
-        del_geo_core::mat3_col_major::transform_homogeneous(transform_xy2pix, p1).unwrap();
-    let q2: [Real; 2] =
-        del_geo_core::mat3_col_major::transform_homogeneous(transform_xy2pix, p2).unwrap();
+    use del_geo_core::mat3_col_major::transform_homogeneous;
+    let q0: [Real; 2] = transform_homogeneous(transform_xy2pix, p0).unwrap();
+    let q1: [Real; 2] = transform_homogeneous(transform_xy2pix, p1).unwrap();
+    let q2: [Real; 2] = transform_homogeneous(transform_xy2pix, p2).unwrap();
     let aabbi = {
-        let aabb = crate::rasterize::polygon::aabb2(&[q0[0], q0[1], q1[0], q1[1], q2[0], q2[1]]);
+        let aabb = crate::rasterize::polygon2::aabb2(&[q0[0], q0[1], q1[0], q1[1], q2[0], q2[1]]);
         del_geo_core::aabb2::rasterize(&aabb, &(img_width, img_height))
     };
     for i_h in aabbi[1]..aabbi[3] {
