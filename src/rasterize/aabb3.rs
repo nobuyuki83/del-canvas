@@ -40,6 +40,12 @@ pub fn wireframe_dda<DATA>(
         let q1 = transform_homogeneous(transform_world2ndc, &p1).unwrap();
         let r0 = mult_vec3(&transform_ndc2pix, &[q0[0], q0[1], 1f32]);
         let r1 = mult_vec3(&transform_ndc2pix, &[q1[0], q1[1], 1f32]);
-        crate::rasterize::line2::draw_dda_pixel_coordinate::<f32, DATA>(img_data, img_shape.0, &r0, &r1, val);
+        crate::rasterize::line2::draw_dda_pixel_coordinate::<f32, DATA>(
+            img_data,
+            img_shape.0,
+            &r0,
+            &r1,
+            val,
+        );
     }
 }
