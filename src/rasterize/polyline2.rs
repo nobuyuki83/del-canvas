@@ -5,7 +5,7 @@ use num_traits::AsPrimitive;
 pub fn stroke_dda<T, VAL>(
     img_data: &mut [VAL],
     width: usize,
-    vtx2xy: &[T],
+    vtx2xy: &[[T; 2]],
     transform_xy2pix: &[T; 9],
     color: VAL,
 ) where
@@ -13,16 +13,9 @@ pub fn stroke_dda<T, VAL>(
     usize: AsPrimitive<T>,
     VAL: Copy,
 {
-    let n = vtx2xy.len() / 2;
-    for i in 0..n - 1 {
-        let j = i + 1;
-        crate::rasterize::line2::draw_dda(
-            img_data,
-            width,
-            &[vtx2xy[i * 2], vtx2xy[i * 2 + 1]],
-            &[vtx2xy[j * 2], vtx2xy[j * 2 + 1]],
-            transform_xy2pix,
-            color,
-        );
+    for vtx in vtx2xy.windows(2) {
+        let p0 = &vtx[0];
+        let p1 = &vtx[1];
+        crate::rasterize::line2::draw_dda(img_data, width, p0, p1, transform_xy2pix, color);
     }
 }

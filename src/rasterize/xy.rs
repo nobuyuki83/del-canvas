@@ -19,3 +19,34 @@ pub fn paint_one_pixel<Real, VAL>(
     }
     pix2color[ih * img_width + iw] = i_color;
 }
+
+pub fn paint_nxn_pixels<Real, VAL>(
+    pix2color: &mut [VAL],
+    img_width: usize,
+    p0: &[Real; 2],
+    transform_xy2pix: &[Real; 9],
+    i_color: VAL,
+    n: isize,
+) where
+    Real: num_traits::Float + AsPrimitive<isize>,
+    VAL: Copy,
+{
+    let img_height = pix2color.len() / img_width;
+    let q0: [Real; 2] =
+        del_geo_core::mat3_col_major::transform_homogeneous(transform_xy2pix, p0).unwrap();
+    let iw: isize = q0[0].floor().as_();
+    let ih: isize = q0[1].floor().as_();
+    let iw0 = iw - n / 2;
+    let ih0 = ih - n / 2;
+    for i in iw0..iw0 + n {
+        if i < 0 || i >= img_width as isize {
+            continue;
+        }
+        for j in ih0..ih0 + n {
+            if j >= img_height as isize {
+                return;
+            }
+            pix2color[(j * img_width as isize + i) as usize] = i_color;
+        }
+    }
+}
