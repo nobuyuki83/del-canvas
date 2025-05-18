@@ -1,6 +1,6 @@
 [package]
 name = "del-canvas"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 license = "MIT"
 description = "drawing primitives (e.g., triangles and lines) to bitmap images and gif animation."
@@ -11,7 +11,7 @@ description = "drawing primitives (e.g., triangles and lines) to bitmap images a
 num-traits = "0.2.19"
 image = { version = "0.25.6", features = ["hdr"], default-features = false}
 png = "0.17.16"
-anyhow = "1.0.97"
+anyhow = "1.0.98"
 gif = "0.13.1"
 slice-of-array = "0.3.2"
 arrayref = "0.3.9"

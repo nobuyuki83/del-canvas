@@ -43,7 +43,7 @@ pub fn paint_nxn_pixels<Real, VAL>(
             continue;
         }
         for j in ih0..ih0 + n {
-            if j >= img_height as isize {
+            if j < 0 || j >= img_height as isize {
                 return;
             }
             pix2color[(j * img_width as isize + i) as usize] = i_color;
