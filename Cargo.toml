@@ -1,6 +1,6 @@
 [package]
 name = "del-canvas"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2021"
 license = "MIT"
 description = "drawing primitives (e.g., triangles and lines) to bitmap images and gif animation."

@@ -6,6 +6,15 @@ pub const COLORMAP_HEAT: [[f32; 3]; 5] = [
     [1.0, 0.0, 0.0],
 ];
 
+pub const COLORMAP_HOT: [[f32; 3]; 6] = [
+    [0.0, 0.0, 0.0], // 0
+    [0.5, 0.0, 0.0], // 0.2
+    [1.0, 0.0, 0.0], // 0.4
+    [1.0, 0.5, 0.0], // 0.6
+    [1.0, 1.0, 0.0], // 0.8
+    [1.0, 1.0, 1.0], // 1.0
+];
+
 pub const COLORMAP_PLASMA: [[f32; 3]; 256] = [
     [0.050383, 0.029803, 0.527975],
     [0.063536, 0.028426, 0.533124],
@@ -545,19 +554,25 @@ pub fn apply_colormap<T, const N: usize>(
 where
     T: num_traits::Float + num_traits::AsPrimitive<f32>,
 {
-    let fc: f32 = (N as f32) * (p - pmin).as_() / (pmax - pmin).as_();
-    if fc as i32 <= 0 {
-        return colormap[0];
+    let num_div = colormap.len() - 1;
+    let fi: f32 = (num_div as f32) * (p - pmin).as_() / (pmax - pmin).as_();
+    let mut ic = fi.floor() as isize;
+    let mut ratio = fi - ic as f32;
+
+    if ic >= num_div as isize {
+        ic = colormap.len() as isize - 2;
+        ratio = 1.0;
     }
-    if fc as usize >= N - 1 {
-        return colormap[N - 1];
+    if ic < 0 {
+        ic = 0;
+        ratio = 0.0;
     }
-    let ic = fc as usize;
-    assert!(ic > 0);
-    let r1 = fc - ic as f32;
+
+    let ic = ic as usize;
+
     [
-        colormap[ic][0] + (colormap[ic + 1][0] - colormap[ic][0]) * r1,
-        colormap[ic][1] + (colormap[ic + 1][1] - colormap[ic][1]) * r1,
-        colormap[ic][2] + (colormap[ic + 1][2] - colormap[ic][2]) * r1,
+        colormap[ic][0] + (colormap[ic + 1][0] - colormap[ic][0]) * ratio,
+        colormap[ic][1] + (colormap[ic + 1][1] - colormap[ic][1]) * ratio,
+        colormap[ic][2] + (colormap[ic + 1][2] - colormap[ic][2]) * ratio,
     ]
 }
