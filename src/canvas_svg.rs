@@ -164,6 +164,10 @@ fn hoge() {
             );
         }
     }
+    let image: image::GrayImage =
+        image::ImageBuffer::from_raw(width as u32, height as u32, img_data.to_vec()).unwrap();
+    image.save("target/r0.png").unwrap();
+    /*
     let file = std::fs::File::create("target/r0.png").unwrap();
     let w = std::io::BufWriter::new(file);
     let mut encoder = png::Encoder::new(w, width.try_into().unwrap(), height.try_into().unwrap()); // Width is 2 pixels and height is 1.
@@ -171,6 +175,7 @@ fn hoge() {
     encoder.set_depth(png::BitDepth::Eight);
     let mut writer = encoder.write_header().unwrap();
     writer.write_image_data(&img_data).unwrap(); // Save
+     */
 }
 
 #[test]
@@ -202,6 +207,10 @@ fn hoge1() {
             crate::rasterize::line2::draw_dda_pixel_coordinate(&mut img_data, width, &p0, &p1, 0);
         }
     }
+    let image: image::GrayImage =
+        image::ImageBuffer::from_raw(width as u32, height as u32, img_data.to_vec()).unwrap();
+    image.save("target/r1.png").unwrap();
+    /*
     let file = std::fs::File::create("target/r1.png").unwrap();
     let w = std::io::BufWriter::new(file);
     let mut encoder = png::Encoder::new(w, width.try_into().unwrap(), height.try_into().unwrap()); // Width is 2 pixels and height is 1.
@@ -209,6 +218,7 @@ fn hoge1() {
     encoder.set_depth(png::BitDepth::Eight);
     let mut writer = encoder.write_header().unwrap();
     writer.write_image_data(&img_data).unwrap(); // Save
+     */
 }
 
 pub fn polyloop2_to_svg<Real>(vtx2xy: &[Real], transform: &[Real; 9]) -> String

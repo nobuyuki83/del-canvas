@@ -9,8 +9,7 @@ description = "drawing primitives (e.g., triangles and lines) to bitmap images a
 
 [dependencies]
 num-traits = "0.2.19"
-image = { version = "0.25.6", features = ["hdr"], default-features = false}
-png = "0.17.16"
+image = { version = "0.25.6", features = ["hdr", "png"], default-features = false}
 anyhow = "1.0.98"
 gif = "0.13.1"
 slice-of-array = "0.3.2"

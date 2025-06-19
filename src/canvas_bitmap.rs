@@ -13,29 +13,10 @@ impl Canvas {
         }
     }
 
-    /*
-    #[allow(clippy::identity_op)]
-    pub fn clear(&mut self, color: i32) {
-        let (r,g,b) = rgb(color);
-        for ih in 0..self.height {
-            for iw in 0..self.width {
-                self.data[(ih * self.width + iw) * 3 + 0] = r;
-                self.data[(ih * self.width + iw) * 3 + 1] = g;
-                self.data[(ih * self.width + iw) * 3 + 2] = b;
-            }
-        }
-    }
-     */
-
     pub fn write<P: AsRef<std::path::Path>>(&mut self, path_: P) -> anyhow::Result<()> {
-        // For reading and opening files
-        let file = std::fs::File::create(path_)?;
-        let w = std::io::BufWriter::new(file);
-        let mut encoder = png::Encoder::new(w, self.width.try_into()?, self.height.try_into()?); // Width is 2 pixels and height is 1.
-        encoder.set_color(png::ColorType::Rgb);
-        encoder.set_depth(png::BitDepth::Eight);
-        let mut writer = encoder.write_header()?;
-        writer.write_image_data(&self.data)?; // Save
-        Ok(())
+        let buffer: image::RgbImage =
+            image::ImageBuffer::from_raw(self.width as u32, self.height as u32, self.data.clone())
+                .unwrap();
+        Ok(buffer.save(path_)?)
     }
 }

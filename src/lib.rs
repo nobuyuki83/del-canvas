@@ -21,25 +21,17 @@ where
     usize: AsPrimitive<Real>,
     Path: AsRef<std::path::Path>,
 {
-    let pix2color_u8: Vec<u8> = img
+    let pix2grayscale: Vec<u8> = img
         .iter()
         .map(|&v| {
             let a: Real = v.clamp(Real::zero(), Real::one());
             (a * 255.as_()).as_()
         })
         .collect();
-    let file = std::fs::File::create(path)?;
-    let w = std::io::BufWriter::new(file);
-    let mut encoder = png::Encoder::new(
-        w,
-        img_shape.0.try_into().unwrap(),
-        img_shape.1.try_into().unwrap(),
-    ); // Width is 2 pixels and height is 1.
-    encoder.set_color(png::ColorType::Grayscale);
-    encoder.set_depth(png::BitDepth::Eight);
-    let mut writer = encoder.write_header()?;
-    writer.write_image_data(&pix2color_u8)?; // Save
-    Ok(())
+    let gray_image: image::GrayImage =
+        image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2grayscale)
+            .unwrap();
+    Ok(gray_image.save(path)?)
 }
 
 pub fn write_png_from_float_image_rgb<Real, Path>(
@@ -55,21 +47,16 @@ where
     let zero = Real::zero();
     let one = Real::one();
     let v255: Real = 255usize.as_();
-    let pix2color_u8: Vec<u8> = img
+    let pix2rgb: Vec<u8> = img
         .iter()
         .map(|&v| {
             let a: Real = v.clamp(zero, one);
             (a * v255).as_()
         })
         .collect();
-    let file = std::fs::File::create(path)?;
-    let w = std::io::BufWriter::new(file);
-    let mut encoder = png::Encoder::new(w, img_shape.0.try_into()?, img_shape.1.try_into()?); // Width is 2 pixels and height is 1.
-    encoder.set_color(png::ColorType::Rgb);
-    encoder.set_depth(png::BitDepth::Eight);
-    let mut writer = encoder.write_header()?;
-    writer.write_image_data(&pix2color_u8)?; // Save
-    Ok(())
+    let rgb_image: image::RgbImage =
+        image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2rgb).unwrap();
+    Ok(rgb_image.save(path)?)
 }
 
 pub fn load_image_as_float_array<P>(path: P) -> anyhow::Result<(Vec<f32>, (usize, usize), usize)>
