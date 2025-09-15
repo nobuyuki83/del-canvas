@@ -5,9 +5,9 @@ pub mod canvas_gif;
 pub mod canvas_svg;
 pub mod color;
 pub mod colormap;
+pub mod image_interpolation;
 pub mod morphology;
 pub mod rasterize;
-pub mod texture;
 
 use num_traits::AsPrimitive;
 

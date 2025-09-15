@@ -38,27 +38,30 @@ pub fn bilinear_integer_center<const NDIM: usize>(
 }
 
 /// coordinate (0., 0.) is the center ot the texel
-pub fn nearest_integer_center<const NDIM: usize>(
+pub fn nearest<const NDIM: usize>(
     pix: &[f32; 2],
     tex_shape: &(usize, usize),
     tex_data: &[f32],
+    is_integer_center: bool,
 ) -> [f32; NDIM] {
-    let ix0 = pix[0].round() as i64;
+    let x0 = if is_integer_center {
+        pix[0] + 0.5
+    } else {
+        pix[0]
+    };
+    let y0 = if is_integer_center {
+        pix[1] + 0.5
+    } else {
+        pix[1]
+    };
+    let ix0 = x0 as i64;
+    let iy0 = y0 as i64;
     if ix0 < 0 || ix0 >= tex_shape.0 as i64 {
         return [0f32; NDIM];
     }
-    let iy0 = pix[1].round() as i64;
     if iy0 < 0 || iy0 >= tex_shape.1 as i64 {
         return [0f32; NDIM];
     }
     let i_tex = (iy0 as usize) * tex_shape.0 + (ix0 as usize);
-    // assert!(i_tex >=0 && i_tex < tex_shape.1);
     std::array::from_fn(|i_dim| tex_data[i_tex * NDIM + i_dim])
-    /*
-    let mut res = [0f32; NDIM];
-    for i_dim in 0..NDIM {
-        res[i_dim] =
-    }
-    res
-     */
 }
