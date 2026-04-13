@@ -36,23 +36,24 @@ where
                 image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2u8)
                     .unwrap();
             Ok(gray_image.save(path)?)
-        },
+        }
         3 => {
             let rgb_image: image::RgbImage =
-                image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2u8).unwrap();
+                image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2u8)
+                    .unwrap();
             Ok(rgb_image.save(path)?)
-        },
+        }
         4 => {
             let rgb_image: image::RgbaImage =
-                image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2u8).unwrap();
+                image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2u8)
+                    .unwrap();
             Ok(rgb_image.save(path)?)
-        },
+        }
         _ => {
             panic!("depth should be 1 or 4");
         }
     }
 }
-
 
 pub fn load_image_as_float_array<P>(path: P) -> anyhow::Result<(Vec<f32>, (usize, usize), usize)>
 where
