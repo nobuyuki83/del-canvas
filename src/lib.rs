@@ -9,55 +9,50 @@ pub mod morphology;
 pub mod rasterize;
 pub mod texture;
 
-use num_traits::AsPrimitive;
+use num_traits::{AsPrimitive, NumCast};
 
-pub fn write_png_from_float_image_grayscale<Real, Path>(
+pub fn write_png_from_float_image<Real, Path>(
     path: Path,
     img_shape: (usize, usize),
+    depth: usize,
     img: &[Real],
 ) -> anyhow::Result<()>
 where
-    Real: num_traits::Float + 'static + Copy + AsPrimitive<u8>,
+    Real: num_traits::Float + num_traits::NumCast + AsPrimitive<u8>,
     usize: AsPrimitive<Real>,
     Path: AsRef<std::path::Path>,
 {
-    let pix2grayscale: Vec<u8> = img
+    let v255: Real = NumCast::from(255u32).unwrap();
+    let pix2u8: Vec<u8> = img
         .iter()
         .map(|&v| {
             let a: Real = v.clamp(Real::zero(), Real::one());
-            (a * 255.as_()).as_()
-        })
-        .collect();
-    let gray_image: image::GrayImage =
-        image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2grayscale)
-            .unwrap();
-    Ok(gray_image.save(path)?)
-}
-
-pub fn write_png_from_float_image_rgb<Real, Path>(
-    path: Path,
-    img_shape: &(usize, usize),
-    img: &[Real],
-) -> anyhow::Result<()>
-where
-    Real: num_traits::Float + 'static + Copy + AsPrimitive<u8>,
-    usize: AsPrimitive<Real>,
-    Path: AsRef<std::path::Path>,
-{
-    let zero = Real::zero();
-    let one = Real::one();
-    let v255: Real = 255usize.as_();
-    let pix2rgb: Vec<u8> = img
-        .iter()
-        .map(|&v| {
-            let a: Real = v.clamp(zero, one);
             (a * v255).as_()
         })
         .collect();
-    let rgb_image: image::RgbImage =
-        image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2rgb).unwrap();
-    Ok(rgb_image.save(path)?)
+    match depth {
+        1 => {
+            let gray_image: image::GrayImage =
+                image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2u8)
+                    .unwrap();
+            Ok(gray_image.save(path)?)
+        },
+        3 => {
+            let rgb_image: image::RgbImage =
+                image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2u8).unwrap();
+            Ok(rgb_image.save(path)?)
+        },
+        4 => {
+            let rgb_image: image::RgbaImage =
+                image::ImageBuffer::from_raw(img_shape.0 as u32, img_shape.1 as u32, pix2u8).unwrap();
+            Ok(rgb_image.save(path)?)
+        },
+        _ => {
+            panic!("depth should be 1 or 4");
+        }
+    }
 }
+
 
 pub fn load_image_as_float_array<P>(path: P) -> anyhow::Result<(Vec<f32>, (usize, usize), usize)>
 where
