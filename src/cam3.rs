@@ -50,10 +50,10 @@ pub fn ray3_homogeneous(
 ) -> ([f32; 3], [f32; 3]) {
     let x0 = 2. * (pix_coord.0 as f32 + 0.5f32) / (image_size.0 as f32) - 1.;
     let y0 = 1. - 2. * (pix_coord.1 as f32 + 0.5f32) / (image_size.1 as f32);
-    let p0 =
+    let (p0, _h0) =
         del_geo_core::mat4_col_major::transform_homogeneous(transform_ndc_to_world, &[x0, y0, 1.])
             .unwrap();
-    let p1 =
+    let (p1, _h1) =
         del_geo_core::mat4_col_major::transform_homogeneous(transform_ndc_to_world, &[x0, y0, -1.])
             .unwrap();
     let ray_org = p0;

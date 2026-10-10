@@ -36,8 +36,8 @@ pub fn wireframe_dda<DATA>(
         let i1_vtx = node2vtx[1];
         let p0 = del_geo_core::aabb3::xyz_from_hex_index(aabb3, i0_vtx);
         let p1 = del_geo_core::aabb3::xyz_from_hex_index(aabb3, i1_vtx);
-        let q0 = transform_homogeneous(transform_world2ndc, &p0).unwrap();
-        let q1 = transform_homogeneous(transform_world2ndc, &p1).unwrap();
+        let (q0, _h0) = transform_homogeneous(transform_world2ndc, &p0).unwrap();
+        let (q1, _h1) = transform_homogeneous(transform_world2ndc, &p1).unwrap();
         let r0 = mult_vec3(&transform_ndc2pix, &[q0[0], q0[1], 1f32]);
         let r1 = mult_vec3(&transform_ndc2pix, &[q1[0], q1[1], 1f32]);
         crate::rasterize::line2::draw_dda_pixel_coordinate::<f32, DATA>(
